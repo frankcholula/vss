@@ -163,3 +163,8 @@ cython_debug/
 
 # Mac Files
 .DS_Store
+
+# Image Files
+MSRC_ObjCategImageDatabase_v2/
+MSRC_ObjCategImageDatabase_v2_local/
+descriptors/

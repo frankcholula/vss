@@ -10,20 +10,30 @@ from data_sources import FirebaseConnection
 import time
 
 class DescriptorExtractor:
-    def __init__(self, dataset_folder: str, descriptor_folder: str):
+    def __init__(self, dataset_folder: str, descriptor_folder: str, extract_method: str):
         self.DATASET_FOLDER = dataset_folder
         self.DESCRIPTOR_FOLDER = descriptor_folder
-
-    def extract(self, extract_method=Extractors.extract_rgb):
-        descriptor_paths = {
-            Extractors.extract_rgb: os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBhisto'),
-            Extractors.extract_random: os.path.join(self.DESCRIPTOR_FOLDER, 'random')
+        self.extract_method = extract_method
+        self.AVAILABLE_EXTRACTORS = {
+            'rgb': {
+                'path': os.path.join(self.DESCRIPTOR_FOLDER, 'rgb'),
+                'method': Extractors.extract_rgb
+            },
+            'random': {
+                'path': os.path.join(self.DESCRIPTOR_FOLDER, 'random'),
+                'method': Extractors.extract_random
+            },
+            'globalRGBHisto': {
+                'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBhisto'),
+                'method': Extractors.extract_globalRGBhisto
+            }
         }
 
-        if extract_method not in descriptor_paths:
-            raise ValueError(f"Invalid extract_method: {extract_method}")
+    def extract(self):
+        if self.extract_method not in self.AVAILABLE_EXTRACTORS:
+            raise ValueError(f"Invalid extract_method: {self.extract_method}")
 
-        descriptor_path = descriptor_paths[extract_method]
+        descriptor_path = self.AVAILABLE_EXTRACTORS[self.extract_method]['path']
         if not os.path.exists(descriptor_path):
             os.makedirs(descriptor_path, exist_ok=True)
         for filename in os.listdir(os.path.join(self.DATASET_FOLDER, 'Images')):
@@ -31,11 +41,11 @@ class DescriptorExtractor:
                 img_path = os.path.join(self.DATASET_FOLDER, 'Images', filename)
                 img = cv2.imread(img_path).astype(np.float64) / 255.0  # Normalize the image
                 fout = os.path.join(descriptor_path, filename).replace('.bmp', '.npy')
-                F = extract_method(img)        
+                F = self.AVAILABLE_EXTRACTORS[self.extract_method]['method'](img)
                 np.save(fout, F)
 
-    def get_image_descriptor_mapping(self, descriptor_type='globalRGBhisto') -> Dict[str, np.ndarray]:
-        descriptor_path = os.path.join(self.DESCRIPTOR_FOLDER, descriptor_type)
+    def get_image_descriptor_mapping(self) -> Dict[str, np.ndarray]:
+        descriptor_path = os.path.join(self.DESCRIPTOR_FOLDER, self.extract_method)
         img_to_descriptor = {}
         for filename in os.listdir(descriptor_path):
             if filename.endswith('.npy'):
@@ -129,14 +139,13 @@ def main():
     DATASET_FOLDER = "MSRC_ObjCategImageDatabase_v2_local"
     DESCRIPTOR_FOLDER = "descriptors"
     st.title("Visual Search Engine 👀")
-    extractor = DescriptorExtractor(DATASET_FOLDER, DESCRIPTOR_FOLDER)
-    extractor.extract()
-    img2descriptors = extractor.get_image_descriptor_mapping()
-    
     image_files = [f for f in os.listdir(os.path.join(DATASET_FOLDER, 'Images')) if f.endswith('.bmp')]
     cols = st.columns([1.75,1.75,1])
     selected_image = cols[0].selectbox("Choose an Image...", image_files)
-    descriptor_method = cols[1].selectbox("Choose your Descriptor...", options=['globalRGBhisto', 'Random', 'SIFT', 'HAOG', 'LBP'])
+    descriptor_method = cols[1].selectbox("Choose your Descriptor...", options=['rgb', 'random', 'globalRGBhisto'])
+    extractor = DescriptorExtractor(DATASET_FOLDER, DESCRIPTOR_FOLDER, descriptor_method)
+    extractor.extract()
+    img2descriptors = extractor.get_image_descriptor_mapping()
     cols[2].markdown("<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True)
     if cols[2].button("I'm Feeling Lucky"):
         selected_image = random.choice(image_files)

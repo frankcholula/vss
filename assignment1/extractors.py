@@ -2,7 +2,7 @@ import numpy as np
 
 class Extractors:
     @staticmethod
-    def extract_random(img):
+    def extract_random(img) -> np.ndarray:
         """
         Generate a random row vector with 30 elements.
         
@@ -17,11 +17,10 @@ class Extractors:
         Returns:
         numpy.ndarray: A random row vector with 30 elements.
         """
-        F = np.random.rand(1, 30)
-        return F
+        return np.random.rand(1, 30)
     
     @staticmethod
-    def extract_rgb(img):
+    def extract_rgb(img) -> np.ndarray:
         """
         Compute the average red, green, and blue values as a basic color descriptor.
         
@@ -36,7 +35,16 @@ class Extractors:
         Returns:
         numpy.ndarray: A feature vector containing the average B, G, and R values.
         """
-        B = np.mean(img[:, :, 0])  # Blue channel
-        G = np.mean(img[:, :, 1])  # Green channel
-        R = np.mean(img[:, :, 2])  # Red channel
+        B = np.mean(img[:, :, 0])
+        G = np.mean(img[:, :, 1])
+        R = np.mean(img[:, :, 2])
         return np.array([R, G, B])
+    
+    @staticmethod
+    def extract_globalRGBhisto(img) -> np.ndarray:
+        """_summary_
+
+        Args:
+            img (_type_): _description_
+        """
+        return np.histogram(img, bins=256, range=(0, 256))[0]
