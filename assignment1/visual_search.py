@@ -162,7 +162,7 @@ def main():
     cols = st.columns([1.75,1.75,1])
     selected_image = cols[0].selectbox("Choose an Image...", image_files, index=image_files.index(st.session_state['selected_image']))
     # TODO: add more descriptors here
-    descriptor_method = cols[1].selectbox("Choose your Descriptor...", options=['rgb', 'globalRGBhisto', 'random'])
+    descriptor_method = cols[1].selectbox("Choose your Descriptor...", options=['rgb', 'random', 'globalRGBhisto', 'globalRGBencoding'])
     if descriptor_method == "globalRGBhisto":
         bins = cols[1].select_slider("Select the number of bins...", options = [8, 16, 32, 64, 128, 256], value=32)
         if bins != st.session_state['bins']:
