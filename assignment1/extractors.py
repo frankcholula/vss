@@ -41,12 +41,17 @@ class Extractors:
         return np.array([R, G, B])
     
     @staticmethod
-    def extract_globalRGBhisto(img, bins=32) -> np.ndarray:
-        hist = np.zeros((3, bins))
-        for i in range(3):
-            # compute the histogram for each channel, but range is [0, 1] because we already normalized the image
-            hist[i] = np.histogram(img[:, :, i], bins=bins, range=(0, 1))[0]
-        # flatten and normalize the histogram
-        hist_flat = hist.flatten()
-        hist_normalized = hist_flat / np.sum(hist_flat)
-        return hist_normalized
+    def extract_globalRGBhisto(img, bins=32, encoding=False) -> np.ndarray:
+        if encoding:
+            # TODO: implement histogram as a polynomial encoding
+            pass
+        else:
+            hist = np.zeros((3, bins))
+            for i in range(3):
+                # compute the histogram for each channel, but range is [0, 1] because we already normalized the image
+                hist[i] = np.histogram(img[:, :, i], bins=bins, range=(0, 1))[0]
+            # flatten and normalize the histogram
+            hist_flat = hist.flatten()
+            hist_normalized = hist_flat / np.sum(hist_flat)
+            return hist_normalized
+    
