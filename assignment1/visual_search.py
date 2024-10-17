@@ -23,7 +23,7 @@ class DescriptorExtractor:
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'random'),
                 'method': Extractors.extract_random
             },
-            'globalRGBHisto': {
+            'globalRGBhisto': {
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBhisto'),
                 'method': Extractors.extract_globalRGBhisto
             }
