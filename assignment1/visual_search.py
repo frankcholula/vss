@@ -137,40 +137,47 @@ def load_data():
     message.empty()
 
 
+
 def main():
     load_data()
     DATASET_FOLDER = "MSRC_ObjCategImageDatabase_v2_local"
     DESCRIPTOR_FOLDER = "descriptors"
-    st.title("Visual Search Engine 👀")
+    RECOMPUTE = False # Flag to recompute the descriptors
     image_files = [f for f in os.listdir(os.path.join(DATASET_FOLDER, 'Images')) if f.endswith('.bmp')]
-    
-    # Section to select the image and descriptor method
-    RECOMPUTE = False
-    # Default number of bins in case of globalRGBhisto descriptor
+    # Initialize the session state variables
     if 'bins' not in st.session_state:
         st.session_state['bins'] = 32
+    if 'selected_image' not in st.session_state:
+        st.session_state['selected_image'] = image_files[0]
+
+    # Section to choose the image and the descriptor
+    st.title("Visual Search Engine 👀")
     cols = st.columns([1.75,1.75,1])
-    selected_image = cols[0].selectbox("Choose an Image...", image_files)
+    selected_image = cols[0].selectbox("Choose an Image...", image_files, index=image_files.index(st.session_state['selected_image']))
     # TODO: add more descriptors here
     descriptor_method = cols[1].selectbox("Choose your Descriptor...", options=['rgb', 'globalRGBhisto', 'random'])
     if descriptor_method == "globalRGBhisto":
-        bins = cols[1].select_slider("Select the number of bins...", options = [16, 32, 64, 128, 256], value=32)
+        bins = cols[1].select_slider("Select the number of bins...", options = [8, 16, 32, 64, 128, 256], value=32)
         if bins != st.session_state['bins']:
             st.session_state['bins'] = bins
             RECOMPUTE = True
     else:
         bins = None
     
+    # Extract the descriptors
     extractor = DescriptorExtractor(DATASET_FOLDER, DESCRIPTOR_FOLDER, descriptor_method, bins=bins)
     extractor.extract(RECOMPUTE)
     img2descriptors = extractor.get_image_descriptor_mapping()
 
+    # Button to select a random image
     cols[2].markdown("<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True)
     if cols[2].button("I'm Feeling Lucky"):
-        selected_image = random.choice(image_files)
+        st.session_state['selected_image'] =  random.choice(image_files)
+        selected_image = st.session_state['selected_image']
+        st.rerun()
     
-
     # Section to display the query image and the top similar images
+
     st.write("Query Image:")
     st.image(os.path.join(DATASET_FOLDER, 'Images', selected_image), use_column_width=True)
     result_num = 10
