@@ -148,7 +148,7 @@ def main():
     # TODO: add more descriptors here
     descriptor_method = cols[1].selectbox("Choose your Descriptor...", options=['globalRGBhisto', 'rgb', 'random'])
     extractor = DescriptorExtractor(DATASET_FOLDER, DESCRIPTOR_FOLDER, descriptor_method)
-    extractor.extract(recompute=False)
+    extractor.extract(recompute=True)
     img2descriptors = extractor.get_image_descriptor_mapping()
     cols[2].markdown("<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True)
     if cols[2].button("I'm Feeling Lucky"):
