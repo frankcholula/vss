@@ -25,7 +25,7 @@ class DescriptorExtractor:
             },
             'globalRGBhisto': {
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBhisto'),
-                'method': lambda img: Extractors.extract_globalRGBhisto(img, bins = kwargs.get('bins'))
+                'method': lambda img: Extractors.extract_globalRGBhisto(img, bins=kwargs.get('bins'))
             }
         }
 
@@ -146,8 +146,10 @@ def main():
     
     # Section to select the image and descriptor method
     RECOMPUTE = False
+    # Default number of bins in case of globalRGBhisto descriptor
+    bins = 32
     if 'bins' not in st.session_state:
-        st.session_state['bins'] = 32
+        st.session_state['bins'] = bins
     cols = st.columns([1.75,1.75,1])
     selected_image = cols[0].selectbox("Choose an Image...", image_files)
     # TODO: add more descriptors here
