@@ -29,12 +29,12 @@ class DescriptorExtractor:
             }
         }
 
-    def extract(self):
+    def extract(self, recompute=False):
         if self.extract_method not in self.AVAILABLE_EXTRACTORS:
             raise ValueError(f"Invalid extract_method: {self.extract_method}")
 
         descriptor_path = self.AVAILABLE_EXTRACTORS[self.extract_method]['path']
-        if not os.path.exists(descriptor_path):
+        if not os.path.exists(descriptor_path) or recompute:
             # compute the descriptors if they don't exist, otherwise load them
             os.makedirs(descriptor_path, exist_ok=True)
             for filename in os.listdir(os.path.join(self.DATASET_FOLDER, 'Images')):
@@ -44,6 +44,7 @@ class DescriptorExtractor:
                     fout = os.path.join(descriptor_path, filename).replace('.bmp', '.npy')
                     F = self.AVAILABLE_EXTRACTORS[self.extract_method]['method'](img)
                     np.save(fout, F)
+
 
     def get_image_descriptor_mapping(self) -> Dict[str, np.ndarray]:
         descriptor_path = os.path.join(self.DESCRIPTOR_FOLDER, self.extract_method)
@@ -59,22 +60,24 @@ class ImageRetriever:
     def __init__(self, img_desc_dict: Dict[str, np.ndarray]):
         self.img_desc_dict = img_desc_dict
 
-    def cvpr_compare(self, F1, F2):
+    def cvpr_compare(self, F1, F2, metric) -> float:
         # This function should compare F1 to F2 - i.e. compute the distance
         # between the two descriptors
-        # For now it just returns a random number
-        # dst = np.random.rand()
-        dst = np.linalg.norm(F1 - F2)
+        match metric:
+            case "l2":
+                dst = np.linalg.norm(F1 - F2)
+            case "l1":
+                dst = np.linalg.norm(F1 - F2, ord=1)
         return dst
 
-    def compute_distance(self, query_img: str, metric="l1") -> List[Tuple[float, str]]:
+    def compute_distance(self, query_img: str, metric="l2") -> List[Tuple[float, str]]:
         # Compute the distance between the query and all other descriptors
         dst = []
         query_img_desc = self.img_desc_dict[query_img]
         
         for img_path, candidate_desc in self.img_desc_dict.items():
             if img_path != query_img:  # Skip the query image itself
-                distance = self.cvpr_compare(query_img_desc, candidate_desc)
+                distance = self.cvpr_compare(query_img_desc, candidate_desc, metric)
                 dst.append((distance, img_path))
         
         dst.sort(key=lambda x: x[0])
@@ -143,9 +146,9 @@ def main():
     cols = st.columns([1.75,1.75,1])
     selected_image = cols[0].selectbox("Choose an Image...", image_files)
     # TODO: add more descriptors here
-    descriptor_method = cols[1].selectbox("Choose your Descriptor...", options=['rgb', 'random', 'globalRGBhisto'])
+    descriptor_method = cols[1].selectbox("Choose your Descriptor...", options=['globalRGBhisto', 'rgb', 'random'])
     extractor = DescriptorExtractor(DATASET_FOLDER, DESCRIPTOR_FOLDER, descriptor_method)
-    extractor.extract()
+    extractor.extract(recompute=False)
     img2descriptors = extractor.get_image_descriptor_mapping()
     cols[2].markdown("<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True)
     if cols[2].button("I'm Feeling Lucky"):
@@ -153,11 +156,11 @@ def main():
     
     st.write("Query Image:")
     st.image(os.path.join(DATASET_FOLDER, 'Images', selected_image), use_column_width=True)
-
+    result_num = 10
     retriever = ImageRetriever(img2descriptors)
-    similiar_images = retriever.retrieve(os.path.join(DATASET_FOLDER, 'Images', selected_image), number=5)
-    st.write("Top 5 similar images:")
-    cols = st.columns(5)
+    similiar_images = retriever.retrieve(os.path.join(DATASET_FOLDER, 'Images', selected_image), number=result_num)
+    st.write("Top {} similar images:".format(result_num))
+    cols = st.columns(result_num)
     for col, img_path in zip(cols, similiar_images):
         col.image(img_path, use_column_width=True)
 

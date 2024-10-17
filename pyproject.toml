@@ -15,7 +15,14 @@ streamlit = "^1.39.0"
 opencv-python-headless = "^4.10.0.84"
 firebase-admin = "^6.5.0"
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
