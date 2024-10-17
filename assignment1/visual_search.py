@@ -147,9 +147,8 @@ def main():
     # Section to select the image and descriptor method
     RECOMPUTE = False
     # Default number of bins in case of globalRGBhisto descriptor
-    bins = 32
     if 'bins' not in st.session_state:
-        st.session_state['bins'] = bins
+        st.session_state['bins'] = 32
     cols = st.columns([1.75,1.75,1])
     selected_image = cols[0].selectbox("Choose an Image...", image_files)
     # TODO: add more descriptors here
@@ -159,6 +158,8 @@ def main():
         if bins != st.session_state['bins']:
             st.session_state['bins'] = bins
             RECOMPUTE = True
+    else:
+        bins = None
     
     extractor = DescriptorExtractor(DATASET_FOLDER, DESCRIPTOR_FOLDER, descriptor_method, bins=bins)
     extractor.extract(RECOMPUTE)
