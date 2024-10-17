@@ -10,7 +10,7 @@ from data_sources import FirebaseConnection
 import time
 
 class DescriptorExtractor:
-    def __init__(self, dataset_folder: str, descriptor_folder: str, extract_method: str):
+    def __init__(self, dataset_folder: str, descriptor_folder: str, extract_method: str, **kwargs):
         self.DATASET_FOLDER = dataset_folder
         self.DESCRIPTOR_FOLDER = descriptor_folder
         self.extract_method = extract_method
@@ -25,7 +25,7 @@ class DescriptorExtractor:
             },
             'globalRGBhisto': {
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBhisto'),
-                'method': Extractors.extract_globalRGBhisto
+                'method': lambda img: Extractors.extract_globalRGBhisto(img, bins = kwargs.get('bins'))
             }
         }
 
@@ -124,16 +124,16 @@ def load_data():
     required_file_count = 591
     message, success = firebase_conn.check_local_dir(local_image_dir, required_file_count)
     if success:
-        time.sleep(3)
+        time.sleep(2)
         message.empty()
         return
     else:
         os.makedirs(local_image_dir, exist_ok=True)
         blobs = list(bucket.list_blobs(prefix=image_directory))
         status = firebase_conn.download_images(blobs, local_image_dir, max_download=required_file_count)
-        time.sleep(3)
+        time.sleep(2)
         status.empty()
-    time.sleep(3)
+    time.sleep(2)
     message.empty()
 
 
@@ -143,17 +143,31 @@ def main():
     DESCRIPTOR_FOLDER = "descriptors"
     st.title("Visual Search Engine 👀")
     image_files = [f for f in os.listdir(os.path.join(DATASET_FOLDER, 'Images')) if f.endswith('.bmp')]
+    
+    # Section to select the image and descriptor method
+    RECOMPUTE = False
+    if 'bins' not in st.session_state:
+        st.session_state['bins'] = 32
     cols = st.columns([1.75,1.75,1])
     selected_image = cols[0].selectbox("Choose an Image...", image_files)
     # TODO: add more descriptors here
-    descriptor_method = cols[1].selectbox("Choose your Descriptor...", options=['globalRGBhisto', 'rgb', 'random'])
-    extractor = DescriptorExtractor(DATASET_FOLDER, DESCRIPTOR_FOLDER, descriptor_method)
-    extractor.extract(recompute=True)
+    descriptor_method = cols[1].selectbox("Choose your Descriptor...", options=['rgb', 'globalRGBhisto', 'random'])
+    if descriptor_method == "globalRGBhisto":
+        bins = cols[1].select_slider("Select the number of bins...", options = [16, 32, 64, 128, 256], value=32)
+        if bins != st.session_state['bins']:
+            st.session_state['bins'] = bins
+            RECOMPUTE = True
+    
+    extractor = DescriptorExtractor(DATASET_FOLDER, DESCRIPTOR_FOLDER, descriptor_method, bins=bins)
+    extractor.extract(RECOMPUTE)
     img2descriptors = extractor.get_image_descriptor_mapping()
+
     cols[2].markdown("<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True)
     if cols[2].button("I'm Feeling Lucky"):
         selected_image = random.choice(image_files)
     
+
+    # Section to display the query image and the top similar images
     st.write("Query Image:")
     st.image(os.path.join(DATASET_FOLDER, 'Images', selected_image), use_column_width=True)
     result_num = 10
