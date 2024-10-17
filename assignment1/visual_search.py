@@ -35,14 +35,15 @@ class DescriptorExtractor:
 
         descriptor_path = self.AVAILABLE_EXTRACTORS[self.extract_method]['path']
         if not os.path.exists(descriptor_path):
+            # compute the descriptors if they don't exist, otherwise load them
             os.makedirs(descriptor_path, exist_ok=True)
-        for filename in os.listdir(os.path.join(self.DATASET_FOLDER, 'Images')):
-            if filename.endswith(".bmp"):
-                img_path = os.path.join(self.DATASET_FOLDER, 'Images', filename)
-                img = cv2.imread(img_path).astype(np.float64) / 255.0  # Normalize the image
-                fout = os.path.join(descriptor_path, filename).replace('.bmp', '.npy')
-                F = self.AVAILABLE_EXTRACTORS[self.extract_method]['method'](img)
-                np.save(fout, F)
+            for filename in os.listdir(os.path.join(self.DATASET_FOLDER, 'Images')):
+                if filename.endswith(".bmp"):
+                    img_path = os.path.join(self.DATASET_FOLDER, 'Images', filename)
+                    img = cv2.imread(img_path).astype(np.float64) / 255.0  # Normalize the image
+                    fout = os.path.join(descriptor_path, filename).replace('.bmp', '.npy')
+                    F = self.AVAILABLE_EXTRACTORS[self.extract_method]['method'](img)
+                    np.save(fout, F)
 
     def get_image_descriptor_mapping(self) -> Dict[str, np.ndarray]:
         descriptor_path = os.path.join(self.DESCRIPTOR_FOLDER, self.extract_method)
@@ -135,13 +136,13 @@ def load_data():
 
 def main():
     load_data()
-
     DATASET_FOLDER = "MSRC_ObjCategImageDatabase_v2_local"
     DESCRIPTOR_FOLDER = "descriptors"
     st.title("Visual Search Engine 👀")
     image_files = [f for f in os.listdir(os.path.join(DATASET_FOLDER, 'Images')) if f.endswith('.bmp')]
     cols = st.columns([1.75,1.75,1])
     selected_image = cols[0].selectbox("Choose an Image...", image_files)
+    # TODO: add more descriptors here
     descriptor_method = cols[1].selectbox("Choose your Descriptor...", options=['rgb', 'random', 'globalRGBhisto'])
     extractor = DescriptorExtractor(DATASET_FOLDER, DESCRIPTOR_FOLDER, descriptor_method)
     extractor.extract()

@@ -42,9 +42,7 @@ class Extractors:
     
     @staticmethod
     def extract_globalRGBhisto(img) -> np.ndarray:
-        """_summary_
-
-        Args:
-            img (_type_): _description_
-        """
-        return np.histogram(img, bins=256, range=(0, 256))[0]
+        hist = np.zeros((3, 256))
+        for i in range(3):
+            hist[i] = np.histogram(img[:, :, i], bins=256, range=(0, 1))[0]
+        return hist.flatten()
