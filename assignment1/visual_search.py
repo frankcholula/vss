@@ -26,7 +26,12 @@ class DescriptorExtractor:
             'globalRGBhisto': {
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBhisto'),
                 'method': lambda img: Extractors.extract_globalRGBhisto(img, bins=kwargs.get('bins'))
+            },
+            'globalRGBencoding': {
+                'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBencoding'),
+                'method': lambda img: Extractors.extract_globalRGBencoding(img, base=kwargs.get('base'))
             }
+
         }
 
     def extract(self, recompute=False):
@@ -149,6 +154,8 @@ def main():
         st.session_state['bins'] = 32
     if 'selected_image' not in st.session_state:
         st.session_state['selected_image'] = image_files[0]
+    if 'base' not in st.session_state:
+        st.session_state['base'] = 256
 
     # Section to choose the image and the descriptor
     st.title("Visual Search Engine 👀")
@@ -161,18 +168,24 @@ def main():
         if bins != st.session_state['bins']:
             st.session_state['bins'] = bins
             RECOMPUTE = True
+    if descriptor_method == "globalRGBencoding":
+        base = cols[1].text_input("Select the base for encoding...")
+        if base != st.session_state['base']:
+            st.session_state['base'] = base
+            RECOMPUTE = True
     else:
-        bins = None
+        base = st.session_state['base']
+        bins = st.session_state['bins']
     
     # Extract the descriptors
-    extractor = DescriptorExtractor(DATASET_FOLDER, DESCRIPTOR_FOLDER, descriptor_method, bins=bins)
+    extractor = DescriptorExtractor(DATASET_FOLDER, DESCRIPTOR_FOLDER, descriptor_method, bins=bins, base=base)
     extractor.extract(RECOMPUTE)
     img2descriptors = extractor.get_image_descriptor_mapping()
 
     # Button to select a random image
     cols[2].markdown("<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True)
     if cols[2].button("I'm Feeling Lucky"):
-        st.session_state['selected_image'] =  random.choice(image_files)
+        st.session_state['selected_image']  =  random.choice(image_files)
         selected_image = st.session_state['selected_image']
         st.rerun()
     
