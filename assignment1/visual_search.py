@@ -127,18 +127,19 @@ def load_data():
     # Create a local directory to store images
     local_image_dir = "MSRC_ObjCategImageDatabase_v2_local/Images"
     required_file_count = 591
+    sleep_time = 1.5
     message, success = firebase_conn.check_local_dir(local_image_dir, required_file_count)
     if success:
-        time.sleep(2)
+        time.sleep(sleep_time)
         message.empty()
         return
     else:
         os.makedirs(local_image_dir, exist_ok=True)
         blobs = list(bucket.list_blobs(prefix=image_directory))
         status = firebase_conn.download_images(blobs, local_image_dir, max_download=required_file_count)
-        time.sleep(2)
+        time.sleep(sleep_time)
         status.empty()
-    time.sleep(2)
+    time.sleep(sleep_time)
     message.empty()
 
 
