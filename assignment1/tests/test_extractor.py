@@ -14,3 +14,9 @@ class TestExtractor(unittest.TestCase):
         result1 = Extractor.extract_globalRGBhisto(self.img1)
         result2 = Extractor.extract_globalRGBhisto(self.img2)
         self.assertFalse(np.array_equal(result1, result2), "The histograms extracted should not be equal.")
+
+
+    def test_extract_globalRGBencoding_equality(self):
+        result1 = Extractor.extract_globalRGBencoding(self.img1, 256)
+        result2 = Extractor.extract_globalRGBencoding(self.img2, 256)
+        self.assertFalse(np.array_equal(result1, result2), "The histograms extracted should not be equal.")
