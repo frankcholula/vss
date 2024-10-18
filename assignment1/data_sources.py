@@ -49,7 +49,7 @@ class FirebaseConnection:
         for index, blob in enumerate(blobs[:max_download]):
             local_path = os.path.join(local_image_directory, os.path.basename(blob.name))
             blob.download_to_filename(local_path)
-            progress_text = "Downloading Images: {}/{}".format(index + 1, total_files)
+            progress_text = f"Downloading Images: {index+1}/{total_files}"
             progress_bar.progress((index + 1) / total_files, text=progress_text)
         time.sleep(1)
         progress_bar.empty()
