@@ -144,7 +144,6 @@ def main():
     if st.session_state['recompute']:
         logging.info("Recomputing descriptors...")
         descriptor.extract(st.session_state['recompute'])
-        img2descriptors = descriptor.get_image_descriptor_mapping()
         session_manager.update_recompute(False)
 
     img2descriptors = descriptor.get_image_descriptor_mapping()

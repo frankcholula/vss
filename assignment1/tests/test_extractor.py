@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import cv2
 
-from assignment1.extractor import Extractor
+from assignment1.descriptor import Extractor
 
 class TestExtractor(unittest.TestCase):
     def setUp(self):
