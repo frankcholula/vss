@@ -33,41 +33,49 @@ def load_data():
     time.sleep(sleep_time)
     message.empty()
 
-def init_session_state(image_files):
-    if 'bins' not in st.session_state:
-        st.session_state['bins'] = 32
-    if 'selected_image' not in st.session_state:
-        st.session_state['selected_image'] = image_files[0]
-    if 'base' not in st.session_state:
-        st.session_state['base'] = 256
-    if 'metric' not in st.session_state:
-        st.session_state['metric'] = "l2"
-    if 'recompute' not in st.session_state:
-        st.session_state['recompute'] = True
+class SessionStateManager:
+    def __init__(self, image_files):
+        self.image_files = image_files
+        self.init_session_state()
 
-def update_metric():
-    st.session_state['metric'] = st.session_state['metric_radio']
+    def init_session_state(self):
+        if 'bins' not in st.session_state:
+            st.session_state['bins'] = 32
+        if 'selected_image' not in st.session_state:
+            st.session_state['selected_image'] = self.image_files[0]
+        if 'base' not in st.session_state:
+            st.session_state['base'] = 256
+        if 'metric' not in st.session_state:
+            st.session_state['metric'] = "l2"
+        if 'recompute' not in st.session_state:
+            st.session_state['recompute'] = True
 
-def update_bins():
-    if st.session_state['bins'] != st.session_state['bins_slider']:
-        st.session_state['bins'] = st.session_state['bins_slider']
-        st.session_state['recompute'] = True
-    else:
-        st.session_state['recompute'] = False
+    def update_metric(self):
+        st.session_state['metric'] = st.session_state['metric_radio']
 
-def update_base():
-    if st.session_state['base'] != st.session_state['base_slider']:
-        st.session_state['base'] = st.session_state['base_slider']
-        st.session_state['recompute'] = True
-    else:
-        st.session_state['recompute'] = False
+    def update_bins(self):
+        if st.session_state['bins'] != st.session_state['bins_slider']:
+            st.session_state['bins'] = st.session_state['bins_slider']
+            st.session_state['recompute'] = True
+        else:
+            st.session_state['recompute'] = False
+
+    def update_base(self):
+        if st.session_state['base'] != st.session_state['base_slider']:
+            st.session_state['base'] = st.session_state['base_slider']
+            st.session_state['recompute'] = True
+        else:
+            st.session_state['recompute'] = False
+    
+    def update_recompute(self, recompute:bool):
+        st.session_state['recompute'] = recompute
 
 def main():
     load_data()
     DATASET_FOLDER = "MSRC_ObjCategImageDatabase_v2_local"
     DESCRIPTOR_FOLDER = "descriptors"
     image_files = [f for f in os.listdir(os.path.join(DATASET_FOLDER, 'Images')) if f.endswith('.bmp')]
-    init_session_state(image_files)
+    session_manager = SessionStateManager(image_files)
     
     # Section to choose the image and the descriptor
     st.title("Visual Search Engine 👀")
@@ -82,7 +90,7 @@ def main():
         options=["l2", "l1"],
         index=["l2", "l1"].index(st.session_state['metric']),
         key="metric_radio",
-        on_change=update_metric
+        on_change=session_manager.update_metric
     )
 
     # Choose the descriptor method
@@ -92,11 +100,11 @@ def main():
     
     if descriptor_method == "globalRGBhisto":
         cols[1].select_slider(
-            "Select the number of bins...",
+            "Select the Number of Bins...",
             options = [8, 16, 32, 64, 128, 256],
             value=32,
             key="bins_slider",
-            on_change=update_bins)
+            on_change=session_manager.update_bins)
 
     # TODO: fix globalRGencoding later
     # if descriptor_method == "globalRGBencoding":
@@ -117,7 +125,7 @@ def main():
     if st.session_state['recompute']:
         logging.info("Recomputing descriptors...")
         descriptor.extract(st.session_state['recompute'])
-        st.session_state['recompute'] = False
+        session_manager.update_recompute(False)
 
     img2descriptors = descriptor.get_image_descriptor_mapping()
 

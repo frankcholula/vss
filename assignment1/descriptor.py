@@ -8,7 +8,7 @@ logging.basicConfig(level=logging.INFO)
 
 class Descriptor:
     def __init__(self, dataset_folder: str, descriptor_folder: str, extract_method: str, **kwargs):
-        logging_message = f"Generating a new Descriptor object using {extract_method}"
+        logging_message = f"Using the Descriptor object with {extract_method} "
         self.DATASET_FOLDER = dataset_folder
         self.DESCRIPTOR_FOLDER = descriptor_folder
         self.extract_method = extract_method
