@@ -14,6 +14,8 @@ class Retriever:
     def cvpr_compare(F1, F2, metric) -> float:
         # This function should compare F1 to F2 - i.e. compute the distance
         # between the two descriptors
+        if F1.shape != F2.shape:
+            raise ValueError(f"The two feature vectors must have the same shape. \nF1 shape: {F1.shape} \nF2 shape: {F2.shape}")
         match metric:
             case "l2":
                 dst = np.linalg.norm(F1 - F2)
