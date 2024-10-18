@@ -42,6 +42,20 @@ class Extractor:
     
     @staticmethod
     def extract_globalRGBhisto(img, bins=32, encoding=False) -> np.ndarray:
+        """
+        Extracts a global RGB histogram from the input image.
+
+        This method computes the histogram for each of the B, G, and R channels of the input image.
+        The histogram is computed with a specified number of bins and is normalized to sum to 1.
+
+        Parameters:
+        img (numpy.ndarray): The input image, assumed to be normalized to the range [0, 1].
+        bins (int): The number of bins to use for the histogram. Default is 32.
+        encoding (bool): A flag for future use, currently not implemented. Default is False.
+
+        Returns:
+        numpy.ndarray: A flattened and normalized histogram of the RGB channels.
+        """
         hist = np.zeros((3, bins))
         for i in range(3):
             # compute the histogram for each channel, but range is [0, 1] because we already normalized the image
@@ -53,5 +67,7 @@ class Extractor:
 
     @staticmethod
     def extract_globalRGBencoding(img, base) -> np.ndarray:
+        
+        
         # TODO implement the encoding version specified in lecture
         return
