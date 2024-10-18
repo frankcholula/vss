@@ -111,6 +111,7 @@ def main():
             descriptor_method,
             bins=st.session_state['bins'],
             base=st.session_state['base'])
+        descriptor.extract(st.session_state['recompute'])
         st.session_state['recompute'] = False
 
     descriptor = Descriptor(
@@ -119,7 +120,6 @@ def main():
         descriptor_method,
         bins=st.session_state['bins'],
         base=st.session_state['base'])
-    descriptor.extract()
     img2descriptors = descriptor.get_image_descriptor_mapping()
 
     # Button to select a random image

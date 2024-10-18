@@ -6,7 +6,7 @@ from typing import Dict
 
 class Descriptor:
     def __init__(self, dataset_folder: str, descriptor_folder: str, extract_method: str, **kwargs):
-        print("Generating a new Descriptor object...")
+        print(f"Generating a new Descriptor object with {kwargs}")
         self.DATASET_FOLDER = dataset_folder
         self.DESCRIPTOR_FOLDER = descriptor_folder
         self.extract_method = extract_method
@@ -30,12 +30,12 @@ class Descriptor:
 
         }
 
-    def extract(self):
+    def extract(self, recompute: bool = False):
         if self.extract_method not in self.AVAILABLE_EXTRACTORS:
             raise ValueError(f"Invalid extract_method: {self.extract_method}")
 
         descriptor_path = self.AVAILABLE_EXTRACTORS[self.extract_method]['path']
-        if not os.path.exists(descriptor_path):
+        if not os.path.exists(descriptor_path) or recompute:
             # compute the descriptors if they don't exist, otherwise load them
             os.makedirs(descriptor_path, exist_ok=True)
             for filename in os.listdir(os.path.join(self.DATASET_FOLDER, 'Images')):
