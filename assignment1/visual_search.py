@@ -9,7 +9,7 @@ import streamlit as st
 from data_sources import FirebaseConnection
 import time
 
-class DescriptorExtractor:
+class Descriptor:
     def __init__(self, dataset_folder: str, descriptor_folder: str, extract_method: str, **kwargs):
         self.DATASET_FOLDER = dataset_folder
         self.DESCRIPTOR_FOLDER = descriptor_folder
@@ -179,9 +179,9 @@ def main():
         bins = st.session_state['bins']
     
     # Extract the descriptors
-    extractor = DescriptorExtractor(DATASET_FOLDER, DESCRIPTOR_FOLDER, descriptor_method, bins=bins, base=base)
-    extractor.extract(RECOMPUTE)
-    img2descriptors = extractor.get_image_descriptor_mapping()
+    descriptor = Descriptor(DATASET_FOLDER, DESCRIPTOR_FOLDER, descriptor_method, bins=bins, base=base)
+    descriptor.extract(RECOMPUTE)
+    img2descriptors = descriptor.get_image_descriptor_mapping()
 
     # Button to select a random image
     cols[2].markdown("<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True)
