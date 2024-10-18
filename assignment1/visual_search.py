@@ -61,7 +61,7 @@ class Descriptor:
                 img_to_descriptor[img_path] = descriptor_data
         return img_to_descriptor
     
-class ImageRetriever:
+class Retriever:
     def __init__(self, img_desc_dict: Dict[str, np.ndarray]):
         self.img_desc_dict = img_desc_dict
 
@@ -92,7 +92,7 @@ class ImageRetriever:
         # Compute distances
         distances = self.compute_distance(query_img)
         top_similar_images = distances[:number]
-        ImageRetriever.display_images(query_img, top_similar_images, number)
+        Retriever.display_images(query_img, top_similar_images, number)
         return [img_path for _, img_path in top_similar_images]
 
     @staticmethod
@@ -195,7 +195,7 @@ def main():
     st.write("Query Image:")
     st.image(os.path.join(DATASET_FOLDER, 'Images', selected_image), use_column_width=True)
     result_num = 10
-    retriever = ImageRetriever(img2descriptors)
+    retriever = Retriever(img2descriptors)
     similiar_images = retriever.retrieve(os.path.join(DATASET_FOLDER, 'Images', selected_image), number=result_num)
     st.write("Top {} similar images:".format(result_num))
     cols = st.columns(result_num)
