@@ -5,6 +5,9 @@ import streamlit as st
 from data_sources import FirebaseConnection
 from descriptor import Descriptor
 from retriever import Retriever
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 @st.cache_resource(show_spinner=False)
 def load_data():
@@ -94,6 +97,7 @@ def main():
             value=32,
             key="bins_slider",
             on_change=update_bins)
+
     # TODO: fix globalRGencoding later
     # if descriptor_method == "globalRGBencoding":
     #     cols[1].select_slider(
@@ -103,23 +107,18 @@ def main():
     #         key="base_slider",
     #         on_change=update_base)
     
-    if st.session_state['recompute']:
-        # generate a new descriptor and set recompute back to false
-        descriptor = Descriptor(
-            DATASET_FOLDER,
-            DESCRIPTOR_FOLDER,
-            descriptor_method,
-            bins=st.session_state['bins'],
-            base=st.session_state['base'])
-        descriptor.extract(st.session_state['recompute'])
-        st.session_state['recompute'] = False
-
     descriptor = Descriptor(
         DATASET_FOLDER,
         DESCRIPTOR_FOLDER,
         descriptor_method,
         bins=st.session_state['bins'],
-        base=st.session_state['base'])
+        base=st.session_state['base']
+    )
+    if st.session_state['recompute']:
+        logging.info("Recomputing descriptors...")
+        descriptor.extract(st.session_state['recompute'])
+        st.session_state['recompute'] = False
+
     img2descriptors = descriptor.get_image_descriptor_mapping()
 
     # Button to select a random image

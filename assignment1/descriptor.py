@@ -3,32 +3,38 @@ import cv2
 import numpy as np
 from extractor import Extractor
 from typing import Dict
+import logging
+logging.basicConfig(level=logging.INFO)
 
 class Descriptor:
     def __init__(self, dataset_folder: str, descriptor_folder: str, extract_method: str, **kwargs):
-        print(f"Generating a new Descriptor object with {kwargs}")
+        logging_message = f"Generating a new Descriptor object using {extract_method}"
         self.DATASET_FOLDER = dataset_folder
         self.DESCRIPTOR_FOLDER = descriptor_folder
         self.extract_method = extract_method
         self.AVAILABLE_EXTRACTORS = {
             'rgb': {
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'rgb'),
-                'method': Extractor.extract_rgb
+                'method': Extractor.extract_rgb,
+                'log_message': logging_message
             },
             'random': {
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'random'),
-                'method': Extractor.extract_random
+                'method': Extractor.extract_random,
+                'log_message': logging_message
             },
             'globalRGBhisto': {
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBhisto'),
-                'method': lambda img: Extractor.extract_globalRGBhisto(img, bins=kwargs.get('bins'))
+                'method': lambda img: Extractor.extract_globalRGBhisto(img, bins=kwargs.get('bins')),
+                'log_message': logging_message + f"{kwargs}"
             },
             'globalRGBencoding': {
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBencoding'),
-                'method': lambda img: Extractor.extract_globalRGBencoding(img, base=kwargs.get('base'))
+                'method': lambda img: Extractor.extract_globalRGBencoding(img, base=kwargs.get('base')),
+                'log_message': logging_message + f"{kwargs}"
             }
-
         }
+        logging.info(self.AVAILABLE_EXTRACTORS[self.extract_method]['log_message'])
 
     def extract(self, recompute: bool = False):
         if self.extract_method not in self.AVAILABLE_EXTRACTORS:
