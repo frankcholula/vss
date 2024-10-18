@@ -1,6 +1,6 @@
 import numpy as np
 
-class Extractors:
+class Extractor:
     @staticmethod
     def extract_random(img) -> np.ndarray:
         """

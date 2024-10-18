@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import os
-from extractors import Extractors
+from extractor import Extractor
 from matplotlib import pyplot as plt
 from typing import Dict, List, Tuple
 import random
@@ -17,19 +17,19 @@ class Descriptor:
         self.AVAILABLE_EXTRACTORS = {
             'rgb': {
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'rgb'),
-                'method': Extractors.extract_rgb
+                'method': Extractor.extract_rgb
             },
             'random': {
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'random'),
-                'method': Extractors.extract_random
+                'method': Extractor.extract_random
             },
             'globalRGBhisto': {
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBhisto'),
-                'method': lambda img: Extractors.extract_globalRGBhisto(img, bins=kwargs.get('bins'))
+                'method': lambda img: Extractor.extract_globalRGBhisto(img, bins=kwargs.get('bins'))
             },
             'globalRGBencoding': {
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBencoding'),
-                'method': lambda img: Extractors.extract_globalRGBencoding(img, base=kwargs.get('base'))
+                'method': lambda img: Extractor.extract_globalRGBencoding(img, base=kwargs.get('base'))
             }
 
         }
