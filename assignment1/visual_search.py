@@ -49,6 +49,8 @@ class SessionStateManager:
             st.session_state['metric'] = "l2"
         if 'recompute' not in st.session_state:
             st.session_state['recompute'] = True
+        if 'descriptor' not in st.session_state:
+            st.session_state['descriptor'] = "rgb"
 
     def update_metric(self):
         st.session_state['metric'] = st.session_state['metric_radio']
@@ -58,15 +60,28 @@ class SessionStateManager:
             st.session_state['bins'] = st.session_state['bins_slider']
             st.session_state['recompute'] = True
         else:
-            st.session_state['recompute'] = False
-
+            self.update_recompute(False)
+    
     def update_base(self):
         if st.session_state['base'] != st.session_state['base_slider']:
             st.session_state['base'] = st.session_state['base_slider']
             st.session_state['recompute'] = True
         else:
-            st.session_state['recompute'] = False
+            self.update_recompute(False)
     
+    def update_descriptor(self):
+        if st.session_state['descriptor'] != st.session_state['descriptor_selectbox']:
+            logging.info(f"Updating descriptor to {st.session_state['descriptor_selectbox']}")
+            st.session_state['descriptor'] = st.session_state['descriptor_selectbox']
+            # TODO: fix the path here
+            if os.path.exists(f"descriptors/{st.session_state['descriptor']}"):
+                self.update_recompute(False)
+            else:
+                self.update_recompute(True)
+        else:
+            self.update_recompute(False)
+
+
     def update_recompute(self, recompute:bool):
         st.session_state['recompute'] = recompute
 
@@ -93,10 +108,13 @@ def main():
         on_change=session_manager.update_metric
     )
 
-    # Choose the descriptor method
+    # TODO: Add new descriptor options here
     descriptor_method = cols[1].selectbox(
         "Choose your Descriptor...",
-        options=['rgb', 'random', 'globalRGBhisto'])
+        options=['rgb', 'random', 'globalRGBhisto', 'globalRGBencoding'],
+        key="descriptor_selectbox",
+        on_change=session_manager.update_descriptor,
+    )
     
     if descriptor_method == "globalRGBhisto":
         cols[1].select_slider(
@@ -104,16 +122,17 @@ def main():
             options = [8, 16, 32, 64, 128, 256],
             value=32,
             key="bins_slider",
-            on_change=session_manager.update_bins)
+            on_change=session_manager.update_bins
+    )
 
-    # TODO: fix globalRGencoding later
-    # if descriptor_method == "globalRGBencoding":
-    #     cols[1].select_slider(
-    #         "Select the base for encoding...",
-    #         options = [64, 128, 256],
-    #         value=256,
-    #         key="base_slider",
-    #         on_change=update_base)
+    if descriptor_method == "globalRGBencoding":
+        cols[1].select_slider(
+            "Select the base for encoding...",
+            options = [64, 128, 256],
+            value=256,
+            key="base_slider",
+            on_change=session_manager.update_base
+        )
     
     descriptor = Descriptor(
         DATASET_FOLDER,
@@ -134,10 +153,10 @@ def main():
     if cols[2].button("I'm Feeling Lucky"):
         st.session_state['selected_image']  =  random.choice(image_files)
         selected_image = st.session_state['selected_image']
+        # need rerun here to refresh selected image value
         st.rerun()
     
     # Section to display the query image and the top similar images
-
     st.write("Query Image:")
     st.image(os.path.join(DATASET_FOLDER, 'Images', selected_image), use_column_width=True)
     result_num = 10
@@ -147,7 +166,6 @@ def main():
     cols = st.columns(result_num)
     for col, img_path in zip(cols, similiar_images):
         col.image(img_path, use_column_width=True)
-
 
 if __name__ == "__main__":
     main()

@@ -67,7 +67,21 @@ class Extractor:
 
     @staticmethod
     def extract_globalRGBencoding(img, base) -> np.ndarray:
-        
-        
-        # TODO implement the encoding version specified in lecture
-        return
+        """
+        Encodes the RGB channels of the input image into a single channel using a polynomial representation.
+
+        This method combines the R, G, and B channels of the input image into a single channel by treating
+        each pixel as a polynomial with the specified base. The resulting encoded image is then flattened.
+
+        Parameters:
+        img (numpy.ndarray): The input image, assumed to be normalized to the range [0, 1].
+        base (int): The base to use for the polynomial representation.
+
+        Returns:
+        numpy.ndarray: A flattened array representing the encoded image.
+        """
+        R = img[:, :, 0]
+        G = img[:, :, 1]
+        B = img[:, :, 2]
+        poly_repr = R * base ** 2 + G * base + B
+        return poly_repr.flatten()
