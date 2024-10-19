@@ -52,6 +52,7 @@ class SessionStateManager:
         if 'descriptor' not in st.session_state:
             st.session_state['descriptor'] = "rgb"
 
+
     def update_metric(self):
         st.session_state['metric'] = st.session_state['metric_radio']
 
@@ -128,8 +129,8 @@ def main():
     if descriptor_method == "globalRGBencoding":
         cols[1].select_slider(
             "Select the base for encoding...",
-            options = [64, 128, 256],
-            value=256,
+            options = [4,8],
+            value=8,
             key="base_slider",
             on_change=session_manager.update_base
         )

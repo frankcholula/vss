@@ -142,8 +142,13 @@ class Extractor:
         Returns:
         numpy.ndarray: A flattened array representing the encoded image.
         """
+        # Quantize the RGB values to the range [0, base-1]
+        # R = (img[:, :, 0] * (base - 1)).astype(int)
+        # G = (img[:, :, 1] * (base - 1)).astype(int)
+        # B = (img[:, :, 2] * (base - 1)).astype(int)
         R = img[:, :, 0]
         G = img[:, :, 1]
         B = img[:, :, 2]
         poly_repr = R * base ** 2 + G * base + B
-        return poly_repr.flatten()
+        hist, _ = np.histogram(poly_repr, bins=base ** 3, range=(0, base ** 3))
+        return hist.flatten()
