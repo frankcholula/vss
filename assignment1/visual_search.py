@@ -147,10 +147,8 @@ def main():
         descriptor.extract(st.session_state['recompute'])
         session_manager.update_recompute(False)
 
+    # Debug the descriptors here
     img2descriptors = descriptor.get_image_descriptor_mapping()
-    # TODO: debug
-    for img, desc in img2descriptors.items():
-        print(f"Image: {img}, Descriptor: {desc.shape}")
 
     # Button to select a random image
     cols[2].markdown("<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True)
