@@ -47,16 +47,14 @@ class ImageLabeler():
         return rgb_img
     
     def get_labels(self, selected_img: str) -> np.ndarray:
-        gt_filename = self.get_gt_filename(selected_img)
         labels_path = os.path.join(self.ground_truth_folder, 'labels.json')
-
         if os.path.exists(labels_path):
             with open(labels_path, 'r') as f:
                 labels_dict = json.load(f)
-            return labels_dict[gt_filename]
+            return labels_dict[selected_img]
         else:
             labels = set()
-            rgb_img = self.load_img(gt_filename)
+            rgb_img = self.load_img(selected_img)
             for rgb, label in self.class_mapping.items():
                 mask = np.all(rgb_img == np.array(rgb), axis=-1)
                 if np.any(mask):
