@@ -1,11 +1,12 @@
 import os
 import random
 import time
+import logging
 import streamlit as st
 from data_sources import FirebaseConnection
 from descriptor import Descriptor
 from retriever import Retriever
-import logging
+from ground_truth import ImageLabeler
 
 logging.basicConfig(level=logging.INFO)
 
@@ -128,8 +129,9 @@ def main():
 
     if descriptor_method == "globalRGBhisto_quant":
         cols[1].select_slider(
-            "Select Your Quantization Level...",
-            options = [4,8, 16, 32],
+            label = "Select Your Quantization Level...",
+            options = [4, 8, 16, 32],
+            help="The number of quantization levels ranges from coarse to fine.",
             value=8,
             key="quant_slider",
             on_change=session_manager.update_quant
@@ -159,15 +161,19 @@ def main():
         st.rerun()
     
     # Section to display the query image and the top similar images
-    left_col, right_col = st.columns([3, 1.5])
+    left_col, right_col = st.columns([2.25, 2.25])
     with left_col:
         st.write("Query Image:")
         st.image(os.path.join(DATASET_FOLDER, 'Images', selected_image), use_column_width=True)
     result_num = 10
     retriever = Retriever(img2descriptors, metric)
     similar_images = retriever.retrieve(os.path.join(DATASET_FOLDER, 'Images', selected_image), number=result_num)
+    
     with right_col:
-        st.write("PR Results:")
+        st.write("Ground Truth:")
+        labeler = ImageLabeler(os.path.join(DATASET_FOLDER,"GroundTruth"))
+        gt_img = labeler.load_img(selected_image)
+        st.image(gt_img, use_column_width=True)
         # TOOD: Add PR Results here
 
     st.write(f"Top {result_num} similar images:")
