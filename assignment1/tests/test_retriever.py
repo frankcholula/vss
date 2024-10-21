@@ -10,8 +10,8 @@ class TestRetriever(unittest.TestCase):
         self.img1 = cv2.imread(f"{DATASET_FOLDER}/Images/1_1_s.bmp").astype(np.float64) / 255.0
         self.img2 = cv2.imread(f"{DATASET_FOLDER}/Images/5_24_s.bmp").astype(np.float64) / 255.0
         base = 256
-        self.desc1 = Extractor.extract_globalRGBencoding(self.img1, base)
-        self.desc2 = Extractor.extract_globalRGBencoding(self.img2, base)
+        self.desc1 = Extractor.extract_globalRGBquantization(self.img1, base)
+        self.desc2 = Extractor.extract_globalRGBquantization(self.img2, base)
 
     def test_cvpr_compare(self):
         result = Retriever.cvpr_compare(self.desc1, self.desc2, metric="l2")

@@ -34,6 +34,24 @@ def load_data():
     message.empty()
 
 class SessionStateManager:
+    """
+    Manages the session state.
+    Attributes:
+        image_files (list): List of image file paths.
+    Methods:
+        init_session_state():
+            Initializes the session state with default values if they are not already set.
+        update_metric():
+            Updates the metric isn the session state based on user selection.
+        update_bins():
+            Updates the number of bins in the session state based on user input and sets recompute flag if changed.
+        update_base():
+            Updates the base value in the session state based on user input and sets recompute flag if changed.
+        update_descriptor():
+            Updates the descriptor in the session state based on user selection and sets recompute flag if necessary.
+        update_recompute(recompute: bool):
+            Updates the recompute flag in the session state.
+    """
     def __init__(self, image_files):
         self.image_files = image_files
         self.init_session_state()
@@ -112,7 +130,7 @@ def main():
     # TODO: Add new descriptor options here
     descriptor_method = cols[1].selectbox(
         "Choose your Descriptor...",
-        options=['rgb', 'random', 'globalRGBhisto', 'globalRGBencoding'],
+        options=['rgb', 'random', 'globalRGBhisto', 'globalRGBquantization'],
         key="descriptor_selectbox",
         on_change=session_manager.update_descriptor,
     )
@@ -126,9 +144,9 @@ def main():
             on_change=session_manager.update_bins
     )
 
-    if descriptor_method == "globalRGBencoding":
+    if descriptor_method == "globalRGBquantization":
         cols[1].select_slider(
-            "Select the base for encoding...",
+            "Select your quantization level...",
             options = [4,8],
             value=8,
             key="base_slider",

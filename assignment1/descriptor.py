@@ -27,9 +27,9 @@ class Descriptor:
                 'method': lambda img: Extractor.extract_globalRGBhisto(img, bins=kwargs.get('bins')),
                 'log_message': logging_message + f"{kwargs}"
             },
-            'globalRGBencoding': {
-                'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBencoding'),
-                'method': lambda img: Extractor.extract_globalRGBencoding(img, base=kwargs.get('base')),
+            'globalRGBquantization': {
+                'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBquantization'),
+                'method': lambda img: Extractor.extract_globalRGBquantization(img, quant_lvl=kwargs.get('quant_lvl')),
                 'log_message': logging_message + f"{kwargs}"
             }
         }
@@ -46,7 +46,7 @@ class Descriptor:
             for filename in os.listdir(os.path.join(self.DATASET_FOLDER, 'Images')):
                 if filename.endswith(".bmp"):
                     img_path = os.path.join(self.DATASET_FOLDER, 'Images', filename)
-                    img = cv2.imread(img_path).astype(np.float64) / 255.0  # Normalize the image
+                    img = cv2.imread(img_path).astype(np.float64)
                     fout = os.path.join(descriptor_path, filename).replace('.bmp', '.npy')
                     F = self.AVAILABLE_EXTRACTORS[self.extract_method]['method'](img)
                     np.save(fout, F)
@@ -97,56 +97,28 @@ class Extractor:
         Returns:
         numpy.ndarray: A feature vector containing the average B, G, and R values.
         """
+        img = img / 255.0 # normalize the image to [0, 1]
         B = np.mean(img[:, :, 0])
         G = np.mean(img[:, :, 1])
         R = np.mean(img[:, :, 2])
         return np.array([R, G, B])
     
     @staticmethod
-    def extract_globalRGBhisto(img, bins=32, encoding=False) -> np.ndarray:
-        """
-        Extracts a global RGB histogram from the input image.
-
-        This method computes the histogram for each of the B, G, and R channels of the input image.
-        The histogram is computed with a specified number of bins and is normalized to sum to 1.
-
-        Parameters:
-        img (numpy.ndarray): The input image, assumed to be normalized to the range [0, 1].
-        bins (int): The number of bins to use for the histogram. Default is 32.
-        encoding (bool): A flag for future use, currently not implemented. Default is False.
-
-        Returns:
-        numpy.ndarray: A flattened and normalized histogram of the RGB channels.
-        """
-        # compute the histogram for each channel, but range is [0, 1] because we already normalized the image
-        hist = [np.histogram(img[:, :, i], bins=bins, range=(0, 1))[0] for i in range(3)]
-        # flatten and normalize the histogram
-        hist_flat = hist.flatten()
+    def extract_globalRGBhisto(img, bins=32) -> np.ndarray:
+        hist = [np.histogram(img[:, :, i], bins=bins, range=(0, 256))[0] for i in range(3)]
+        hist_flat = np.concatenate(hist)
         hist_normalized = hist_flat / np.sum(hist_flat)
         return hist_normalized
 
     @staticmethod
-    def extract_globalRGBencoding(img, base) -> np.ndarray:
-        """
-        Encodes the RGB channels of the input image into a single channel using a polynomial representation.
+    def extract_globalRGBquantization(img, quant_lvl) -> np.ndarray:
+        # Quantize the RGB values
+        R = np.floor(img[:, :, 0] / quant_lvl).astype(int)
+        G = np.floor(img[:, :, 1] / quant_lvl).astype(int)
+        B = np.floor(img[:, :, 2] / quant_lvl).astype(int)
 
-        This method combines the R, G, and B channels of the input image into a single channel by treating
-        each pixel as a polynomial with the specified base. The resulting encoded image is then flattened.
-
-        Parameters:
-        img (numpy.ndarray): The input image, assumed to be normalized to the range [0, 1].
-        base (int): The base to use for the polynomial representation.
-
-        Returns:
-        numpy.ndarray: A flattened array representing the encoded image.
-        """
-        # Quantize the RGB values to the range [0, base-1]
-        # R = (img[:, :, 0] * (base - 1)).astype(int)
-        # G = (img[:, :, 1] * (base - 1)).astype(int)
-        # B = (img[:, :, 2] * (base - 1)).astype(int)
-        R = img[:, :, 0]
-        G = img[:, :, 1]
-        B = img[:, :, 2]
-        poly_repr = R * base ** 2 + G * base + B
-        hist, _ = np.histogram(poly_repr, bins=base ** 3, range=(0, base ** 3))
-        return hist.flatten()
+        poly_repr = R * quant_lvl ** 2 + G * quant_lvl + B
+        hist = np.histogram(poly_repr, bins=np.arange(quant_lvl**3+1), density=False)[0]
+        hist_flat = hist.flatten()
+        hist_normalized = hist_flat / np.sum(hist_flat)
+        return hist_normalized
