@@ -159,15 +159,22 @@ def main():
         st.rerun()
     
     # Section to display the query image and the top similar images
-    st.write("Query Image:")
-    st.image(os.path.join(DATASET_FOLDER, 'Images', selected_image), use_column_width=True)
+    left_col, right_col = st.columns([3, 1.5])
+    with left_col:
+        st.write("Query Image:")
+        st.image(os.path.join(DATASET_FOLDER, 'Images', selected_image), use_column_width=True)
     result_num = 10
     retriever = Retriever(img2descriptors, metric)
-    similiar_images = retriever.retrieve(os.path.join(DATASET_FOLDER, 'Images', selected_image), number=result_num)
+    similar_images = retriever.retrieve(os.path.join(DATASET_FOLDER, 'Images', selected_image), number=result_num)
+    with right_col:
+        st.write("PR Results:")
+        # TOOD: Add PR Results here
+
     st.write(f"Top {result_num} similar images:")
-    cols = st.columns(result_num)
-    for col, img_path in zip(cols, similiar_images):
-        col.image(img_path, use_column_width=True)
+    for i in range(0, len(similar_images), 5):
+        cols = st.columns(5)
+        for col, img_path in zip(cols, similar_images[i:i+5]):
+            col.image(img_path, use_column_width=True, caption=os.path.basename(img_path))
 
 if __name__ == "__main__":
     main()
