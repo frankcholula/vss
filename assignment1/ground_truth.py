@@ -2,13 +2,15 @@ import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import logging
+import json
 
-
+logging.basicConfig(level=logging.INFO)
 class ImageLabeler():
     def __init__(self, ground_truth_folder: str):
         self.ground_truth_folder = ground_truth_folder
         self.class_mapping = {
-            (0, 0, 0): 'void',
+            # (0, 0, 0): 'void',
             (128, 0, 0): 'building',
             (0, 128, 0): 'grass',
             (128, 128, 0): 'tree',
@@ -35,17 +37,48 @@ class ImageLabeler():
         }
     
     def load_img (self, selected_img: str):
-        filename, ext = os.path.splitext(selected_img)
-        gt_filename = f"{filename}_GT{ext}"
-        img = cv2.imread(os.path.join(self.ground_truth_folder, gt_filename))
+        img = cv2.imread(os.path.join(self.ground_truth_folder, selected_img))
         rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         return rgb_img
     
     def get_labels(self, selected_img: str) -> np.ndarray:
-        labels = set()
-        rgb_img = self.load_img(selected_img)
-        for rgb, label in self.class_mapping.items():
-            mask = np.all(rgb_img == np.array(rgb), axis=-1)
-            if np.any(mask):
-                labels.add(label)
-        return labels
+        labels_path = os.path.join(self.ground_truth_folder, 'labels.json')
+
+        if os.path.exists(labels_path):
+            with open(labels_path, 'r') as f:
+                labels_dict = json.load(f)
+            return labels_dict[selected_img]
+        else:
+            labels = set()
+            rgb_img = self.load_img(selected_img)
+            for rgb, label in self.class_mapping.items():
+                mask = np.all(rgb_img == np.array(rgb), axis=-1)
+                if np.any(mask):
+                    labels.add(label)
+            return list(labels)
+    
+    def get_all_labels(self):
+        labels_path = os.path.join(self.ground_truth_folder, 'labels.json')
+        if os.path.exists(labels_path):
+            logging.info(f"Loading labels from {labels_path}...")
+            with open(labels_path, 'r') as f:
+                labels_dict = json.load(f)
+        else:
+            logging.info(f"No labels found. Computing labels for all images...")
+            labels_dict = self.compute_all_labels()
+            with open(labels_path, 'w') as f:
+                json.dump(labels_dict, f, indent=4)
+                logging.info(f"Labels saved to {labels_path}")
+        return labels_dict
+
+    def compute_all_labels(self):
+        labels_dict = {}
+        # Process all images in the directory
+        for image_file in os.listdir(self.ground_truth_folder):
+            if image_file.endswith('.bmp'):  # Assuming PNG format
+                try:
+                    labels = self.get_labels(image_file)
+                    labels_dict[image_file] = labels
+                except Exception as e:
+                    print(f"Error processing {image_file}: {e}")
+        return labels_dict
