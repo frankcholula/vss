@@ -41,3 +41,11 @@ class ImageLabeler():
         rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         return rgb_img
     
+    def get_labels(self, selected_img: str) -> np.ndarray:
+        labels = set()
+        rgb_img = self.load_img(selected_img)
+        for rgb, label in self.class_mapping.items():
+            mask = np.all(rgb_img == np.array(rgb), axis=-1)
+            if np.any(mask):
+                labels.add(label)
+        return labels

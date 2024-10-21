@@ -174,6 +174,7 @@ def main():
         labeler = ImageLabeler(os.path.join(DATASET_FOLDER,"GroundTruth"))
         gt_img = labeler.load_img(selected_image)
         st.image(gt_img, use_column_width=True)
+        st.write(f"Ground Truth Labels: {labeler.get_labels(selected_image)}")
         # TOOD: Add PR Results here
 
     st.write(f"Top {result_num} similar images:")
