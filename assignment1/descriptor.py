@@ -118,10 +118,8 @@ class Extractor:
         Returns:
         numpy.ndarray: A flattened and normalized histogram of the RGB channels.
         """
-        hist = np.zeros((3, bins))
-        for i in range(3):
-            # compute the histogram for each channel, but range is [0, 1] because we already normalized the image
-            hist[i] = np.histogram(img[:, :, i], bins=bins, range=(0, 1))[0]
+        # compute the histogram for each channel, but range is [0, 1] because we already normalized the image
+        hist = [np.histogram(img[:, :, i], bins=bins, range=(0, 1))[0] for i in range(3)]
         # flatten and normalize the histogram
         hist_flat = hist.flatten()
         hist_normalized = hist_flat / np.sum(hist_flat)

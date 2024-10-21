@@ -14,5 +14,5 @@ class TestDescriptor(unittest.TestCase):
         self.descriptor.extract()
         mapping = self.descriptor.get_image_descriptor_mapping()
         for key, value in mapping.items():
-            print(key, value.shape)
+            self.assertEqual(value.shape, (512,), "The shape of the descriptor should be (4,).")
         self.assertEqual(len(mapping), 591, "The number of images should be 591.")
