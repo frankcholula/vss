@@ -27,9 +27,9 @@ class Descriptor:
                 'method': lambda img: Extractor.extract_globalRGBhisto(img, bins=kwargs.get('bins')),
                 'log_message': logging_message + f"{kwargs}"
             },
-            'globalRGBquantization': {
-                'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBquantization'),
-                'method': lambda img: Extractor.extract_globalRGBquantization(img, quant_lvl=kwargs.get('quant_lvl')),
+            'globalRGBhisto_quant': {
+                'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBhisto_quant'),
+                'method': lambda img: Extractor.extract_globalRGBhisto_quant(img, quant_lvl=kwargs.get('quant_lvl')),
                 'log_message': logging_message + f"{kwargs}"
             }
         }
@@ -111,11 +111,11 @@ class Extractor:
         return hist_normalized
 
     @staticmethod
-    def extract_globalRGBquantization(img, quant_lvl) -> np.ndarray:
+    def extract_globalRGBhisto_quant(img, quant_lvl=4) -> np.ndarray:
         # Quantize the RGB values
-        R = np.floor(img[:, :, 0] / quant_lvl).astype(int)
-        G = np.floor(img[:, :, 1] / quant_lvl).astype(int)
-        B = np.floor(img[:, :, 2] / quant_lvl).astype(int)
+        R = np.floor(img[:, :, 0] * quant_lvl / 256).astype(int)
+        G = np.floor(img[:, :, 1] * quant_lvl / 256).astype(int)
+        B = np.floor(img[:, :, 2] * quant_lvl / 256).astype(int)
 
         poly_repr = R * quant_lvl ** 2 + G * quant_lvl + B
         hist = np.histogram(poly_repr, bins=np.arange(quant_lvl**3+1), density=False)[0]

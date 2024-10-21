@@ -34,24 +34,6 @@ def load_data():
     message.empty()
 
 class SessionStateManager:
-    """
-    Manages the session state.
-    Attributes:
-        image_files (list): List of image file paths.
-    Methods:
-        init_session_state():
-            Initializes the session state with default values if they are not already set.
-        update_metric():
-            Updates the metric isn the session state based on user selection.
-        update_bins():
-            Updates the number of bins in the session state based on user input and sets recompute flag if changed.
-        update_base():
-            Updates the base value in the session state based on user input and sets recompute flag if changed.
-        update_descriptor():
-            Updates the descriptor in the session state based on user selection and sets recompute flag if necessary.
-        update_recompute(recompute: bool):
-            Updates the recompute flag in the session state.
-    """
     def __init__(self, image_files):
         self.image_files = image_files
         self.init_session_state()
@@ -61,8 +43,8 @@ class SessionStateManager:
             st.session_state['bins'] = 32
         if 'selected_image' not in st.session_state:
             st.session_state['selected_image'] = self.image_files[0]
-        if 'base' not in st.session_state:
-            st.session_state['base'] = 256
+        if 'quant_lvl' not in st.session_state:
+            st.session_state['quant_lvl'] = 8
         if 'metric' not in st.session_state:
             st.session_state['metric'] = "l2"
         if 'recompute' not in st.session_state:
@@ -81,9 +63,9 @@ class SessionStateManager:
         else:
             self.update_recompute(False)
     
-    def update_base(self):
-        if st.session_state['base'] != st.session_state['base_slider']:
-            st.session_state['base'] = st.session_state['base_slider']
+    def update_quant(self):
+        if st.session_state['quant_lvl'] != st.session_state['quant_slider']:
+            st.session_state['quant_lvl'] = st.session_state['quant_slider']
             st.session_state['recompute'] = True
         else:
             self.update_recompute(False)
@@ -130,7 +112,7 @@ def main():
     # TODO: Add new descriptor options here
     descriptor_method = cols[1].selectbox(
         "Choose your Descriptor...",
-        options=['rgb', 'random', 'globalRGBhisto', 'globalRGBquantization'],
+        options=['rgb', 'random', 'globalRGBhisto', 'globalRGBhisto_quant'],
         key="descriptor_selectbox",
         on_change=session_manager.update_descriptor,
     )
@@ -144,13 +126,13 @@ def main():
             on_change=session_manager.update_bins
     )
 
-    if descriptor_method == "globalRGBquantization":
+    if descriptor_method == "globalRGBhisto_quant":
         cols[1].select_slider(
-            "Select your quantization level...",
-            options = [4,8],
+            "Select Your Quantization Level...",
+            options = [4,8, 16, 32],
             value=8,
-            key="base_slider",
-            on_change=session_manager.update_base
+            key="quant_slider",
+            on_change=session_manager.update_quant
         )
     
     descriptor = Descriptor(
@@ -158,7 +140,7 @@ def main():
         DESCRIPTOR_FOLDER,
         descriptor_method,
         bins=st.session_state['bins'],
-        base=st.session_state['base']
+        quant_lvl=st.session_state['quant_lvl']
     )
     if st.session_state['recompute']:
         logging.info("Recomputing descriptors...")

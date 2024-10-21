@@ -8,16 +8,21 @@ class TestDescriptor(unittest.TestCase):
         DATASET_FOLDER = "MSRC_ObjCategImageDatabase_v2_local"
         self.img1 = cv2.imread(f"{DATASET_FOLDER}/Images/1_1_s.bmp").astype(np.float64) / 255.0
         self.img2 = cv2.imread(f"{DATASET_FOLDER}/Images/5_24_s.bmp").astype(np.float64) / 255.0
-        self.descriptor = Descriptor(DATASET_FOLDER, "descriptors", "globalRGBquantization", base=4)
+        self.descriptor1 = Descriptor(DATASET_FOLDER, "descriptors", "globalRGBhisto_quant", quant_lvl=4)
+        self.descriptor2 = Descriptor(DATASET_FOLDER, "descriptors", "globalRGBhisto_quant", quant_lvl=8)
+
 
     def test_image_descriptor_mapping(self):
-        self.descriptor.extract()
-        mapping = self.descriptor.get_image_descriptor_mapping()
+        self.descriptor1.extract(recompute=True)
+        mapping = self.descriptor1.get_image_descriptor_mapping()
         for key, value in mapping.items():
-            print(key, value.shape)
-            # self.assertEqual(value.shape, (512,), "The shape of the descriptor should be (4,).")
-        print(len(mapping))
-        # self.assertEqual(len(mapping), 591, "The number of images should be 591.")
+            self.assertEqual(value.shape, (64,), "The shape of the descriptor should be (64,).")
+        self.assertEqual(len(mapping), 591, "The number of images should be 591.")
+        self.descriptor2.extract(recompute=True)
+        mapping = self.descriptor2.get_image_descriptor_mapping()
+        for key, value in mapping.items():
+            self.assertEqual(value.shape, (512,), "The shape of the descriptor should be (512,).")
+        self.assertEqual(len(mapping), 591, "The number of images should be 591.")
 
 
 class TestExtractor(unittest.TestCase):
@@ -29,9 +34,10 @@ class TestExtractor(unittest.TestCase):
     def test_extract_globalRGBhisto_equality(self):
         result1 = Extractor.extract_globalRGBhisto(self.img1)
         result2 = Extractor.extract_globalRGBhisto(self.img2)
+        self.assertTrue(np.array_equal(result1, result2), "The histograms extracted should be equal.")
 
 
-    def test_extract_globalRGBquantization_equality(self):
-        result1 = Extractor.extract_globalRGBquantization(self.img1, 256)
-        result2 = Extractor.extract_globalRGBquantization(self.img2, 256)
-
+    def test_extract_globalRGBhisto_quant_equality(self):
+        result1 = Extractor.extract_globalRGBhisto_quant(self.img1, 8)
+        result2 = Extractor.extract_globalRGBhisto_quant(self.img2, 8)
+        self.assertTrue(np.array_equal(result1, result2), "The histograms extracted should be equal.")
