@@ -53,7 +53,6 @@ class SessionStateManager:
         if 'descriptor' not in st.session_state:
             st.session_state['descriptor'] = "rgb"
 
-
     def update_metric(self):
         st.session_state['metric'] = st.session_state['metric_radio']
 
@@ -160,6 +159,11 @@ def main():
         # need rerun here to refresh selected image value
         st.rerun()
     
+    cols[2].toggle(
+        "Debug Mode",
+        key="debug_mode"
+    )
+    
     # Section to display the query image and the top similar images
     left_col, right_col = st.columns([2.25, 2.25])
     with left_col:
@@ -172,20 +176,17 @@ def main():
     with right_col:
         st.header("Ground Truth:")
         labeler = ImageLabeler(os.path.join(DATASET_FOLDER,"GroundTruth"))
-        filename, ext = os.path.splitext(selected_image)
-        gt_filename = f"{filename}_GT{ext}"
-        gt_img = labeler.load_img(gt_filename)
+        gt_img = labeler.load_img(selected_image)
         st.image(gt_img, use_column_width=True)
-        st.write(labeler.get_labels(gt_filename))
-        # TOOD: Add PR Results here
+        if st.session_state['debug_mode']:
+            st.write(labeler.get_labels(selected_image))
 
     st.header(f"Top {result_num} Similar Images:")
     for i in range(0, len(similar_images), 5):
         cols = st.columns(5)
         for col, img_path in zip(cols, similar_images[i:i+5]):
             col.image(img_path, use_column_width=True, caption=os.path.basename(img_path))
-            filename, ext = os.path.splitext(os.path.basename(img_path))
-            gt_filename = f"{filename}_GT{ext}"
-            col.write(labeler.get_labels(gt_filename))
+            if st.session_state['debug_mode']:
+                col.write(labeler.get_labels(os.path.basename(img_path)))
 if __name__ == "__main__":
     main()

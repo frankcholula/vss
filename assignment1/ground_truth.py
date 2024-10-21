@@ -35,22 +35,28 @@ class ImageLabeler():
             (64, 64, 0): 'body',
             (192, 64, 0): 'boat'
         }
+
+    def get_gt_filename(self, img_filename):
+        filename, ext = os.path.splitext(img_filename)
+        return f"{filename}_GT{ext}"
     
-    def load_img (self, selected_img: str):
-        img = cv2.imread(os.path.join(self.ground_truth_folder, selected_img))
+    def load_img(self, selected_img: str):
+        img_path = os.path.join(self.ground_truth_folder, selected_img)
+        img = cv2.imread(self.get_gt_filename(img_path))
         rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         return rgb_img
     
     def get_labels(self, selected_img: str) -> np.ndarray:
+        gt_filename = self.get_gt_filename(selected_img)
         labels_path = os.path.join(self.ground_truth_folder, 'labels.json')
 
         if os.path.exists(labels_path):
             with open(labels_path, 'r') as f:
                 labels_dict = json.load(f)
-            return labels_dict[selected_img]
+            return labels_dict[gt_filename]
         else:
             labels = set()
-            rgb_img = self.load_img(selected_img)
+            rgb_img = self.load_img(gt_filename)
             for rgb, label in self.class_mapping.items():
                 mask = np.all(rgb_img == np.array(rgb), axis=-1)
                 if np.any(mask):
