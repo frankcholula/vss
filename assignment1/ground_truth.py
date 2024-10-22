@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import logging
 import json
-from typing import Dict, List
+from typing import Dict
 
 logging.basicConfig(level=logging.INFO)
 class ImageLabeler():
@@ -12,7 +12,7 @@ class ImageLabeler():
         self.ground_truth_folder = os.path.join(dataset_folder, 'GroundTruth')
         self.image_files = os.path.join(dataset_folder, 'Images')
         self.labels_path = os.path.join(self.ground_truth_folder, 'labels.json')
-        self.class_mapping = {
+        self.label_mapping = {
             # (0, 0, 0): 'void',
             (128, 0, 0): 'building',
             (0, 128, 0): 'grass',
@@ -39,6 +39,29 @@ class ImageLabeler():
             (192, 64, 0): 'boat'
         }
 
+        self.class_mapping = {
+            1: ['grass', 'cow'],
+            2: ['tree', 'grass', 'sky'],
+            3: ['building', 'sky'],
+            4: ['aeroplane', 'grass', 'sky'],
+            5: ['cow', 'grass', 'mount'],
+            6: ['face', 'body'],
+            7: ['car','building'],
+            8: ['bike', 'building'],
+            9: ['sheep', 'grass'],
+            10: ['flower'],
+            11: ['sign'],
+            12: ['bird', "sky", "grass", "water"],
+            13: ['book'],
+            14: ['chair'],
+            15: ['cat'],
+            16: ['dog'],
+            17: ['road', 'building'], 
+            18: ['water', 'boat'],
+            19: ['body', 'face'],
+            20: ['water', 'boat', 'sky', 'mount'],
+        }
+
     def get_gt_filename(self, img_filename: str) -> str:
         filename, ext = os.path.splitext(img_filename)
         return f"{filename}_GT{ext}"
@@ -57,13 +80,13 @@ class ImageLabeler():
         else:
             labels = set()
             rgb_img = self.load_img(selected_img)
-            for rgb, label in self.class_mapping.items():
+            for rgb, label in self.label_mapping.items():
                 mask = np.all(rgb_img == np.array(rgb), axis=-1)
                 if np.any(mask):
                     labels.add(label)
             return list(labels)
     
-    def get_all_labels(self) -> Dict[str, List[str]]:
+    def get_all_labels(self) -> Dict[str, Dict]:
         labels_dict = {}
         if os.path.exists(self.labels_path):
             labels_dict = self.load_labels()
@@ -83,13 +106,17 @@ class ImageLabeler():
             json.dump(labels_dict, f, indent=4)
             logging.info(f"Labels saved to {self.labels_path}")
 
-    def compute_all_labels(self):
-        labels_dict = {}
+    def compute_all_labels(self) -> Dict[str, Dict]:
+        result = {}
         for image_file in os.listdir(self.image_files):
             if image_file.endswith('.bmp'):
+                class_id = image_file.split('_')[0]
                 try:
                     labels = self.get_labels(image_file)
-                    labels_dict[image_file] = labels
                 except Exception as e:
                     print(f"Error processing {image_file}: {e}")
-        return labels_dict
+            result[image_file] = {
+                "labels": labels,
+                "class": class_id
+            }
+        return result

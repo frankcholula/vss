@@ -92,7 +92,8 @@ def main():
     DESCRIPTOR_FOLDER = "descriptors"
     image_files = [f for f in os.listdir(os.path.join(DATASET_FOLDER, 'Images')) if f.endswith('.bmp')]
     session_manager = SessionStateManager(image_files)
-    
+    labeler = ImageLabeler(DATASET_FOLDER)
+
     # Section to choose the image and the descriptor
     st.title("Visual Search Engine 👀")
     cols = st.columns([1.75,1.75,1])
@@ -160,22 +161,24 @@ def main():
         st.rerun()
     
     cols[2].toggle(
-        "Debug Mode",
-        key="debug_mode"
-    )
+        "Debug",
+        key="debug_mode",
+        help="Toggle to display the ground truth labels for the images."
+    )   
     
     # Section to display the query image and the top similar images
     left_col, right_col = st.columns([2.25, 2.25])
     with left_col:
         st.header("Query Image:")
         st.image(os.path.join(DATASET_FOLDER, 'Images', selected_image), use_column_width=True)
+        if st.session_state['debug_mode']:
+            st.write(labeler.get_labels(selected_image))
     result_num = 10
     retriever = Retriever(img2descriptors, metric)
     similar_images = retriever.retrieve(os.path.join(DATASET_FOLDER, 'Images', selected_image), number=result_num)
     
     with right_col:
         st.header("Ground Truth:")
-        labeler = ImageLabeler(DATASET_FOLDER)
         gt_img = labeler.load_img(selected_image)
         st.image(gt_img, use_column_width=True)
         if st.session_state['debug_mode']:
