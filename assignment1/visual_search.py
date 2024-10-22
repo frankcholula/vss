@@ -175,7 +175,7 @@ def main():
     
     with right_col:
         st.header("Ground Truth:")
-        labeler = ImageLabeler(os.path.join(DATASET_FOLDER,"GroundTruth"))
+        labeler = ImageLabeler(DATASET_FOLDER)
         gt_img = labeler.load_img(selected_image)
         st.image(gt_img, use_column_width=True)
         if st.session_state['debug_mode']:
