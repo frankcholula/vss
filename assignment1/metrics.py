@@ -15,16 +15,23 @@ def create_class_matrix(input_image_class: str, retrieved_image_classes: List) -
     return confusion_df
 
 def plot_class_matrix(confusion_df: pd.DataFrame, input_image_class: str):
+    columns = list(confusion_df.columns)
+    # Move the input class to the first position
+    if input_image_class in columns:
+        columns.remove(input_image_class)
+        columns = [input_image_class] + columns
+    confusion_df = confusion_df[columns]
+
     match_matrix = np.zeros_like(confusion_df, dtype=int)
     for col in confusion_df.columns:
         if col == input_image_class:
             match_matrix[0, confusion_df.columns.get_loc(col)] = 1
     
     cmap = sns.color_palette(['lightgreen', 'pink'])
+
     plt.figure(figsize=(10, 2))
     sns.heatmap(confusion_df, annot=True, fmt="d", cmap=cmap, cbar=False, linewidths=0.5, linecolor='black', mask=(match_matrix == 0))
     sns.heatmap(confusion_df, annot=True, fmt="d", cmap=['pink'], cbar=False, linewidths=0.5, linecolor='black', mask=(match_matrix == 1))
-
     plt.xlabel("Retrieved Classes")
     plt.ylabel("Input Class")
     plt.tight_layout()
