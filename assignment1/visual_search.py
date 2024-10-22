@@ -52,7 +52,7 @@ class SessionStateManager:
         if 'recompute' not in st.session_state:
             st.session_state['recompute'] = True
         if 'descriptor' not in st.session_state:
-            st.session_state['descriptor'] = "rgb"
+            st.session_state['descriptor'] = "globalRGBhisto_quant"
 
     def update_metric(self):
         st.session_state['metric'] = st.session_state['metric_radio']
@@ -114,7 +114,7 @@ def main():
     # TODO: Add new descriptor options here
     descriptor_method = cols[1].selectbox(
         "Choose your Descriptor...",
-        options=['rgb', 'random', 'globalRGBhisto', 'globalRGBhisto_quant'],
+        options=['globalRGBhisto_quant','globalRGBhisto', 'rgb', 'random'],
         key="descriptor_selectbox",
         on_change=session_manager.update_descriptor,
     )

@@ -9,6 +9,9 @@ def create_class_matrix(input_image_class: str, retrieved_image_classes: list) -
     unique_retrieved_classes = sorted(set(retrieved_image_classes + [input_image_class]))
     counts = [retrieved_image_classes.count(cls) for cls in unique_retrieved_classes]
     confusion_df = pd.DataFrame([counts], index=[input_image_class], columns=unique_retrieved_classes)
+    confusion_df = confusion_df.sort_values(by=input_image_class, axis=1, ascending=False)
+
+    print(confusion_df)
     return confusion_df
 
 def plot_class_matrix(confusion_df: pd.DataFrame):
