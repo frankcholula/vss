@@ -15,8 +15,8 @@ def create_class_matrix(input_image_class: str, retrieved_image_classes: List) -
     return confusion_df
 
 def plot_class_matrix(confusion_df: pd.DataFrame, input_image_class: str):
-    columns = list(confusion_df.columns)
     # Move the input class to the first position
+    columns = list(confusion_df.columns)
     if input_image_class in columns:
         columns.remove(input_image_class)
         columns = [input_image_class] + columns
@@ -28,10 +28,12 @@ def plot_class_matrix(confusion_df: pd.DataFrame, input_image_class: str):
             match_matrix[0, confusion_df.columns.get_loc(col)] = 1
     
     cmap = sns.color_palette(['lightgreen', 'pink'])
-
     plt.figure(figsize=(10, 2))
-    sns.heatmap(confusion_df, annot=True, fmt="d", cmap=cmap, cbar=False, linewidths=0.5, linecolor='black', mask=(match_matrix == 0))
-    sns.heatmap(confusion_df, annot=True, fmt="d", cmap=['pink'], cbar=False, linewidths=0.5, linecolor='black', mask=(match_matrix == 1))
+    if confusion_df[input_image_class][0] == 0:
+        sns.heatmap(confusion_df, annot=True, fmt="d", cmap=['pink'], cbar=False, linewidths=0.5, linecolor='black')
+    else:
+        sns.heatmap(confusion_df, annot=True, fmt="d", cmap=cmap, cbar=False, linewidths=0.5, linecolor='black', mask=(match_matrix == 0))
+        sns.heatmap(confusion_df, annot=True, fmt="d", cmap=['pink'], cbar=False, linewidths=0.5, linecolor='black', mask=(match_matrix == 1))
     plt.xlabel("Retrieved Classes")
     plt.ylabel("Input Class")
     plt.tight_layout()
