@@ -44,7 +44,7 @@ class ImageLabeler():
             2: ['tree', 'grass', 'sky'],
             3: ['building', 'sky'],
             4: ['aeroplane', 'grass', 'sky'],
-            5: ['cow', 'grass', 'mount'],
+            5: ['cow', 'grass', 'mountain'],
             6: ['face', 'body'],
             7: ['car','building'],
             8: ['bike', 'building'],
@@ -59,7 +59,7 @@ class ImageLabeler():
             17: ['road', 'building'], 
             18: ['water', 'boat'],
             19: ['body', 'face'],
-            20: ['water', 'boat', 'sky', 'mount'],
+            20: ['water', 'boat', 'sky', 'mountain'],
         }
 
     def get_gt_filename(self, img_filename: str) -> str:

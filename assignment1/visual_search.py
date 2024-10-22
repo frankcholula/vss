@@ -7,7 +7,7 @@ from data_sources import FirebaseConnection
 from descriptor import Descriptor
 from retriever import Retriever
 from ground_truth import ImageLabeler
-from metrics import create_class_matrix, plot_class_matrix, calculate_precision_recall
+from metrics import create_class_matrix, plot_class_matrix, calculate_pr_curve, plot_pr_curve
 
 logging.basicConfig(level=logging.INFO)
 
@@ -207,21 +207,20 @@ def main():
                 col.write(f"Class: {labeler.get_class(os.path.basename(img_path))}")
                 col.write(labeler.get_labels(os.path.basename(img_path)))
 
-    st.header("Class-based Confusion Matrix:")
+
+    st.header("Precision and Recall:")
     input_class = labeler.get_class(selected_image)
     retrieved_image_classes = [labeler.get_class(os.path.basename(img_path)) for img_path in similar_images]
     cm = create_class_matrix(input_class, retrieved_image_classes)
-    plot_class_matrix(cm)
+    plot_class_matrix(cm, input_class)
 
     all_labels = labeler.get_all_labels()
     total_relevant = sum(1 for image_data in all_labels.values() if image_data['class'] == input_class)
-    precision, recall = calculate_precision_recall(input_class, retrieved_image_classes,total_relevant) 
-    st.write(f"Precision: {precision} and Recall: {recall}")
+    precisions, recalls = calculate_pr_curve(input_class, retrieved_image_classes, total_relevant)
+    plot_pr_curve(precisions, recalls)
+    # precision, recall = calculate_precision_recall(input_class, retrieved_image_classes,total_relevant) 
+    # st.write(f"Precision: {precision} and Recall: {recall}")
 
-    # confusion_matrix = create_class_confusion_matrix(similar_images, retrieved_image_classes)
-
-    # similiar_image_classes = [labeler.get_class(os.path.basename(img_path)) for img_path in similar_images]
-    # confusion_matrix = create_class_confusion_matrix(similar_images, labeler)
 
 if __name__ == "__main__":
     main()
