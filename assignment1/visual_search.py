@@ -96,20 +96,19 @@ def main():
     labeler = ImageLabeler(DATASET_FOLDER)
 
     # Section to choose the image and the descriptor
+
     st.title("Visual Search Engine 👀")
+    st.toggle(
+        "Debug",
+        key="debug_mode",
+        help="Toggle to display the ground truth labels for the images."
+    )
     cols = st.columns([1.75,1.75,1])
     selected_image = cols[0].selectbox(
         "Choose an Image...",
         image_files,
         index=image_files.index(st.session_state['selected_image']))
     
-    metric = cols[0].radio(
-        "Select Comparison Metric...",
-        options=["l2", "l1"],
-        index=["l2", "l1"].index(st.session_state['metric']),
-        key="metric_radio",
-        on_change=session_manager.update_metric
-    )
 
     # TODO: Add new descriptor options here
     descriptor_method = cols[1].selectbox(
@@ -161,11 +160,14 @@ def main():
         # need rerun here to refresh selected image value
         st.rerun()
     
-    cols[2].toggle(
-        "Debug",
-        key="debug_mode",
-        help="Toggle to display the ground truth labels for the images."
+    metric = cols[2].radio(
+        "Comparison Metric",
+        options=["l2", "l1"],
+        index=["l2", "l1"].index(st.session_state['metric']),
+        key="metric_radio",
+        on_change=session_manager.update_metric
     )
+
     result_num = cols[0].slider(
         "Number of Similar Images to Retrieve...",
         min_value=5,
