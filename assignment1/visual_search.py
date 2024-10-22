@@ -15,9 +15,7 @@ logging.basicConfig(level=logging.INFO)
 def load_data():
     firebase_conn = FirebaseConnection()
     bucket = firebase_conn.get_bucket()    
-    # Directory in Firebase storage
     image_directory = "MSRC_ObjCategImageDatabase_v2/Images"
-    # Create a local directory to store images
     local_image_dir = "MSRC_ObjCategImageDatabase_v2_local/Images"
     required_file_count = 591
     sleep_time = 1.5
@@ -208,7 +206,7 @@ def main():
                 col.write(labeler.get_labels(os.path.basename(img_path)))
 
 
-    st.header("Precision and Recall:")
+    st.header("Performance:")
     input_class = labeler.get_class(selected_image)
     retrieved_image_classes = [labeler.get_class(os.path.basename(img_path)) for img_path in similar_images]
     cm = create_class_matrix(input_class, retrieved_image_classes)
@@ -218,8 +216,6 @@ def main():
     total_relevant = sum(1 for image_data in all_labels.values() if image_data['class'] == input_class)
     precisions, recalls = calculate_pr_curve(input_class, retrieved_image_classes, total_relevant)
     plot_pr_curve(precisions, recalls)
-    # precision, recall = calculate_precision_recall(input_class, retrieved_image_classes,total_relevant) 
-    # st.write(f"Precision: {precision} and Recall: {recall}")
 
 
 if __name__ == "__main__":

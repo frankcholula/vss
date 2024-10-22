@@ -1,11 +1,11 @@
 import pandas as pd
-from sklearn.metrics import confusion_matrix
 from typing import List
-from matplotlib import pyplot as plt
 import seaborn as sns
 import streamlit as st
 from typing import List
 import numpy as np
+from matplotlib import pyplot as plt
+import plotly.graph_objects as go
 
 def create_class_matrix(input_image_class: str, retrieved_image_classes: List) -> pd.DataFrame:
     unique_retrieved_classes = sorted(set(retrieved_image_classes + [input_image_class]))
@@ -29,7 +29,7 @@ def plot_class_matrix(confusion_df: pd.DataFrame, input_image_class: str):
     
     cmap = sns.color_palette(['lightgreen', 'pink'])
     plt.figure(figsize=(10, 2))
-    if confusion_df[input_image_class][0] == 0:
+    if confusion_df[input_image_class].iloc[0] == 0:
         sns.heatmap(confusion_df, annot=True, fmt="d", cmap=['pink'], cbar=False, linewidths=0.5, linecolor='black')
     else:
         sns.heatmap(confusion_df, annot=True, fmt="d", cmap=cmap, cbar=False, linewidths=0.5, linecolor='black', mask=(match_matrix == 0))
@@ -58,16 +58,27 @@ def calculate_pr_curve(input_image_class: str, retrieved_image_classes: list, to
         recall_values.append(recall)
     return precision_values, recall_values
 
-
 def plot_pr_curve(precision_values: list, recall_values: list):
-    data = {
+    thresholds = list(range(1, len(precision_values) + 1))  # Top N values
+    data = pd.DataFrame({
         'Precision': precision_values,
-        'Recall': recall_values
-    }
-    plt.figure(figsize=(8, 6))
-    sns.lineplot(x='Recall', y='Precision', data=data, marker='o', errorbar=None)
-    plt.xlabel('Recall')
-    plt.ylabel('Precision')
-    plt.title('Precision-Recall Curve')
-    plt.grid(True)
-    st.pyplot(plt)
+        'Recall': recall_values,
+        'Threshold': thresholds
+    })
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=data['Recall'],
+        y=data['Precision'],
+        mode='lines+markers', 
+        text=data['Threshold'],
+        hovertemplate='Precision: %{y}<br>Recall: %{x}<br>Threshold: %{text}<extra></extra>',
+        name='PR Curve'
+    ))
+
+    fig.update_layout(
+        title='Precision-Recall Curve',
+        xaxis_title='Recall',
+        yaxis_title='Precision',
+        hovermode='closest'
+    )
+    st.plotly_chart(fig)
