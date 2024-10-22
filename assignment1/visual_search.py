@@ -81,9 +81,12 @@ class SessionStateManager:
         else:
             self.update_recompute(False)
 
+    def update_result_num(self):
+        st.session_state['result_num'] = st.session_state['result_num_slider']
 
     def update_recompute(self, recompute:bool):
         st.session_state['recompute'] = recompute
+        
 
 def main():
     load_data()
@@ -170,9 +173,11 @@ def main():
         "Number of Similar Images to Retrieve...",
         min_value=5,
         max_value=30,
-        value=10,
+        value=st.session_state.get('result_num', 10),
         step=5,
-        format="%d"
+        format="%d",
+        key="result_num_slider",
+        on_change=session_manager.update_result_num
     )
     
     # Section to display the query image and the top similar images
