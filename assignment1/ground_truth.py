@@ -76,7 +76,7 @@ class ImageLabeler():
         if os.path.exists(self.labels_path):
             with open(self.labels_path, 'r') as f:
                 labels_dict = json.load(f)
-            return labels_dict[selected_img]
+            return labels_dict[selected_img]['labels']
         else:
             labels = set()
             rgb_img = self.load_img(selected_img)
@@ -86,6 +86,14 @@ class ImageLabeler():
                     labels.add(label)
             return list(labels)
     
+    def get_class(self, selected_img: str) -> str:
+        if os.path.exists(self.labels_path):
+            with open(self.labels_path, 'r') as f:
+                labels_dict = json.load(f)
+            return labels_dict[selected_img]['class']
+        else:
+            return selected_img.split('_')[0]
+
     def get_all_labels(self) -> Dict[str, Dict]:
         labels_dict = {}
         if os.path.exists(self.labels_path):

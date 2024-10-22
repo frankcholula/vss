@@ -7,6 +7,7 @@ from data_sources import FirebaseConnection
 from descriptor import Descriptor
 from retriever import Retriever
 from ground_truth import ImageLabeler
+from metrics import create_class_matrix, plot_class_matrix
 
 logging.basicConfig(level=logging.INFO)
 
@@ -172,6 +173,7 @@ def main():
         st.header("Query Image:")
         st.image(os.path.join(DATASET_FOLDER, 'Images', selected_image), use_column_width=True)
         if st.session_state['debug_mode']:
+            st.write(f"Class: {labeler.get_class(selected_image)}")
             st.write(labeler.get_labels(selected_image))
     result_num = 10
     retriever = Retriever(img2descriptors, metric)
@@ -182,6 +184,7 @@ def main():
         gt_img = labeler.load_img(selected_image)
         st.image(gt_img, use_column_width=True)
         if st.session_state['debug_mode']:
+            st.write(f"Class: {labeler.get_class(selected_image)}")
             st.write(labeler.get_labels(selected_image))
 
     st.header(f"Top {result_num} Similar Images:")
@@ -190,6 +193,19 @@ def main():
         for col, img_path in zip(cols, similar_images[i:i+5]):
             col.image(img_path, use_column_width=True, caption=os.path.basename(img_path))
             if st.session_state['debug_mode']:
+                col.write(f"Class: {labeler.get_class(os.path.basename(img_path))}")
                 col.write(labeler.get_labels(os.path.basename(img_path)))
+
+    st.header("Class-based Confusion Matrix:")
+    input_class = labeler.get_class(selected_image)
+    retrieved_image_classes = [labeler.get_class(os.path.basename(img_path)) for img_path in similar_images]
+    cm = create_class_matrix(input_class, retrieved_image_classes)
+    plot_class_matrix(cm)
+
+    # confusion_matrix = create_class_confusion_matrix(similar_images, retrieved_image_classes)
+
+    # similiar_image_classes = [labeler.get_class(os.path.basename(img_path)) for img_path in similar_images]
+    # confusion_matrix = create_class_confusion_matrix(similar_images, labeler)
+
 if __name__ == "__main__":
     main()
