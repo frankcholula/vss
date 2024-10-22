@@ -21,7 +21,10 @@ def plot_class_matrix(confusion_df: pd.DataFrame):
     plt.tight_layout()
     st.pyplot(plt)
 
-def calculate_precision_recall(input_image_class: str, retrieved_image_classes: List):
+def calculate_precision_recall(input_image_class: str, retrieved_image_classes: List, total_relevant_images:int):
     tp = retrieved_image_classes.count(input_image_class)
     fp = len(retrieved_image_classes) - tp
-
+    fn = total_relevant_images - tp
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+    return (precision, recall)

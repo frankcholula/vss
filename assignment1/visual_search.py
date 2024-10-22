@@ -7,7 +7,7 @@ from data_sources import FirebaseConnection
 from descriptor import Descriptor
 from retriever import Retriever
 from ground_truth import ImageLabeler
-from metrics import create_class_matrix, plot_class_matrix
+from metrics import create_class_matrix, plot_class_matrix, calculate_precision_recall
 
 logging.basicConfig(level=logging.INFO)
 
@@ -165,7 +165,15 @@ def main():
         "Debug",
         key="debug_mode",
         help="Toggle to display the ground truth labels for the images."
-    )   
+    )
+    result_num = cols[0].slider(
+        "Number of Similar Images to Retrieve...",
+        min_value=5,
+        max_value=30,
+        value=10,
+        step=5,
+        format="%d"
+    )
     
     # Section to display the query image and the top similar images
     left_col, right_col = st.columns([2.25, 2.25])
@@ -175,7 +183,8 @@ def main():
         if st.session_state['debug_mode']:
             st.write(f"Class: {labeler.get_class(selected_image)}")
             st.write(labeler.get_labels(selected_image))
-    result_num = 10
+    
+
     retriever = Retriever(img2descriptors, metric)
     similar_images = retriever.retrieve(os.path.join(DATASET_FOLDER, 'Images', selected_image), number=result_num)
     
@@ -201,6 +210,11 @@ def main():
     retrieved_image_classes = [labeler.get_class(os.path.basename(img_path)) for img_path in similar_images]
     cm = create_class_matrix(input_class, retrieved_image_classes)
     plot_class_matrix(cm)
+
+    all_labels = labeler.get_all_labels()
+    total_relevant = sum(1 for image_data in all_labels.values() if image_data['class'] == input_class)
+    precision, recall = calculate_precision_recall(input_class, retrieved_image_classes,total_relevant) 
+    st.write(f"Precision: {precision} and Recall: {recall}")
 
     # confusion_matrix = create_class_confusion_matrix(similar_images, retrieved_image_classes)
 
