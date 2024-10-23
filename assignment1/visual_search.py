@@ -114,7 +114,7 @@ def main():
     # TODO: Add new descriptor options here
     descriptor_method = cols[1].selectbox(
         "Choose your Descriptor...",
-        options=['globalRGBhisto_quant','globalRGBhisto', 'rgb', 'random'],
+        options=['gridRGB','globalRGBhisto_quant','globalRGBhisto', 'rgb', 'random'],
         key="descriptor_selectbox",
         on_change=session_manager.update_descriptor,
     )
@@ -211,7 +211,7 @@ def main():
                 col.write(labeler.get_labels(os.path.basename(img_path)))
 
 
-    st.header("Performance:")
+    st.header("Class-based Performance")
     input_class = labeler.get_class(selected_image)
     retrieved_image_classes = [labeler.get_class(os.path.basename(img_path)) for img_path in similar_images]
     cm = create_class_matrix(input_class, retrieved_image_classes)
@@ -220,6 +220,7 @@ def main():
     all_labels = labeler.get_all_labels()
     total_relevant = sum(1 for image_data in all_labels.values() if image_data['class'] == input_class)
     precisions, recalls = calculate_pr_curve(input_class, retrieved_image_classes, total_relevant)
+    st.subheader("Precision-Recall Curve")
     plot_pr_curve(precisions, recalls)
 
 

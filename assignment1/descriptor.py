@@ -31,6 +31,11 @@ class Descriptor:
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'globalRGBhisto_quant'),
                 'method': lambda img: Extractor.extract_globalRGBhisto_quant(img, quant_lvl=kwargs.get('quant_lvl')),
                 'log_message': logging_message + f"{kwargs}"
+            },
+            'gridRGB': {
+                'path': os.path.join(self.DESCRIPTOR_FOLDER, 'gridRGB'),
+                'method': lambda img: Extractor.extract_gridRGB(img, grid_size=4),
+                'log_message': logging_message + f"{kwargs}"
             }
         }
         logging.info(self.AVAILABLE_EXTRACTORS[self.extract_method]['log_message'])
@@ -65,44 +70,31 @@ class Descriptor:
 class Extractor:
     @staticmethod
     def extract_random(img) -> np.ndarray:
-        """
-        Generate a random row vector with 30 elements.
-        
-        This function returns a row vector [rand rand .... rand] representing 
-        an image descriptor computed from the image 'img'.
-        
-        Note: 'img' is expected to be a normalized RGB image (colors range [0,1] not [0,255]).
-        
-        Parameters:
-        img (numpy.ndarray): The input image.
-        
-        Returns:
-        numpy.ndarray: A random row vector with 30 elements.
-        """
         return np.random.rand(1, 30)
     
     @staticmethod
     def extract_rgb(img) -> np.ndarray:
-        """
-        Compute the average red, green, and blue values as a basic color descriptor.
-        
-        This function calculates the average values for the blue, green, and red channels
-        of the input image and returns them as a feature vector.
-        
-        Note: OpenCV uses BGR format, so the channels are accessed in the order B, G, R.
-        
-        Parameters:
-        img (numpy.ndarray): The input image.
-        
-        Returns:
-        numpy.ndarray: A feature vector containing the average B, G, and R values.
-        """
         img = img / 255.0 # normalize the image to [0, 1]
         B = np.mean(img[:, :, 0])
         G = np.mean(img[:, :, 1])
         R = np.mean(img[:, :, 2])
         return np.array([R, G, B])
     
+    @staticmethod
+    def extract_gridRGB(img, grid_size=4) -> np.ndarray:
+        img_height, img_width, img_channel = img.shape
+        grid_height = img_height // grid_size
+        grid_width = img_width // grid_size
+        grid_features = []
+        for i in range(grid_size):
+            for j in range(grid_size):
+                grid_cell = img[i*grid_height:(i+1)*grid_height, j*grid_width:(j+1)*grid_width, :]
+                R = np.mean(grid_cell[:, :, 0])
+                G = np.mean(grid_cell[:, :, 1])
+                B = np.mean(grid_cell[:, :, 2])
+                grid_features.extend([R, G, B])
+        return np.array(grid_features)
+        
     @staticmethod
     def extract_globalRGBhisto(img, bins=32) -> np.ndarray:
         hist = [np.histogram(img[:, :, i], bins=bins, range=(0, 256))[0] for i in range(3)]

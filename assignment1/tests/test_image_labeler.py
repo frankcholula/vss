@@ -35,7 +35,7 @@ class TestImageLabeler(unittest.TestCase):
         )
     
     def test_get_labels(self):
-        labels = self.img_labeler.get_labels(self.img1_filename)['labels']
+        labels = self.img_labeler.get_labels(self.img1_filename)
         self.assertIsInstance(labels, list, "The labels should be a list.")
         self.assertGreater(len(labels), 0, "The labels list should not be empty.")
 

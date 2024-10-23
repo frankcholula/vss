@@ -76,7 +76,6 @@ def plot_pr_curve(precision_values: list, recall_values: list):
     ))
 
     fig.update_layout(
-        title='Precision-Recall Curve',
         xaxis_title='Recall',
         yaxis_title='Precision',
         hovermode='closest'
