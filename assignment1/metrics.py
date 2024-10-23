@@ -6,6 +6,9 @@ from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
 import plotly.graph_objects as go
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 def create_class_matrix(input_image_class: str, retrieved_image_classes: List) -> pd.DataFrame:
     unique_retrieved_classes = sorted(set(retrieved_image_classes + [input_image_class]))
@@ -13,6 +16,46 @@ def create_class_matrix(input_image_class: str, retrieved_image_classes: List) -
     confusion_df = pd.DataFrame([counts], index=[input_image_class], columns=unique_retrieved_classes)
     confusion_df = confusion_df.sort_values(by=input_image_class, axis=1, ascending=False)
     return confusion_df
+
+
+def create_labels_matrix(input_image_labels: List[str], retrieved_image_labels: List[List[str]]) -> pd.DataFrame:
+    input_image_labels = sorted(input_image_labels)    
+    unique_retrieved_labels = sorted(set(input_image_labels).union(*retrieved_image_labels))
+    labels_matrix = []
+    input_labels_set = set(input_image_labels)
+    for label in unique_retrieved_labels:
+        row = []
+        for retrieved_labels in retrieved_image_labels:
+            retrieved_labels_set = set(retrieved_labels) 
+            if label in input_labels_set and label in retrieved_labels_set:
+                row.append(1)
+            elif label not in input_labels_set and label in retrieved_labels_set:
+                row.append(-1)
+            else:
+                row.append(0)
+        labels_matrix.append(row)
+    labels_df = pd.DataFrame(labels_matrix, index=unique_retrieved_labels, columns=[f'Image {i+1}' for i in range(len(retrieved_image_labels))])
+    return labels_df
+
+def plot_labels_matrix(labels_df: pd.DataFrame):
+    plt.figure(figsize=(6, 4))  # Reduce the size to make the heatmap smaller
+    cmap = sns.color_palette(['pink', 'white', 'lightgreen'], as_cmap=True)
+    sns.heatmap(
+        labels_df,
+        annot=True,
+        fmt='d',
+        cmap=cmap,
+        cbar=False,
+        linewidths=0.5,
+        linecolor='black',
+    )
+    plt.xlabel("Retrieved Images")
+    plt.ylabel("Labels")
+    plt.xticks(rotation=45, ha="right")
+    plt.tight_layout()
+    st.pyplot(plt)
+
+
 
 def plot_class_matrix(confusion_df: pd.DataFrame, input_image_class: str):
     # Move the input class to the first position
@@ -38,7 +81,6 @@ def plot_class_matrix(confusion_df: pd.DataFrame, input_image_class: str):
     plt.ylabel("Input Class")
     plt.tight_layout()
     st.pyplot(plt)
-
 
 def calculate_precision_recall(input_image_class: str, retrieved_image_classes: List, total_relevant_images:int):
     tp = retrieved_image_classes.count(input_image_class)

@@ -96,7 +96,11 @@ class Extractor:
         return np.array(grid_features)
     
     @staticmethod
-    def extract_gridEOhisto(img, grid_size:int = 4) -> np.ndarray:
+    def extract_gridEOhisto(img, grid_size:int = 4, sobel_filter_size:int = 5) -> np.ndarray:
+        img_height, img_width, img_channel = img.shape
+        grid_height = img_height // grid_size
+        grid_width = img_width // grid_size
+        sobel_filter = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
         pass
 
     @staticmethod
