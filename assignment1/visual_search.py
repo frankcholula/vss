@@ -231,7 +231,6 @@ def main():
 
     tab1, tab2 = st.tabs(["Class-based Performance", "Label-based Performance"])
     with tab1:
-        st.header("Class-based Performance")
         input_class = labeler.get_class(selected_image)
         retrieved_image_classes = [labeler.get_class(os.path.basename(img_path)) for img_path in similar_images]
         cbe = ClassBasedEvaluator(input_class, retrieved_image_classes)
@@ -241,10 +240,8 @@ def main():
         all_labels = labeler.get_all_labels()
         total_relevant = sum(1 for image_data in all_labels.values() if image_data['class'] == input_class)
         precisions, recalls = cbe.calculate_pr_curve(input_class, retrieved_image_classes, total_relevant)
-        st.subheader("Precision-Recall Curve")
         cbe.plot_pr_curve(precisions, recalls)
     with tab2:
-        st.header("Label-based Performance")
         input_class_labels = labeler.get_labels(selected_image)
         retrieved_image_labels = [labeler.get_labels(os.path.basename(img_path)) for img_path in similar_images]
         lbe = LabelBasedEvaluator(input_class_labels, retrieved_image_labels)
