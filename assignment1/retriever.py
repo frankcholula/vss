@@ -5,6 +5,8 @@ from typing import Dict, List, Tuple
 import logging
 
 logging.basicConfig(level=logging.INFO)
+
+
 class Retriever:
     def __init__(self, img_desc_dict: Dict[str, np.ndarray], metric: str):
         self.img_desc_dict = img_desc_dict
@@ -15,7 +17,9 @@ class Retriever:
         # This function should compare F1 to F2 - i.e. compute the distance
         # between the two descriptors
         if F1.shape != F2.shape:
-            raise ValueError(f"The two feature vectors must have the same shape. \nF1 shape: {F1.shape} \nF2 shape: {F2.shape}")
+            raise ValueError(
+                f"The two feature vectors must have the same shape. \nF1 shape: {F1.shape} \nF2 shape: {F2.shape}"
+            )
         match metric:
             case "l2":
                 dst = np.linalg.norm(F1 - F2)
@@ -27,12 +31,14 @@ class Retriever:
         # Compute the distance between the query and all other descriptors
         dst = []
         query_img_desc = self.img_desc_dict[query_img]
-        
+
         for img_path, candidate_desc in self.img_desc_dict.items():
             if img_path != query_img:  # Skip the query image itself
-                distance = Retriever.cvpr_compare(query_img_desc, candidate_desc, self.metric)
+                distance = Retriever.cvpr_compare(
+                    query_img_desc, candidate_desc, self.metric
+                )
                 dst.append((distance, img_path))
-        
+
         dst.sort(key=lambda x: x[0])
         return dst
 
@@ -50,14 +56,14 @@ class Retriever:
         query_img_data = cv2.imread(query_img)
         query_img_data = cv2.cvtColor(query_img_data, cv2.COLOR_BGR2RGB)
         axes[0].imshow(query_img_data)
-        axes[0].set_title('Query Image')
-        axes[0].axis('off')
-        
+        axes[0].set_title("Query Image")
+        axes[0].axis("off")
+
         # Display the top similar images
         for ax, (distance, img_path) in zip(axes[1:], top_similar_images):
             img = cv2.imread(img_path)
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             ax.imshow(img)
-            ax.axis('off')
+            ax.axis("off")
             distances.append(distance)
         logging.info(f"{self.metric} Distances: {distances} \n ")
