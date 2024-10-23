@@ -34,7 +34,7 @@ class Descriptor:
             },
             'gridRGB': {
                 'path': os.path.join(self.DESCRIPTOR_FOLDER, 'gridRGB'),
-                'method': lambda img: Extractor.extract_gridRGB(img, grid_size=4),
+                'method': lambda img: Extractor.extract_gridRGB(img, grid_size=kwargs.get('grid_size')),
                 'log_message': logging_message + f"{kwargs}"
             }
         }
@@ -81,7 +81,7 @@ class Extractor:
         return np.array([R, G, B])
     
     @staticmethod
-    def extract_gridRGB(img, grid_size=4) -> np.ndarray:
+    def extract_gridRGB(img, grid_size:int = 4) -> np.ndarray:
         img_height, img_width, img_channel = img.shape
         grid_height = img_height // grid_size
         grid_width = img_width // grid_size
@@ -94,7 +94,15 @@ class Extractor:
                 B = np.mean(grid_cell[:, :, 2])
                 grid_features.extend([R, G, B])
         return np.array(grid_features)
-        
+    
+    @staticmethod
+    def extract_gridEOhisto(img, grid_size:int = 4) -> np.ndarray:
+        pass
+
+    @staticmethod
+    def extract_grid_combined(img, grid_size:int = 4) -> np.ndarray:
+        pass
+
     @staticmethod
     def extract_globalRGBhisto(img, bins=32) -> np.ndarray:
         hist = [np.histogram(img[:, :, i], bins=bins, range=(0, 256))[0] for i in range(3)]

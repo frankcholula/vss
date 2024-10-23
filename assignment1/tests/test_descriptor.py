@@ -29,6 +29,7 @@ class TestExtractor(unittest.TestCase):
     def setUp(self):
         DATASET_FOLDER = "MSRC_ObjCategImageDatabase_v2_local"
         self.img1 = cv2.imread(f"{DATASET_FOLDER}/Images/1_1_s.bmp").astype(np.float64) / 255.0
+        # specifically choose an image of different sizes
         self.img2 = cv2.imread(f"{DATASET_FOLDER}/Images/16_19_s.bmp").astype(np.float64) / 255.0
     
     def test_extract_globalRGBhisto_equality(self):
@@ -44,7 +45,8 @@ class TestExtractor(unittest.TestCase):
 
     def test_extract_gridRGB(self):
         result1 = Extractor.extract_gridRGB(self.img1, 4)
-        result2 = Extractor.extract_gridRGB(self.img2, 4)
+        result2 = Extractor.extract_gridRGB(self.img2, 8)
         # 4 by 4 grid, 3 channels = 48 final length
         self.assertEqual(result1.shape[0], 48, "The dimension of result1 should be 48.")
-        self.assertEqual(result2.shape[0], 48, "The dimension of result2 should be 48.")
+        # 8 by 8 grid, 3 channels = 192 final length
+        self.assertEqual(result2.shape[0], 192, "The dimension of result2 should be 48.")

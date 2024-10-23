@@ -17,6 +17,7 @@ def load_data():
     bucket = firebase_conn.get_bucket()    
     image_directory = "MSRC_ObjCategImageDatabase_v2/Images"
     local_image_dir = "MSRC_ObjCategImageDatabase_v2_local/Images"
+    # TODO: load ground truth labels
     required_file_count = 591
     sleep_time = 1.5
     message, success = firebase_conn.check_local_dir(local_image_dir, required_file_count)
@@ -51,6 +52,10 @@ class SessionStateManager:
             st.session_state['recompute'] = True
         if 'descriptor' not in st.session_state:
             st.session_state['descriptor'] = "globalRGBhisto_quant"
+        if 'result_num' not in st.session_state:
+            st.session_state['result_num'] = 5
+        if 'grid_size' not in st.session_state:
+            st.session_state['grid_size'] = 4
 
     def update_metric(self):
         st.session_state['metric'] = st.session_state['metric_radio']
@@ -84,9 +89,13 @@ class SessionStateManager:
     def update_result_num(self):
         st.session_state['result_num'] = st.session_state['result_num_slider']
 
+    def update_grid_size(self):
+        st.session_state['grid_size'] = st.session_state['grid_slider']
+        st.session_state['recompute'] = True
+    
     def update_recompute(self, recompute:bool):
         st.session_state['recompute'] = recompute
-        
+
 
 def main():
     load_data()
@@ -117,33 +126,43 @@ def main():
         options=['gridRGB','globalRGBhisto_quant','globalRGBhisto', 'rgb', 'random'],
         key="descriptor_selectbox",
         on_change=session_manager.update_descriptor,
-    )
-    
-    if descriptor_method == "globalRGBhisto":
-        cols[1].select_slider(
-            "Select the Number of Bins...",
-            options = [8, 16, 32, 64, 128, 256],
-            value=32,
-            key="bins_slider",
-            on_change=session_manager.update_bins
-    )
-
-    if descriptor_method == "globalRGBhisto_quant":
-        cols[1].select_slider(
-            label = "Select Your Quantization Level...",
-            options = [4, 8, 16, 32],
-            help="The number of quantization levels ranges from coarse to fine.",
-            value=8,
-            key="quant_slider",
-            on_change=session_manager.update_quant
         )
+    
+    match descriptor_method:
+        case "globalRGBhisto":
+            cols[1].select_slider(
+                "Select the Number of Bins...",
+                options = [8, 16, 32, 64, 128, 256],
+                value=st.session_state['bins'],
+                key="bins_slider",
+                on_change=session_manager.update_bins
+            )
+        case "globalRGBhisto_quant":
+            cols[1].select_slider(
+                label = "Select Your Quantization Level...",
+                options = [4, 8, 16, 32],
+                help="The number of quantization levels ranges from coarse to fine.",
+                value=st.session_state['quant_lvl'],
+                key="quant_slider",
+                on_change=session_manager.update_quant
+            )
+        case "gridRGB":
+            cols[1].select_slider(
+                label = "Select Your Grid Size...",
+                options = [2, 4, 8, 16],
+                help="Determines how the image is divided horizontally and vertically. ",
+                value=st.session_state['grid_size'],
+                key="grid_slider",
+                on_change=session_manager.update_grid_size
+            )
     
     descriptor = Descriptor(
         DATASET_FOLDER,
         DESCRIPTOR_FOLDER,
         descriptor_method,
         bins=st.session_state['bins'],
-        quant_lvl=st.session_state['quant_lvl']
+        quant_lvl=st.session_state['quant_lvl'],
+        grid_size=st.session_state['grid_size']
     )
     if st.session_state['recompute']:
         logging.info("Recomputing descriptors...")
@@ -173,8 +192,8 @@ def main():
         "Number of Similar Images to Retrieve...",
         min_value=5,
         max_value=30,
-        value=st.session_state.get('result_num', 10),
-        step=5,
+        value=st.session_state.get('result_num', 5),
+        step=1,
         format="%d",
         key="result_num_slider",
         on_change=session_manager.update_result_num
