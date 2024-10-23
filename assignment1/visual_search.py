@@ -7,8 +7,7 @@ from data_sources import FirebaseConnection
 from descriptor import Descriptor
 from retriever import Retriever
 from ground_truth import ImageLabeler
-from metrics import create_class_matrix, create_labels_matrix,plot_class_matrix, calculate_pr_curve, plot_pr_curve, plot_labels_matrix
-
+from metrics import ClassBasedEvaluator, LabelBasedEvaluator
 logging.basicConfig(level=logging.INFO)
 
 @st.cache_resource(show_spinner=False)
@@ -235,20 +234,22 @@ def main():
         st.header("Class-based Performance")
         input_class = labeler.get_class(selected_image)
         retrieved_image_classes = [labeler.get_class(os.path.basename(img_path)) for img_path in similar_images]
-        cm = create_class_matrix(input_class, retrieved_image_classes)
-        plot_class_matrix(cm, input_class)
+        cbe = ClassBasedEvaluator(input_class, retrieved_image_classes)
+        cm = cbe.create_class_matrix(input_class, retrieved_image_classes)
+        cbe.plot_class_matrix(cm, input_class)
 
         all_labels = labeler.get_all_labels()
         total_relevant = sum(1 for image_data in all_labels.values() if image_data['class'] == input_class)
-        precisions, recalls = calculate_pr_curve(input_class, retrieved_image_classes, total_relevant)
+        precisions, recalls = cbe.calculate_pr_curve(input_class, retrieved_image_classes, total_relevant)
         st.subheader("Precision-Recall Curve")
-        plot_pr_curve(precisions, recalls)
+        cbe.plot_pr_curve(precisions, recalls)
     with tab2:
         st.header("Label-based Performance")
         input_class_labels = labeler.get_labels(selected_image)
         retrieved_image_labels = [labeler.get_labels(os.path.basename(img_path)) for img_path in similar_images]
-        labels_matrix = create_labels_matrix(input_class_labels, retrieved_image_labels)
-        plot_labels_matrix(labels_matrix)
+        lbe = LabelBasedEvaluator(input_class_labels, retrieved_image_labels)
+        labels_matrix = lbe.create_labels_matrix(input_class_labels, retrieved_image_labels)
+        lbe.plot_labels_matrix(labels_matrix)
 
     
 
