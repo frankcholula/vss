@@ -287,8 +287,8 @@ def main():
         lbe.plot_labels_matrix(labels_matrix)
         tri = lbe.count_total_relevant_images(selected_image, labeler.get_labels_dict())
         st.write(f"There are `{tri}` total relevant images with one of these labels: `{input_class_labels}`.")
-        # changing total relevance to be capped by the number retrieved
-        lbe.plot_pr_curve(result_num)
+        tri = min(tri, result_num)
+        lbe.plot_pr_curve(tri)
 
 
 if __name__ == "__main__":
