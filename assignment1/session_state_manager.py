@@ -29,7 +29,7 @@ class SessionStateManager:
         if "grid_size" not in st.session_state:
             st.session_state["grid_size"] = 4
         if "sobel_filter_size" not in st.session_state:
-            st.session_state["sobel_filter_size"] = 3
+            st.session_state["sobel_filter_size"] = 5
         if "ang_quant_lvl" not in st.session_state:
             st.session_state["ang_quant_lvl"] = 8
 

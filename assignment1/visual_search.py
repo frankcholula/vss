@@ -136,7 +136,7 @@ def main():
             )
             option_cols[1].select_slider(
                 "Select the Angular Quantization Level...",
-                options=[4, 8, 16, 32],
+                options=range(8,33),
                 value=st.session_state["ang_quant_lvl"],
                 key="ang_quant_slider",
                 on_change=session_manager.update_ang_quant_lvl,
@@ -145,7 +145,7 @@ def main():
             option_cols[1].select_slider(
                 label="Select Your Grid Size...",
                 options=[2, 4, 8, 16],
-                help="Determines how the image is divided horizontally and vertically. ",
+                help="The smaller the grid size, the more broad, global features it captures.",
                 value=st.session_state["grid_size"],
                 key="grid_slider",
                 on_change=session_manager.update_grid_size,
@@ -153,15 +153,16 @@ def main():
             option_cols[1].select_slider(
                 label="Select Your Sobel Filter Size...",
                 options=[3, 5, 7],
-                help="Determines the size of the Sobel filter.",
+                help="The larger the kernel, the coarser the edge and less sensitive to noise.",
                 value=st.session_state["sobel_filter_size"],
                 key="sobel_filter_slider",
                 on_change=session_manager.update_sobel_filter_size,
             )
             option_cols[1].select_slider(
                 "Select the Angular Quantization Level...",
-                options=[4, 8, 16, 32],
+                options=range(8,33),
                 value=st.session_state["ang_quant_lvl"],
+                help="The higher the quantizatino, the finder the edge orientation histogram, but also more prone to noise.",
                 key="ang_quant_slider",
                 on_change=session_manager.update_ang_quant_lvl,
             )
