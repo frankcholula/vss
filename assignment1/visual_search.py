@@ -252,22 +252,19 @@ def main():
     tab1, tab2 = st.tabs(["Class-based Performance", "Label-based Performance"])
     with tab1:
         input_class = labeler.get_class(selected_image)
+        labels_dict = labeler.get_labels_dict()
         retrieved_image_classes = [
             labeler.get_class(os.path.basename(img_path)) for img_path in similar_images
         ]
         cbe = ClassBasedEvaluator(input_class, retrieved_image_classes)
         cm = cbe.create_class_matrix(input_class, retrieved_image_classes)
         cbe.plot_class_matrix(cm, input_class)
-
-        all_labels = labeler.get_labels_dict()
-
-        total_relevant = sum(
-            1
-            for image_data in all_labels.values()
-            if image_data["class"] == input_class
+        total_relevant_images = cbe.count_total_relevant_images(
+            selected_image, labels_dict
         )
+        st.write(f"There are `{total_relevant_images}` total relevant images in `class {input_class}`.")
         precisions, recalls = cbe.calculate_pr_curve(
-            input_class, retrieved_image_classes, total_relevant
+            input_class, retrieved_image_classes, total_relevant_images
         )
         cbe.plot_pr_curve(precisions, recalls)
     with tab2:
@@ -280,7 +277,7 @@ def main():
         labels_matrix = lbe.create_labels_matrix()
         lbe.plot_labels_matrix(labels_matrix)
         tri = lbe.count_total_relevant_images(selected_image, labeler.get_labels_dict())
-        st.write(f"Total Relevant Images: {tri}")
+        st.write(f"There are `{tri}` total relevant images with `{input_class_labels}`.")
         lbe.plot_pr_curve(tri)
 
 

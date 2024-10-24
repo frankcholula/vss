@@ -84,6 +84,16 @@ class ClassBasedEvaluator:
         plt.tight_layout()
         st.pyplot(plt)
 
+    def count_total_relevant_images(self, selected_image, labels_dict) -> int:
+        count = 0
+        for k, v in labels_dict.items():
+            img_class = v["class"]
+            # exclude the selected image
+            if k == selected_image:
+                continue
+            if img_class == self.input_image_class:
+                count += 1
+        return count
     def calculate_precision_recall(
         self,
         input_image_class: str,
