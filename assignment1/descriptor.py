@@ -191,7 +191,7 @@ class Extractor:
         if max_val - min_val == 0:
             return features
         return (features - min_val) / (max_val - min_val)
-    
+
     @staticmethod
     def z_score_normalize(features: np.ndarray) -> np.ndarray:
         mean = np.mean(features)
@@ -203,7 +203,11 @@ class Extractor:
     # TODO: Try out z-score normalization for gridCombined
     @staticmethod
     def extract_grid_combined(
-        img, grid_size: int = 4, sobel_filter_size: int = 3, ang_quant_lvl: int =8, norm_method: str = "minmax"
+        img,
+        grid_size: int = 4,
+        sobel_filter_size: int = 3,
+        ang_quant_lvl: int = 8,
+        norm_method: str = "minmax",
     ) -> np.ndarray:
         # Reuse the individual functions for RGB and Edge Orientation
         rgb_features = Extractor.extract_gridRGB(img, grid_size)
@@ -213,10 +217,14 @@ class Extractor:
         match norm_method:
             case "minmax":
                 rgb_features_normalized = Extractor.min_max_normalize(rgb_features)
-                eohisto_features_normalized = Extractor.min_max_normalize(eohisto_features)
+                eohisto_features_normalized = Extractor.min_max_normalize(
+                    eohisto_features
+                )
             case "zscore":
                 rgb_features_normalized = Extractor.z_score_normalize(rgb_features)
-                eohisto_features_normalized = Extractor.z_score_normalize(eohisto_features)
+                eohisto_features_normalized = Extractor.z_score_normalize(
+                    eohisto_features
+                )
         # Concatenate the two feature vectors
         combined_features = np.concatenate(
             (rgb_features_normalized, eohisto_features_normalized)
