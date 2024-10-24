@@ -94,6 +94,7 @@ class ClassBasedEvaluator:
             if img_class == self.input_image_class:
                 count += 1
         return count
+
     def calculate_precision_recall(
         self,
         input_image_class: str,
@@ -200,7 +201,7 @@ class LabelBasedEvaluator:
             linewidths=0.5,
             linecolor="black",
             vmin=-1,
-            vmax=1
+            vmax=1,
         )
         plt.xlabel("Retrieved Images")
         plt.ylabel("Labels")

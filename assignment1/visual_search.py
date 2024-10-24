@@ -135,7 +135,7 @@ def main():
     # TODO: Add new descriptor options here
     descriptor_method = cols[1].selectbox(
         "Choose your Descriptor...",
-        options=["gridRGB", "globalRGBhisto_quant", "globalRGBhisto", "rgb", "random"],
+        options=["gridEOhisto","gridRGB", "globalRGBhisto_quant", "globalRGBhisto", "rgb", "random"],
         key="descriptor_selectbox",
         on_change=session_manager.update_descriptor,
     )
@@ -159,6 +159,15 @@ def main():
                 on_change=session_manager.update_quant,
             )
         case "gridRGB":
+            cols[1].select_slider(
+                label="Select Your Grid Size...",
+                options=[2, 4, 8, 16],
+                help="Determines how the image is divided horizontally and vertically. ",
+                value=st.session_state["grid_size"],
+                key="grid_slider",
+                on_change=session_manager.update_grid_size,
+            )
+        case "gridEOhisto":
             cols[1].select_slider(
                 label="Select Your Grid Size...",
                 options=[2, 4, 8, 16],

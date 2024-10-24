@@ -15,6 +15,7 @@ class Descriptor:
         self.DATASET_FOLDER = dataset_folder
         self.DESCRIPTOR_FOLDER = descriptor_folder
         self.extract_method = extract_method
+        #TODO: add new descriptors here
         self.AVAILABLE_EXTRACTORS = {
             "rgb": {
                 "path": os.path.join(self.DESCRIPTOR_FOLDER, "rgb"),
@@ -44,6 +45,15 @@ class Descriptor:
                 "path": os.path.join(self.DESCRIPTOR_FOLDER, "gridRGB"),
                 "method": lambda img: Extractor.extract_gridRGB(
                     img, grid_size=kwargs.get("grid_size")
+                ),
+                "log_message": logging_message + f"{kwargs}",
+            },
+            "gridEOhisto": {
+                "path": os.path.join(self.DESCRIPTOR_FOLDER, "gridEOhisto"),
+                "method": lambda img: Extractor.extract_gridEOhisto(
+                    img,
+                    grid_size=kwargs.get("grid_size"),
+                    sobel_filter_size=kwargs.get("sobel_filter_size"),
                 ),
                 "log_message": logging_message + f"{kwargs}",
             },
@@ -115,12 +125,12 @@ class Extractor:
 
     @staticmethod
     def extract_gridEOhisto(
-        img, grid_size: int = 4, sobel_filter_size: int = 5
+        img, grid_size: int = 4, sobel_filter_size: int = 3
     ) -> np.ndarray:
-        img_height, img_width, img_channel = img.shape
+        img_height, img_width, _ = img.shape
         grid_height = img_height // grid_size
         grid_width = img_width // grid_size
-        sobel_filter = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+        grid_features = []
         pass
 
     @staticmethod
