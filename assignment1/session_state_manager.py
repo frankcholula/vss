@@ -37,7 +37,7 @@ class SessionStateManager:
 
     def update_metric(self):
         st.session_state["metric"] = st.session_state["metric_radio"]
-    
+
     def update_norm_method(self):
         st.session_state["norm_method"] = st.session_state["norm_method_radio"]
         self.update_recompute(True)
