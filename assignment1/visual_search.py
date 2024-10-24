@@ -135,7 +135,14 @@ def main():
     # TODO: Add new descriptor options here
     descriptor_method = cols[1].selectbox(
         "Choose your Descriptor...",
-        options=["gridEOhisto","gridRGB", "globalRGBhisto_quant", "globalRGBhisto", "rgb", "random"],
+        options=[
+            "gridEOhisto",
+            "gridRGB",
+            "globalRGBhisto_quant",
+            "globalRGBhisto",
+            "rgb",
+            "random",
+        ],
         key="descriptor_selectbox",
         on_change=session_manager.update_descriptor,
     )
@@ -271,7 +278,9 @@ def main():
         total_relevant_images = cbe.count_total_relevant_images(
             selected_image, labels_dict
         )
-        st.write(f"There are `{total_relevant_images}` total relevant images in `class {input_class}`.")
+        st.write(
+            f"There are `{total_relevant_images}` total relevant images in `class {input_class}`."
+        )
         precisions, recalls = cbe.calculate_pr_curve(
             input_class, retrieved_image_classes, total_relevant_images
         )
@@ -286,7 +295,9 @@ def main():
         labels_matrix = lbe.create_labels_matrix()
         lbe.plot_labels_matrix(labels_matrix)
         tri = lbe.count_total_relevant_images(selected_image, labeler.get_labels_dict())
-        st.write(f"There are `{tri}` total relevant images with one of these labels: `{input_class_labels}`.")
+        st.write(
+            f"There are `{tri}` total relevant images with one of these labels: `{input_class_labels}`."
+        )
         tri = min(tri, result_num)
         lbe.plot_pr_curve(tri)
 
