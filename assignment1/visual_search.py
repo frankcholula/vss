@@ -56,12 +56,16 @@ def main():
     # Section to choose the image and the descriptor
 
     st.title("Visual Search Engine 👀")
-    st.toggle(
+
+    header_cols = st.columns([3, 3, 3, 2])
+    header_cols[3].markdown(
+        "<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True
+    )
+    header_cols[3].toggle(
         "Debug",
         key="debug_mode",
-        help="Toggle to display the ground truth labels for the images.",
+        help="Toggle to display the ground truth labels for the images."
     )
-    header_cols = st.columns([3, 3, 2])
     with st.expander("**Expand to tweak hyper-parameters!**", icon="🎛️"):
         option_cols = st.columns([3, 3, 2])
     selected_image = header_cols[0].selectbox(
@@ -72,7 +76,7 @@ def main():
 
     # TODO: Add new descriptor options here
     descriptor_method = header_cols[1].selectbox(
-        "**🎨 Choose your Descriptor...**",
+        "**🎨 Choose a Descriptor...**",
         options=[
             "gridCombined",
             "gridEOhisto",
