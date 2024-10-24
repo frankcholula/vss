@@ -61,16 +61,18 @@ def main():
         key="debug_mode",
         help="Toggle to display the ground truth labels for the images.",
     )
-    cols = st.columns([1.75, 1.75, 1])
-    selected_image = cols[0].selectbox(
-        "Choose an Image...",
+    header_cols = st.columns([3, 3, 2])
+    with st.expander("**Expand to tweak hyper-parameters!**", icon="🎛️"):
+        option_cols = st.columns([3, 3, 2])
+    selected_image = header_cols[0].selectbox(
+        "**🖼️ Choose an Image...**",
         image_files,
-        index=image_files.index(st.session_state["selected_image"]),
+        index=image_files.index(st.session_state["selected_image"])
     )
 
     # TODO: Add new descriptor options here
-    descriptor_method = cols[1].selectbox(
-        "Choose your Descriptor...",
+    descriptor_method = header_cols[1].selectbox(
+        "**🎨 Choose your Descriptor...**",
         options=[
             "gridCombined",
             "gridEOhisto",
@@ -86,7 +88,7 @@ def main():
 
     match descriptor_method:
         case "globalRGBhisto":
-            cols[1].select_slider(
+            option_cols[1].select_slider(
                 "Select the Number of Bins...",
                 options=[8, 16, 32, 64, 128, 256],
                 value=st.session_state["bins"],
@@ -94,7 +96,7 @@ def main():
                 on_change=session_manager.update_bins,
             )
         case "globalRGBhisto_quant":
-            cols[1].select_slider(
+            option_cols[1].select_slider(
                 label="Select Your Quantization Level...",
                 options=[4, 8, 16, 32],
                 help="The number of quantization levels ranges from coarse to fine.",
@@ -103,7 +105,7 @@ def main():
                 on_change=session_manager.update_quant,
             )
         case "gridRGB":
-            cols[1].select_slider(
+            option_cols[1].select_slider(
                 label="Select Your Grid Size...",
                 options=[2, 4, 8, 16],
                 help="Determines how the image is divided horizontally and vertically. ",
@@ -112,7 +114,7 @@ def main():
                 on_change=session_manager.update_grid_size,
             )
         case "gridEOhisto":
-            cols[1].select_slider(
+            option_cols[1].select_slider(
                 label="Select Your Grid Size...",
                 options=[2, 4, 8, 16],
                 help="Determines how the image is divided horizontally and vertically. ",
@@ -120,7 +122,7 @@ def main():
                 key="grid_slider",
                 on_change=session_manager.update_grid_size,
             )
-            cols[1].select_slider(
+            option_cols[1].select_slider(
                 label="Select Your Sobel Filter Size...",
                 options=[3, 5, 7],
                 help="Determines the size of the Sobel filter.",
@@ -128,27 +130,33 @@ def main():
                 key="sobel_filter_slider",
                 on_change=session_manager.update_sobel_filter_size,
             )
-
-        case "gridCombined":
-            cols[1].select_slider(
-                label="Select Your Grid Size...",
-                options=[2, 4, 8, 16],
-                help="Determines how the image is divided horizontally and vertically. ",
-                value=st.session_state["grid_size"],
-                key="grid_slider",
-                on_change=session_manager.update_grid_size,
-            )
-            cols[1].select_slider(
-                label="Select Your Sobel Filter Size...",
-                options=[3, 5, 7],
-                help="Determines the size of the Sobel filter.",
-                value=st.session_state["sobel_filter_size"],
-                key="sobel_filter_slider",
-                on_change=session_manager.update_sobel_filter_size,
-            )
-            cols[1].select_slider(
+            option_cols[1].select_slider(
                 "Select the Angular Quantization Level...",
-                options=[0, 4, 8, 16, 32],
+                options=[4, 8, 16, 32],
+                value=st.session_state["ang_quant_lvl"],
+                key="ang_quant_slider",
+                on_change=session_manager.update_ang_quant_lvl,
+            )
+        case "gridCombined":
+            option_cols[1].select_slider(
+                label="Select Your Grid Size...",
+                options=[2, 4, 8, 16],
+                help="Determines how the image is divided horizontally and vertically. ",
+                value=st.session_state["grid_size"],
+                key="grid_slider",
+                on_change=session_manager.update_grid_size,
+            )
+            option_cols[1].select_slider(
+                label="Select Your Sobel Filter Size...",
+                options=[3, 5, 7],
+                help="Determines the size of the Sobel filter.",
+                value=st.session_state["sobel_filter_size"],
+                key="sobel_filter_slider",
+                on_change=session_manager.update_sobel_filter_size,
+            )
+            option_cols[1].select_slider(
+                "Select the Angular Quantization Level...",
+                options=[4, 8, 16, 32],
                 value=st.session_state["ang_quant_lvl"],
                 key="ang_quant_slider",
                 on_change=session_manager.update_ang_quant_lvl,
@@ -174,16 +182,16 @@ def main():
     img2descriptors = descriptor.get_image_descriptor_mapping()
 
     # Button to select a random image
-    cols[2].markdown(
+    header_cols[2].markdown(
         "<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True
     )
-    if cols[2].button("I'm Feeling Lucky"):
+    if header_cols[2].button("🎲 I'm Feeling Lucky"):
         st.session_state["selected_image"] = random.choice(image_files)
         selected_image = st.session_state["selected_image"]
         # need rerun here to refresh selected image value
         st.rerun()
 
-    metric = cols[2].radio(
+    metric = option_cols[2].radio(
         "Comparison Metric",
         options=["l2", "l1"],
         index=["l2", "l1"].index(st.session_state["metric"]),
@@ -191,8 +199,8 @@ def main():
         on_change=session_manager.update_metric,
     )
 
-    result_num = cols[0].slider(
-        "Number of Similar Images to Retrieve...",
+    result_num = option_cols[0].slider(
+        "Number of Images to Retrieve...",
         min_value=5,
         max_value=30,
         value=st.session_state.get("result_num", 5),
@@ -203,7 +211,7 @@ def main():
     )
 
     # Section to display the query image and the top similar images
-    left_col, right_col = st.columns([2.25, 2.25])
+    left_col, right_col = st.columns([1,1])
     with left_col:
         st.header("Query Image:")
         st.image(
