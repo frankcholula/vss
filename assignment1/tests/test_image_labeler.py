@@ -45,7 +45,7 @@ class TestImageLabeler(unittest.TestCase):
         self.assertIsInstance(labels_dict, dict, "The labels should be a dictionary.")
         self.assertGreater(len(labels_dict), 0, "The labels dictionary should not be empty.")
     
-    def test_get_all_labels(self):
-        results = self.img_labeler.get_all_labels()
+    def test_get_labels_dict(self):
+        results = self.img_labeler.get_labels_dict()
         self.assertIsInstance(results, dict, "The results should be a dictionary.")
         self.assertGreater(len(results), 0, "The results dictionary should not be empty.")
