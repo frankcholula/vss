@@ -139,6 +139,8 @@ class ClassBasedEvaluator:
             xaxis_title="Recall",
             yaxis_title="Precision",
             hovermode="closest",
+            yaxis=dict(range=[0, 1]),
+            xaxis=dict(range=[0, 1]),
         )
         st.plotly_chart(fig)
 
@@ -150,18 +152,16 @@ class LabelBasedEvaluator:
         self.input_image_labels = input_image_labels
         self.retrieved_image_labels = retrieved_image_labels
 
-    def create_labels_matrix(
-        self, input_image_labels: List[str], retrieved_image_labels: List[List[str]]
-    ) -> pd.DataFrame:
-        input_image_labels = sorted(input_image_labels)
+    def create_labels_matrix(self) -> pd.DataFrame:
+        input_image_labels = sorted(self.input_image_labels)
         unique_retrieved_labels = sorted(
-            set(input_image_labels).union(*retrieved_image_labels)
+            set(input_image_labels).union(*self.retrieved_image_labels)
         )
         labels_matrix = []
         input_labels_set = set(input_image_labels)
         for label in unique_retrieved_labels:
             row = []
-            for retrieved_labels in retrieved_image_labels:
+            for retrieved_labels in self.retrieved_image_labels:
                 retrieved_labels_set = set(retrieved_labels)
                 if label in input_labels_set and label in retrieved_labels_set:
                     row.append(1)
@@ -173,13 +173,14 @@ class LabelBasedEvaluator:
         labels_df = pd.DataFrame(
             labels_matrix,
             index=unique_retrieved_labels,
-            columns=[f"Image {i+1}" for i in range(len(retrieved_image_labels))],
+            columns=[f"Image {i+1}" for i in range(len(self.retrieved_image_labels))],
         )
         return labels_df
 
     def plot_labels_matrix(self, labels_df: pd.DataFrame):
         plt.figure(figsize=(10, 4))
         cmap = sns.color_palette(["pink", "white", "lightgreen"], as_cmap=True)
+
         sns.heatmap(
             labels_df,
             annot=True,
@@ -188,9 +189,84 @@ class LabelBasedEvaluator:
             cbar=False,
             linewidths=0.5,
             linecolor="black",
+            vmin=-1,
+            vmax=1,
         )
         plt.xlabel("Retrieved Images")
         plt.ylabel("Labels")
-        plt.xticks(rotation=45, ha="right")
         plt.tight_layout()
         st.pyplot(plt)
+
+    def count_total_relevant_images(self, selected_image, labels_dict) -> int:
+        count = 0
+        for k, v in labels_dict.items():
+            img_labels = v["labels"]
+            # exclude the selected image
+            if k == selected_image:
+                continue
+            if any(label in self.input_image_labels for label in img_labels):
+                count += 1
+        return count
+
+    def calculate_cumulative_precision_recall(
+        self, total_relevant_images: int
+    ) -> pd.DataFrame:
+        labels_matrix = self.create_labels_matrix()
+        precision_list = []
+        recall_list = []
+        cumulative_correct_images = 0
+        cumulative_retrieved_images = 0
+
+        for i in range(labels_matrix.shape[1]):
+            column = labels_matrix.iloc[:, i]
+            if (column == 1).any():
+                cumulative_correct_images += 1
+            cumulative_retrieved_images += 1
+            # Precision = relevant retrieved images / total retrieved images
+            precision = (
+                cumulative_correct_images / cumulative_retrieved_images
+                if cumulative_retrieved_images > 0
+                else 0
+            )
+            precision_list.append(precision)
+            # Recall = relevant retrieved images / total relevant images in the dataset
+            recall = (
+                cumulative_correct_images / total_relevant_images
+                if total_relevant_images > 0
+                else 0
+            )
+            recall_list.append(recall)
+        pr_df = pd.DataFrame(
+            {
+                "Image Index": [
+                    i + 1 for i in range(labels_matrix.shape[1])
+                ],  # Index of retrieved images
+                "Cumulative Precision": precision_list,
+                "Cumulative Recall": recall_list,
+            }
+        )
+        return pr_df
+
+    def plot_pr_curve(self, total_relevant_images):
+        pr_df = self.calculate_cumulative_precision_recall(total_relevant_images)
+
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=pr_df["Cumulative Recall"],
+                y=pr_df["Cumulative Precision"],
+                mode="lines+markers",
+                name="Precision-Recall Curve",
+                hovertemplate="Precision: %{y}<br>Recall: %{x}<extra></extra>",
+            )
+        )
+
+        fig.update_layout(
+            title="Precision-Recall Curve (Instance-Level Evaluation)",
+            xaxis_title="Recall",
+            yaxis_title="Precision",
+            hovermode="closest",
+            yaxis=dict(range=[0, 1]),
+        )
+
+        st.plotly_chart(fig)

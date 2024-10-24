@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import logging
 import json
-from typing import Dict
+from typing import Dict, List
 
 logging.basicConfig(level=logging.INFO)
 
@@ -96,7 +96,7 @@ class ImageLabeler:
         else:
             return selected_img.split("_")[0]
 
-    def get_all_labels(self) -> Dict[str, Dict]:
+    def get_labels_dict(self) -> Dict[str, Dict]:
         labels_dict = {}
         if os.path.exists(self.labels_path):
             labels_dict = self.load_labels()

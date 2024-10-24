@@ -259,7 +259,8 @@ def main():
         cm = cbe.create_class_matrix(input_class, retrieved_image_classes)
         cbe.plot_class_matrix(cm, input_class)
 
-        all_labels = labeler.get_all_labels()
+        all_labels = labeler.get_labels_dict()
+
         total_relevant = sum(
             1
             for image_data in all_labels.values()
@@ -276,10 +277,11 @@ def main():
             for img_path in similar_images
         ]
         lbe = LabelBasedEvaluator(input_class_labels, retrieved_image_labels)
-        labels_matrix = lbe.create_labels_matrix(
-            input_class_labels, retrieved_image_labels
-        )
+        labels_matrix = lbe.create_labels_matrix()
         lbe.plot_labels_matrix(labels_matrix)
+        tri = lbe.count_total_relevant_images(selected_image, labeler.get_labels_dict())
+        st.write(f"Total Relevant Images: {tri}")
+        lbe.plot_pr_curve(tri)
 
 
 if __name__ == "__main__":
