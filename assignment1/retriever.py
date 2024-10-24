@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
+from numpy.linalg import LinAlgError
 from matplotlib import pyplot as plt
 from typing import Dict, List, Tuple
 import logging
+import streamlit as st
 
 logging.basicConfig(level=logging.INFO)
 
@@ -11,20 +13,41 @@ class Retriever:
     def __init__(self, img_desc_dict: Dict[str, np.ndarray], metric: str):
         self.img_desc_dict = img_desc_dict
         self.metric = metric
+        self.cov_matrix_inv = None
+        if metric == "Mahalanobis":
+            self.cov_matrix_inv = self.calculate_covariance_matrix_inverse()
+    
+    def calculate_covariance_matrix_inverse(self) -> np.array:
+        all_descriptors = np.array(list(self.img_desc_dict.values()))
+        try:
+            cov_matrix = np.cov(all_descriptors.T)
+            cov_matrix_inv = np.linalg.inv(cov_matrix)
+        except LinAlgError as e:
+            logging.error(f"Error in calculating the inverse covariance matrix: {str(e)}")
+            cov_matrix_inv = None
+        return cov_matrix_inv
 
     @staticmethod
-    def cvpr_compare(F1, F2, metric) -> float:
+    def cvpr_compare(F1, F2, metric, cov_matrix_inv=None) -> float:
         # This function should compare F1 to F2 - i.e. compute the distance
         # between the two descriptors
         if F1.shape != F2.shape:
             raise ValueError(
                 f"The two feature vectors must have the same shape. \nF1 shape: {F1.shape} \nF2 shape: {F2.shape}"
             )
+        # TODO: Add new metrics here
         match metric:
-            case "l2":
+            case "L2":
                 dst = np.linalg.norm(F1 - F2)
-            case "l1":
+            case "L1":
                 dst = np.linalg.norm(F1 - F2, ord=1)
+            case "Mahalanobis":
+                # sqrt((F1 - F2)^T * cov_matrix_inv * (F1 - F2))
+                if cov_matrix_inv is None:
+                    return float("inf")
+                diff = F1 - F2
+                dst = np.sqrt(np.dot(diff.T, np.dot(cov_matrix_inv, diff)))
+                
         return dst
 
     def compute_distance(self, query_img: str) -> List[Tuple[float, str]]:
@@ -35,7 +58,7 @@ class Retriever:
         for img_path, candidate_desc in self.img_desc_dict.items():
             if img_path != query_img:  # Skip the query image itself
                 distance = Retriever.cvpr_compare(
-                    query_img_desc, candidate_desc, self.metric
+                    query_img_desc, candidate_desc, self.metric, self.cov_matrix_inv
                 )
                 dst.append((distance, img_path))
 
@@ -47,6 +70,8 @@ class Retriever:
         distances = self.compute_distance(query_img)
         top_similar_images = distances[:number]
         self.display_images(query_img, top_similar_images, number)
+        if float("inf") in [distance for distance, _ in top_similar_images]:
+            return []
         return [img_path for _, img_path in top_similar_images]
 
     def display_images(self, query_img: str, top_similar_images: list, number: int):
@@ -66,4 +91,7 @@ class Retriever:
             ax.imshow(img)
             ax.axis("off")
             distances.append(distance)
+        if float("inf") in distances:
+            logging.error(f"Mahalanobis distance is infinite for some images.")
+            st.error(f"Error in calculating {self.metric} distances for some images. Please try another metric.", icon="🚨")
         logging.info(f"{self.metric} Distances: {distances} \n ")

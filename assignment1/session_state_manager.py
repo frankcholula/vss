@@ -19,7 +19,7 @@ class SessionStateManager:
         if "quant_lvl" not in st.session_state:
             st.session_state["quant_lvl"] = 8
         if "metric" not in st.session_state:
-            st.session_state["metric"] = "l2"
+            st.session_state["metric"] = "L2"
         if "recompute" not in st.session_state:
             st.session_state["recompute"] = True
         if "descriptor" not in st.session_state:

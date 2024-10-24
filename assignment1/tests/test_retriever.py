@@ -14,5 +14,5 @@ class TestRetriever(unittest.TestCase):
         self.desc2 = Extractor.extract_globalRGBhisto_quant(self.img2, base)
 
     def test_cvpr_compare(self):
-        result = Retriever.cvpr_compare(self.desc1, self.desc2, metric="l2")
+        result = Retriever.cvpr_compare(self.desc1, self.desc2, metric="L2")
         self.assertTrue(result >= 0, "The CVPR comparison should be greater than or equal to 0.")
