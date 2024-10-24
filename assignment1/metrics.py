@@ -200,10 +200,11 @@ class LabelBasedEvaluator:
             linewidths=0.5,
             linecolor="black",
             vmin=-1,
-            vmax=1,
+            vmax=1
         )
         plt.xlabel("Retrieved Images")
         plt.ylabel("Labels")
+        plt.xticks(rotation=45)
         plt.tight_layout()
         st.pyplot(plt)
 
