@@ -32,9 +32,15 @@ class SessionStateManager:
             st.session_state["sobel_filter_size"] = 5
         if "ang_quant_lvl" not in st.session_state:
             st.session_state["ang_quant_lvl"] = 8
+        if "norm_method" not in st.session_state:
+            st.session_state["norm_method"] = "minmax"
 
     def update_metric(self):
         st.session_state["metric"] = st.session_state["metric_radio"]
+    
+    def update_norm_method(self):
+        st.session_state["norm_method"] = st.session_state["norm_method_radio"]
+        self.update_recompute(True)
 
     def update_bins(self):
         if st.session_state["bins"] != st.session_state["bins_slider"]:

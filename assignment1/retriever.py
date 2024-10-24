@@ -42,11 +42,14 @@ class Retriever:
             case "L1":
                 dst = np.linalg.norm(F1 - F2, ord=1)
             case "Mahalanobis":
-                # sqrt((F1 - F2)^T * cov_matrix_inv * (F1 - F2))
-                if cov_matrix_inv is None:
-                    return float("inf")
-                diff = F1 - F2
-                dst = np.sqrt(np.dot(diff.T, np.dot(cov_matrix_inv, diff)))
+                try:
+                    # sqrt((F1 - F2)^T * cov_matrix_inv * (F1 - F2))
+                    diff = F1 - F2
+                    dst = np.sqrt(np.dot(diff.T, np.dot(cov_matrix_inv, diff)))
+                except Exception as e:
+                    logging.error(f"Error in calculating Mahalanobis distance: {str(e)}")
+                    dst = float("inf")
+
                 
         return dst
 
@@ -93,5 +96,5 @@ class Retriever:
             distances.append(distance)
         if float("inf") in distances:
             logging.error(f"Mahalanobis distance is infinite for some images.")
-            st.error(f"Error in calculating {self.metric} distances for some images. Please try another metric.", icon="🚨")
+            st.error(f"Error in calculating {self.metric} distances for some images. Please try another metric or use PCA to lower the dimensionality.", icon="🚨")
         logging.info(f"{self.metric} Distances: {distances} \n ")

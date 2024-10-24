@@ -107,7 +107,6 @@ class ImageLabeler:
         return labels_dict
 
     def load_labels(self):
-        logging.info(f"Loading labels from {self.labels_path}...")
         with open(self.labels_path, "r") as f:
             return json.load(f)
 

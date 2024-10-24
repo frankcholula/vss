@@ -166,6 +166,13 @@ def main():
                 key="ang_quant_slider",
                 on_change=session_manager.update_ang_quant_lvl,
             )
+            option_cols[1].radio(
+                "Normalization Method",
+                options=["minmax", "zscore"],
+                help="Used to normalize EO histograms and RGB histograms.",
+                key="norm_method_radio",
+                on_change=session_manager.update_norm_method,
+            )
 
     # TODO: Add new descriptor options here
     descriptor = Descriptor(
@@ -177,6 +184,7 @@ def main():
         grid_size=st.session_state["grid_size"],
         sobel_filter_size=st.session_state["sobel_filter_size"],
         ang_quant_lvl=st.session_state["ang_quant_lvl"],
+        norm_method=st.session_state["norm_method"],
     )
     if st.session_state["recompute"]:
         logging.info("Recomputing descriptors...")
