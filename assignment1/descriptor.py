@@ -15,7 +15,7 @@ class Descriptor:
         self.DATASET_FOLDER = dataset_folder
         self.DESCRIPTOR_FOLDER = descriptor_folder
         self.extract_method = extract_method
-        #TODO: add new descriptors here
+        # TODO: add new descriptors here
         self.AVAILABLE_EXTRACTORS = {
             "rgb": {
                 "path": os.path.join(self.DESCRIPTOR_FOLDER, "rgb"),
@@ -61,12 +61,12 @@ class Descriptor:
                 "path": os.path.join(self.DESCRIPTOR_FOLDER, "gridCombined"),
                 "method": lambda img: Extractor.extract_grid_combined(
                     img,
-                    grid_size=kwargs.get("grid_size")
-                    # sobel_filter_size=kwargs.get("sobel_filter_size"),
-                    # angular_bins=kwargs.get("angular_bins"),
+                    grid_size=kwargs.get("grid_size"),
+                    sobel_filter_size=kwargs.get("sobel_filter_size"),
+                    ang_quant_lvl=kwargs.get("bins"),
                 ),
                 "log_message": logging_message + f"{kwargs}",
-            }
+            },
         }
         logging.info(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])
 
@@ -136,7 +136,7 @@ class Extractor:
 
     @staticmethod
     def extract_gridEOhisto(
-        img, grid_size: int = 4, sobel_filter_size: int = 3, angular_bins = 8
+        img, grid_size: int = 4, sobel_filter_size: int = 3, ang_quant_lvl=8
     ) -> np.ndarray:
         img_height, img_width, channel = img.shape
         grid_height = img_height // grid_size
@@ -147,21 +147,38 @@ class Extractor:
                 grid_cell = img[
                     i * grid_height : (i + 1) * grid_height,
                     j * grid_width : (j + 1) * grid_width,
-                    :
+                    :,
                 ]
                 # convert to uint8 for cv2
                 grid_cell = grid_cell.astype(np.uint8)
                 gray = cv2.cvtColor(grid_cell, cv2.COLOR_BGR2GRAY)
-                sobelx = cv2.Sobel(gray, cv2.CV_64F, dx=1, dy=0, ksize=sobel_filter_size)
-                sobely = cv2.Sobel(gray, cv2.CV_64F, dx=0, dy=1, ksize=sobel_filter_size)
-                magnitude = np.sqrt(sobelx ** 2 + sobely ** 2)
-                orientation = np.arctan2(sobely, sobelx) * 180 /np.pi # convert to degrees
+                sobelx = cv2.Sobel(
+                    gray, cv2.CV_64F, dx=1, dy=0, ksize=sobel_filter_size
+                )
+                sobely = cv2.Sobel(
+                    gray, cv2.CV_64F, dx=0, dy=1, ksize=sobel_filter_size
+                )
+                magnitude = np.sqrt(sobelx**2 + sobely**2)
+                orientation = (
+                    np.arctan2(sobely, sobelx) * 180 / np.pi
+                )  # convert to degrees
                 # Normalize orientation to [0, 180] because direction of an angle is ambiguous up to 180.
                 norm_orientation = np.mod(orientation + 180, 180)
-                bin_width = 180/ angular_bins
-                quantized_orientation = np.floor(norm_orientation / bin_width).astype(int)
-                hist = np.histogram(quantized_orientation, bins=angular_bins, range=(0, angular_bins), weights=magnitude)[0] # emphasize stronger edges
-                hist_normalized = hist / (np.sum(hist) + 1e-6) # so we don't divide by zero
+                bin_width = 180 / ang_quant_lvl
+                quantized_orientation = np.floor(norm_orientation / bin_width).astype(
+                    int
+                )
+                hist = np.histogram(
+                    quantized_orientation,
+                    bins=ang_quant_lvl,
+                    range=(0, ang_quant_lvl),
+                    weights=magnitude,
+                )[
+                    0
+                ]  # emphasize stronger edges
+                hist_normalized = hist / (
+                    np.sum(hist) + 1e-6
+                )  # so we don't divide by zero
                 grid_features.extend(hist_normalized)
         return np.array(grid_features)
 
@@ -173,17 +190,22 @@ class Extractor:
             return features
         return (features - min_val) / (max_val - min_val)
 
-
     @staticmethod
-    def extract_grid_combined(img, grid_size: int = 4, sobel_filter_size: int = 3, angular_bins=8) -> np.ndarray:
+    def extract_grid_combined(
+        img, grid_size: int = 4, sobel_filter_size: int = 3, ang_quant_lvl=8
+    ) -> np.ndarray:
         # Reuse the individual functions for RGB and Edge Orientation
         rgb_features = Extractor.extract_gridRGB(img, grid_size)
-        eohisto_features = Extractor.extract_gridEOhisto(img, grid_size, sobel_filter_size, angular_bins)
-        
+        eohisto_features = Extractor.extract_gridEOhisto(
+            img, grid_size, sobel_filter_size, ang_quant_lvl
+        )
+
         rgb_features_normalized = Extractor.min_max_normalize(rgb_features)
         eohisto_features_normalized = Extractor.min_max_normalize(eohisto_features)
         # Concatenate the two feature vectors
-        combined_features = np.concatenate((rgb_features_normalized, eohisto_features_normalized))
+        combined_features = np.concatenate(
+            (rgb_features_normalized, eohisto_features_normalized)
+        )
         return combined_features
 
     @staticmethod

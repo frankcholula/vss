@@ -10,6 +10,7 @@ class SessionStateManager:
         self.image_files = image_files
         self.init_session_state()
 
+    # TODO: Initialize the session state variables
     def init_session_state(self):
         if "bins" not in st.session_state:
             st.session_state["bins"] = 32
@@ -29,6 +30,8 @@ class SessionStateManager:
             st.session_state["grid_size"] = 4
         if "sobel_filter_size" not in st.session_state:
             st.session_state["sobel_filter_size"] = 3
+        if "ang_quant_lvl" not in st.session_state:
+            st.session_state["ang_quant_lvl"] = 8
 
     def update_metric(self):
         st.session_state["metric"] = st.session_state["metric_radio"]
@@ -44,6 +47,13 @@ class SessionStateManager:
         if st.session_state["quant_lvl"] != st.session_state["quant_slider"]:
             st.session_state["quant_lvl"] = st.session_state["quant_slider"]
             st.session_state["recompute"] = True
+        else:
+            self.update_recompute(False)
+
+    def update_ang_quant_lvl(self):
+        if st.session_state["ang_quant_lvl"] != st.session_state["ang_quant_slider"]:
+            st.session_state["ang_quant_lvl"] = st.session_state["ang_quant_slider"]
+            self.update_recompute(True)
         else:
             self.update_recompute(False)
 

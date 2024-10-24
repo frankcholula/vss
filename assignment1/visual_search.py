@@ -138,6 +138,21 @@ def main():
                 key="grid_slider",
                 on_change=session_manager.update_grid_size,
             )
+            cols[1].select_slider(
+                label="Select Your Sobel Filter Size...",
+                options=[3, 5, 7],
+                help="Determines the size of the Sobel filter.",
+                value=st.session_state["sobel_filter_size"],
+                key="sobel_filter_slider",
+                on_change=session_manager.update_sobel_filter_size,
+            )
+            cols[1].select_slider(
+                "Select the Angular Quantization Level...",
+                options=[0, 4, 8, 16, 32],
+                value=st.session_state["ang_quant_lvl"],
+                key="ang_quant_slider",
+                on_change=session_manager.update_ang_quant_lvl,
+            )
 
     # TODO: Add new descriptor options here
     descriptor = Descriptor(
@@ -148,6 +163,7 @@ def main():
         quant_lvl=st.session_state["quant_lvl"],
         grid_size=st.session_state["grid_size"],
         sobel_filter_size=st.session_state["sobel_filter_size"],
+        ang_quant_lvl=st.session_state["ang_quant_lvl"],
     )
     if st.session_state["recompute"]:
         logging.info("Recomputing descriptors...")
@@ -232,17 +248,15 @@ def main():
         ]
         cbe = ClassBasedEvaluator(input_class, retrieved_image_classes)
         cm = cbe.create_class_matrix(input_class, retrieved_image_classes)
-        tri = cbe.count_total_relevant_images(
-            selected_image, labels_dict
-        )
+        tri = cbe.count_total_relevant_images(selected_image, labels_dict)
         min_tri = min(tri, result_num)
-        fetched  = cm[input_class].iloc[0]
+        fetched = cm[input_class].iloc[0]
 
         st.write(
             f"**In the top `{result_num}` results, you retrieved `{fetched}` images in `class {input_class}`. There are `{tri}` total relevant images.**"
         )
         if fetched == result_num:
-            st.toast('Good class-based performance!', icon='😍')
+            st.toast("Good class-based performance!", icon="😍")
             time.sleep(0.5)
             good_class_based = True
 
@@ -265,10 +279,9 @@ def main():
         st.write(
             f"**In the top `{min_tri}` results, you retrieved `{fetched}` with one of these labels:`{input_class_labels}`.**"
         )
-        st. write(f"**There are `{tri}` total relevant images.**"
-        )
+        st.write(f"**There are `{tri}` total relevant images.**")
         if fetched == result_num:
-            st.toast('Good label-based performance!', icon='😍')
+            st.toast("Good label-based performance!", icon="😍")
             time.sleep(0.5)
             good_label_based = True
         lbe.plot_labels_matrix(lm)
