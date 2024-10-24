@@ -8,6 +8,7 @@ from descriptor import Descriptor
 from retriever import Retriever
 from ground_truth import ImageLabeler
 from metrics import ClassBasedEvaluator, LabelBasedEvaluator
+from session_state_manager import SessionStateManager
 
 logging.basicConfig(level=logging.INFO)
 
@@ -38,71 +39,6 @@ def load_data():
         status.empty()
     time.sleep(sleep_time)
     message.empty()
-
-
-class SessionStateManager:
-    def __init__(self, image_files):
-        self.image_files = image_files
-        self.init_session_state()
-
-    def init_session_state(self):
-        if "bins" not in st.session_state:
-            st.session_state["bins"] = 32
-        if "selected_image" not in st.session_state:
-            st.session_state["selected_image"] = self.image_files[0]
-        if "quant_lvl" not in st.session_state:
-            st.session_state["quant_lvl"] = 8
-        if "metric" not in st.session_state:
-            st.session_state["metric"] = "l2"
-        if "recompute" not in st.session_state:
-            st.session_state["recompute"] = True
-        if "descriptor" not in st.session_state:
-            st.session_state["descriptor"] = "globalRGBhisto_quant"
-        if "result_num" not in st.session_state:
-            st.session_state["result_num"] = 5
-        if "grid_size" not in st.session_state:
-            st.session_state["grid_size"] = 4
-
-    def update_metric(self):
-        st.session_state["metric"] = st.session_state["metric_radio"]
-
-    def update_bins(self):
-        if st.session_state["bins"] != st.session_state["bins_slider"]:
-            st.session_state["bins"] = st.session_state["bins_slider"]
-            st.session_state["recompute"] = True
-        else:
-            self.update_recompute(False)
-
-    def update_quant(self):
-        if st.session_state["quant_lvl"] != st.session_state["quant_slider"]:
-            st.session_state["quant_lvl"] = st.session_state["quant_slider"]
-            st.session_state["recompute"] = True
-        else:
-            self.update_recompute(False)
-
-    def update_descriptor(self):
-        if st.session_state["descriptor"] != st.session_state["descriptor_selectbox"]:
-            logging.info(
-                f"Updating descriptor to {st.session_state['descriptor_selectbox']}"
-            )
-            st.session_state["descriptor"] = st.session_state["descriptor_selectbox"]
-            # TODO: fix the path here
-            if os.path.exists(f"descriptors/{st.session_state['descriptor']}"):
-                self.update_recompute(False)
-            else:
-                self.update_recompute(True)
-        else:
-            self.update_recompute(False)
-
-    def update_result_num(self):
-        st.session_state["result_num"] = st.session_state["result_num_slider"]
-
-    def update_grid_size(self):
-        st.session_state["grid_size"] = st.session_state["grid_slider"]
-        st.session_state["recompute"] = True
-
-    def update_recompute(self, recompute: bool):
-        st.session_state["recompute"] = recompute
 
 
 def main():
@@ -184,7 +120,15 @@ def main():
                 key="grid_slider",
                 on_change=session_manager.update_grid_size,
             )
-        
+            cols[1].select_slider(
+                label="Select Your Sobel Filter Size...",
+                options=[3, 5, 7],
+                help="Determines the size of the Sobel filter.",
+                value=st.session_state["sobel_filter_size"],
+                key="sobel_filter_slider",
+                on_change=session_manager.update_sobel_filter_size,
+            )
+
         case "gridCombined":
             cols[1].select_slider(
                 label="Select Your Grid Size...",
@@ -195,6 +139,7 @@ def main():
                 on_change=session_manager.update_grid_size,
             )
 
+    # TODO: Add new descriptor options here
     descriptor = Descriptor(
         DATASET_FOLDER,
         DESCRIPTOR_FOLDER,
@@ -202,6 +147,7 @@ def main():
         bins=st.session_state["bins"],
         quant_lvl=st.session_state["quant_lvl"],
         grid_size=st.session_state["grid_size"],
+        sobel_filter_size=st.session_state["sobel_filter_size"],
     )
     if st.session_state["recompute"]:
         logging.info("Recomputing descriptors...")
@@ -275,8 +221,9 @@ def main():
             if st.session_state["debug_mode"]:
                 col.write(f"Class: {labeler.get_class(os.path.basename(img_path))}")
                 col.write(labeler.get_labels(os.path.basename(img_path)))
-
     tab1, tab2 = st.tabs(["Class-based Performance", "Label-based Performance"])
+    good_class_based = False
+    good_label_based = False
     with tab1:
         input_class = labeler.get_class(selected_image)
         labels_dict = labeler.get_labels_dict()
@@ -285,15 +232,23 @@ def main():
         ]
         cbe = ClassBasedEvaluator(input_class, retrieved_image_classes)
         cm = cbe.create_class_matrix(input_class, retrieved_image_classes)
-        cbe.plot_class_matrix(cm, input_class)
-        total_relevant_images = cbe.count_total_relevant_images(
+        tri = cbe.count_total_relevant_images(
             selected_image, labels_dict
         )
+        min_tri = min(tri, result_num)
+        fetched  = cm[input_class].iloc[0]
+
         st.write(
-            f"There are `{total_relevant_images}` total relevant images in `class {input_class}`."
+            f"**In the top `{result_num}` results, you retrieved `{fetched}` images in `class {input_class}`. There are `{tri}` total relevant images.**"
         )
+        if fetched == result_num:
+            st.toast('Good class-based performance!', icon='😍')
+            time.sleep(0.5)
+            good_class_based = True
+
+        cbe.plot_class_matrix(cm, input_class)
         precisions, recalls = cbe.calculate_pr_curve(
-            input_class, retrieved_image_classes, total_relevant_images
+            input_class, retrieved_image_classes, min_tri
         )
         cbe.plot_pr_curve(precisions, recalls)
     with tab2:
@@ -303,14 +258,23 @@ def main():
             for img_path in similar_images
         ]
         lbe = LabelBasedEvaluator(input_class_labels, retrieved_image_labels)
-        labels_matrix = lbe.create_labels_matrix()
-        lbe.plot_labels_matrix(labels_matrix)
+        lm = lbe.create_labels_matrix()
         tri = lbe.count_total_relevant_images(selected_image, labeler.get_labels_dict())
+        fetched = (lm == 1).any().sum()
+        min_tri = min(tri, result_num)
         st.write(
-            f"There are `{tri}` total relevant images with one of these labels: `{input_class_labels}`."
+            f"**In the top `{min_tri}` results, you retrieved `{fetched}` with one of these labels:`{input_class_labels}`.**"
         )
-        tri = min(tri, result_num)
-        lbe.plot_pr_curve(tri)
+        st. write(f"**There are `{tri}` total relevant images.**"
+        )
+        if fetched == result_num:
+            st.toast('Good label-based performance!', icon='😍')
+            time.sleep(0.5)
+            good_label_based = True
+        lbe.plot_labels_matrix(lm)
+        lbe.plot_pr_curve(min_tri)
+    if good_class_based and good_label_based:
+        st.balloons()
 
 
 if __name__ == "__main__":
