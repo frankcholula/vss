@@ -315,8 +315,8 @@ class LabelBasedEvaluator:
             xaxis_title="Recall",
             yaxis_title="Precision",
             hovermode="closest",
-            yaxis=dict(range=[0, 1]),
-            xaxis=dict(range=[0, 1]),
+            yaxis=dict(range=[0, 1.1]),
+            xaxis=dict(range=[0, 1.1])
         )
 
         st.plotly_chart(fig)
