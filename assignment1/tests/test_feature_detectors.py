@@ -1,6 +1,5 @@
 import cv2
 import unittest
-import numpy as np
 from assignment1.feature_detectors import FeatureDetector
 class TestFeatureDetectors(unittest.TestCase):
     def setUp(self):

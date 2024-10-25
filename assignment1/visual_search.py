@@ -5,10 +5,10 @@ import logging
 import streamlit as st
 from data_sources import FirebaseConnection
 from descriptors import Descriptor
-from assignment1.retrievers import Retriever
+from retrievers import Retriever
 from ground_truth import ImageLabeler
 from metrics import ClassBasedEvaluator, LabelBasedEvaluator
-from assignment1.session_state_managers import SessionStateManager
+from session_state_managers import SessionStateManager
 
 logging.basicConfig(level=logging.INFO)
 
