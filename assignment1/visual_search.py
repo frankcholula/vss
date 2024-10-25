@@ -287,10 +287,11 @@ def main():
             good_class_based = True
 
         cbe.plot_class_matrix(cm, input_class)
-        precisions, recalls = cbe.calculate_pr_curve(
+        precisions, recalls, f1_scores = cbe.calculate_pr_f1_values(
             input_class, retrieved_image_classes, min_tri
         )
         cbe.plot_pr_curve(precisions, recalls)
+        cbe.plot_f1_score(f1_scores)
     with tab2:
         input_class_labels = labeler.get_labels(selected_image)
         retrieved_image_labels = [

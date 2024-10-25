@@ -1,8 +1,7 @@
 import pandas as pd
-from typing import List
+from typing import List, Tuple
 import seaborn as sns
 import streamlit as st
-from typing import List
 import numpy as np
 from matplotlib import pyplot as plt
 import plotly.graph_objects as go
@@ -95,7 +94,7 @@ class ClassBasedEvaluator:
                 count += 1
         return count
 
-    def calculate_precision_recall(
+    def calculate_precision_recall_f1(
         self,
         input_image_class: str,
         retrieved_image_classes: List,
@@ -106,26 +105,29 @@ class ClassBasedEvaluator:
         fn = total_relevant_images - tp
         precision = tp / (tp + fp) if (tp + fp) > 0 else 0
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0
-        return (precision, recall)
+        f1 = precision * recall * 2 / (precision + recall) if precision + recall > 0 else 0
+        return (precision, recall, f1)
 
-    def calculate_pr_curve(
+
+    def calculate_pr_f1_values(
         self,
         input_image_class: str,
         retrieved_image_classes: list,
         total_relevant_images: int,
-    ):
-        precision_values = []
-        recall_values = []
+    ) -> Tuple:
+        precision_values, recall_values, f1_values = [], [], []
+
         for i in range(1, len(retrieved_image_classes) + 1):
             top_retrieved_classes = retrieved_image_classes[:i]
-            precision, recall = self.calculate_precision_recall(
+            precision, recall, f1 = self.calculate_precision_recall_f1(
                 input_image_class, top_retrieved_classes, total_relevant_images
             )
             precision_values.append(precision)
             recall_values.append(recall)
-        return precision_values, recall_values
+            f1_values.append(f1)
+        return precision_values, recall_values, f1_values
 
-    def plot_pr_curve(self, precision_values: list, recall_values: list):
+    def plot_pr_curve(self, precision_values: List, recall_values: List):
         thresholds = list(range(1, len(precision_values) + 1))  # Top N values
         data = pd.DataFrame(
             {
@@ -145,14 +147,42 @@ class ClassBasedEvaluator:
                 name="PR Curve",
             )
         )
+
         fig.update_layout(
             title="Precision-Recall Curve",
             xaxis_title="Recall",
             yaxis_title="Precision",
             hovermode="closest",
-            yaxis=dict(range=[0, 1]),
-            xaxis=dict(range=[0, 1]),
+            yaxis=dict(range=[0, 1.1]),
+            xaxis=dict(range=[0, 1.1]),
         )
+        st.plotly_chart(fig)
+    
+        
+    def plot_f1_score(self, f1_values: List):
+        data = pd.DataFrame(
+            {
+                "F1 Score": f1_values,
+                "Threshold": list(range(1, len(f1_values) + 1)),
+            }
+        )
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=data["Threshold"],
+                y=data["F1 Score"],
+                mode="lines+markers",
+                name="F1 Score",
+                hovertemplate="Threshold: %{x}<br>F1 Score: %{y}<extra></extra>",
+            )
+        )
+        
+        fig.update_layout(
+            title="F1 Score",
+            xaxis_title="Threshold",
+            yaxis_title="F1 Score",
+        )
+        
         st.plotly_chart(fig)
 
 

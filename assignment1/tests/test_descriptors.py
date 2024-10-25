@@ -51,6 +51,5 @@ class TestExtractors(unittest.TestCase):
         # 8 by 8 grid, 3 channels = 192 final length
         self.assertEqual(result2.shape[0], 192, "The dimension of result2 should be 48.")
 
-    
     def test_extract_gridEOhisto(self):
         result1 = Extractor.extract_gridEOhisto(self.img1, 4, 3)

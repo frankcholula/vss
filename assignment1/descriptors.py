@@ -263,3 +263,8 @@ class Extractor:
         hist_flat = hist.flatten()
         hist_normalized = hist_flat / np.sum(hist_flat)
         return hist_normalized
+
+    @staticmethod
+    def extract_SIFT(img):
+        fd = FeatureDetector("SIFT")
+        return fd.detect_keypoints_compute_descriptors(img)[1]
