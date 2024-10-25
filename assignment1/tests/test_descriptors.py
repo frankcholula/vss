@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 import cv2
-from assignment1.descriptors import Descriptor, Extractor
+from descriptors import Descriptor, Extractor
 
 class TestDescriptors(unittest.TestCase):
     def setUp(self):

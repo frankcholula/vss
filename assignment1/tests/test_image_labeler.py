@@ -1,5 +1,5 @@
 import unittest
-from assignment1.ground_truth import ImageLabeler
+from ground_truth import ImageLabeler
 
 class TestImageLabeler(unittest.TestCase):
     def setUp(self):

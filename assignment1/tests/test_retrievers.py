@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
 import cv2
-from assignment1.retrievers import Retriever
-from assignment1.descriptors import Extractor
+from retrievers import Retriever
+from descriptors import Extractor
 
 class TestRetrievers(unittest.TestCase):
     def setUp(self):
