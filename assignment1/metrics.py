@@ -7,8 +7,7 @@ from matplotlib import pyplot as plt
 import plotly.graph_objects as go
 import logging
 
-logging.basicConfig(level=logging.INFO)
-
+LOGGER = logging.getLogger(__name__)
 
 class ClassBasedEvaluator:
     def __init__(self, input_image_class: str, retrieved_image_classes: List):
@@ -283,7 +282,7 @@ class LabelBasedEvaluator:
                 else 0
             )
             f1_list.append(f1)
-        
+        # TODO: maybe iterate until recall reaches 1
         pr_df = pd.DataFrame(
             {
                 "Image Index": [

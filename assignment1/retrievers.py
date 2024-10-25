@@ -6,8 +6,7 @@ from typing import Dict, List, Tuple
 import logging
 import streamlit as st
 
-logging.basicConfig(level=logging.INFO)
-
+LOGGER = logging.getLogger(__name__)
 
 class Retriever:
     def __init__(self, img_desc_dict: Dict[str, np.ndarray], metric: str):
@@ -23,7 +22,7 @@ class Retriever:
             cov_matrix = np.cov(all_descriptors.T)
             cov_matrix_inv = np.linalg.inv(cov_matrix)
         except LinAlgError as e:
-            logging.error(f"Error in calculating the inverse covariance matrix: {str(e)}")
+            LOGGER.error(f"Error in calculating the inverse covariance matrix: {str(e)}")
             cov_matrix_inv = None
         return cov_matrix_inv
 
@@ -47,7 +46,7 @@ class Retriever:
                     diff = F1 - F2
                     dst = np.sqrt(np.dot(diff.T, np.dot(cov_matrix_inv, diff)))
                 except Exception as e:
-                    logging.error(f"Error in calculating Mahalanobis distance: {str(e)}")
+                    LOGGER.error(f"Error in calculating Mahalanobis distance: {str(e)}")
                     dst = float("inf")
 
                 
@@ -95,6 +94,6 @@ class Retriever:
             ax.axis("off")
             distances.append(distance)
         if float("inf") in distances:
-            logging.error(f"Mahalanobis distance is infinite for some images.")
+            LOGGER.error(f"Mahalanobis distance is infinite for some images.")
             st.error(f"Error in calculating {self.metric} distances for some images. Please try another metric or use PCA to lower the dimensionality.", icon="🚨")
-        logging.info(f"{self.metric} Distances: {distances} \n ")
+        LOGGER.info(f"{self.metric} Distances: {distances} \n ")

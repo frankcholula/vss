@@ -9,9 +9,13 @@ from retrievers import Retriever
 from ground_truth import ImageLabeler
 from metrics import ClassBasedEvaluator, LabelBasedEvaluator
 from session_state_managers import SessionStateManager
+from feature_detectors import FeatureDetector
+from matplotlib import pyplot as plt
+import numpy as np
+import cv2
 
-logging.basicConfig(level=logging.INFO)
-
+LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.INFO)
 
 @st.cache_resource(show_spinner=False)
 def load_data():
@@ -54,10 +58,10 @@ def main():
     labeler = ImageLabeler(DATASET_FOLDER)
 
     # Section to choose the image and the descriptor
+    vse, sv = st.tabs(["Visual Search Engine", "SIFT Visualizer"])
+    vse.title("Visual Search Engine 👀")
 
-    st.title("Visual Search Engine 👀")
-
-    header_cols = st.columns([3, 3, 3, 2])
+    header_cols = vse.columns([3, 3, 3, 2])
     header_cols[3].markdown(
         "<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True
     )
@@ -66,8 +70,10 @@ def main():
         key="debug_mode",
         help="Toggle to display the ground truth labels for the images."
     )
-    with st.expander("**Expand to tweak hyper-parameters!**", icon="🎛️"):
+    with vse.expander("**Expand to tweak hyper-parameters!**", icon="🎛️"):
         option_cols = st.columns([3, 3, 2])
+    
+    
     selected_image = header_cols[0].selectbox(
         "**🖼️ Choose an Image...**",
         image_files,
@@ -167,7 +173,7 @@ def main():
                 key="ang_quant_slider",
                 on_change=session_manager.update_ang_quant_lvl,
             )
-            option_cols[1].radio(
+            option_cols[2].radio(
                 "Normalization Method",
                 options=["minmax", "zscore"],
                 help="Used to normalize EO histograms and RGB histograms.",
@@ -192,7 +198,7 @@ def main():
         feature_detector="SIFT",
     )
     if st.session_state["recompute"]:
-        logging.info("Recomputing descriptors...")
+        LOGGER.info("Recomputing descriptors...")
         descriptor.extract(st.session_state["recompute"])
         session_manager.update_recompute(False)
 
@@ -229,7 +235,7 @@ def main():
     )
 
     # Section to display the query image and the top similar images
-    left_col, right_col = st.columns([1,1])
+    left_col, right_col = vse.columns([1,1])
     with left_col:
         st.header("Query Image:")
         st.image(
@@ -253,9 +259,9 @@ def main():
             st.write(f"Class: {labeler.get_class(selected_image)}")
             st.write(labeler.get_labels(selected_image))
 
-    st.header(f"Top {result_num} Similar Images:")
+    vse.header(f"Top {result_num} Similar Images:")
     for i in range(0, len(similar_images), 5):
-        cols = st.columns(5)
+        cols = vse.columns(5)
         for col, img_path in zip(cols, similar_images[i : i + 5]):
             col.image(
                 img_path, use_column_width=True, caption=os.path.basename(img_path)
@@ -263,7 +269,7 @@ def main():
             if st.session_state["debug_mode"]:
                 col.write(f"Class: {labeler.get_class(os.path.basename(img_path))}")
                 col.write(labeler.get_labels(os.path.basename(img_path)))
-    tab1, tab2 = st.tabs(["Class-based Performance", "Label-based Performance"])
+    tab1, tab2 = vse.tabs(["Class-based Performance", "Label-based Performance"])
     good_class_based = False
     good_label_based = False
     with tab1:
@@ -317,6 +323,112 @@ def main():
     if good_class_based and good_label_based:
         st.balloons()
 
+
+
+    sv.title("SIFT Visualizer 🪄")
+    sv_select_image = sv.selectbox(
+        "**🖼️ Choose an Image...**",
+        image_files,
+        key="sv_select_image",
+    )
+    sv_left_col, sv_right_col = sv.columns([1, 1])
+    with sv_left_col:
+        st.header("Query Image:")
+        st.image(
+            os.path.join(DATASET_FOLDER, "Images", sv_select_image),
+            use_column_width=True,
+        )
+    
+    def visualize_sift_ghostlike(img):
+        # Create a black background image with the same dimensions as the original
+        black_background = np.zeros_like(img)
+
+        # Split into B, G, R channels
+        b_channel, g_channel, r_channel = cv2.split(img)
+
+        # Initialize SIFT detector
+        sift = cv2.SIFT_create()
+
+        # Detect keypoints in each channel
+        keypoints_b, _ = sift.detectAndCompute(b_channel, None)
+        keypoints_g, _ = sift.detectAndCompute(g_channel, None)
+        keypoints_r, _ = sift.detectAndCompute(r_channel, None)
+
+        # Draw filled circles for keypoints on the black background
+        ghost_img = black_background.copy()
+        
+        # Draw keypoints from the blue channel
+        for kp in keypoints_b:
+            x, y = int(kp.pt[0]), int(kp.pt[1])
+            radius = int(kp.size / 2)  # Scale the radius based on keypoint size
+            cv2.circle(ghost_img, (x, y), radius, (255, 0, 0), thickness=-1)  # Blue filled circle
+
+        # Draw keypoints from the green channel
+        for kp in keypoints_g:
+            x, y = int(kp.pt[0]), int(kp.pt[1])
+            radius = int(kp.size / 2)
+            cv2.circle(ghost_img, (x, y), radius, (0, 255, 0), thickness=-1)  # Green filled circle
+
+        # Draw keypoints from the red channel
+        for kp in keypoints_r:
+            x, y = int(kp.pt[0]), int(kp.pt[1])
+            radius = int(kp.size / 2)
+            cv2.circle(ghost_img, (x, y), radius, (0, 0, 255), thickness=-1)  # Red filled circle
+
+        # Convert to RGB for displaying in Streamlit
+        ghost_img_rgb = cv2.cvtColor(ghost_img, cv2.COLOR_BGR2RGB)
+
+        return ghost_img_rgb, keypoints_r, keypoints_g, keypoints_b
+
+
+    def visualize_sift_ghostlike_avg_color(img):
+        # Create a black background image with the same dimensions as the original
+        black_background = np.zeros_like(img)
+
+        # Initialize SIFT detector
+        sift = cv2.SIFT_create()
+
+        # Detect keypoints and descriptors in the grayscale version for consistent keypoints
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        keypoints, _ = sift.detectAndCompute(gray, None)
+
+        # Draw filled circles for each keypoint using the average color around the keypoint
+        ghost_img = black_background.copy()
+        
+        for kp in keypoints:
+            x, y = int(kp.pt[0]), int(kp.pt[1])
+            radius = int(kp.size / 2)  # Radius based on keypoint size
+            
+            # Define a square region around the keypoint to calculate the average color
+            x_start = max(0, x - radius)
+            y_start = max(0, y - radius)
+            x_end = min(img.shape[1], x + radius)
+            y_end = min(img.shape[0], y + radius)
+            
+            # Get the region and calculate the mean color
+            region = img[y_start:y_end, x_start:x_end]
+            mean_color = region.mean(axis=(0, 1)).astype(np.uint8)  # Ensure integer format (B, G, R)
+            
+            # Draw the filled circle with the mean color
+            cv2.circle(ghost_img, (x, y), radius, (int(mean_color[0]), int(mean_color[1]), int(mean_color[2])), thickness=-1)
+
+        # Convert to RGB for displaying in Streamlit
+        ghost_img_rgb = cv2.cvtColor(ghost_img, cv2.COLOR_BGR2RGB)
+
+        return ghost_img_rgb, keypoints
+
+    with sv_right_col:
+        st.header("Keypoints:")
+        fd = FeatureDetector("SIFT")
+        selected_img_obj = cv2.imread(os.path.join(DATASET_FOLDER, "Images", sv_select_image))
+        kp, desc = fd.detect_keypoints_compute_descriptors(selected_img_obj,)
+        img_with_kp = cv2.drawKeypoints(selected_img_obj, kp, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        img_with_kp_rgb = cv2.cvtColor(img_with_kp, cv2.COLOR_BGR2RGB)
+        st.image(img_with_kp_rgb, use_column_width=True)
+        ghost_img_rgb = visualize_sift_ghostlike(selected_img_obj)[0]
+        ghost_img_rgb_avg_color = visualize_sift_ghostlike_avg_color(selected_img_obj)[0]
+        st.image(ghost_img_rgb, use_column_width=True)
+        st.image(ghost_img_rgb_avg_color, use_column_width=True)
 
 if __name__ == "__main__":
     main()

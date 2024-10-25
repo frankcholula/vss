@@ -5,8 +5,7 @@ from typing import Dict
 import logging
 from feature_detectors import FeatureDetector
 
-logging.basicConfig(level=logging.INFO)
-
+LOGGER = logging.getLogger(__name__)
 
 class Descriptor:
     def __init__(
@@ -79,7 +78,7 @@ class Descriptor:
                 "log_message": logging_message + "using SIFT"
             }
         }
-        logging.info(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])
+        LOGGER.info(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])
 
     def extract(self, recompute: bool = False):
         if self.extract_method not in self.AVAILABLE_EXTRACTORS:
