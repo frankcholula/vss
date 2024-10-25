@@ -250,12 +250,11 @@ class LabelBasedEvaluator:
                 count += 1
         return count
 
-    def calculate_cumulative_precision_recall(
+    def calculate_cumulative_precision_recall_f1(
         self, total_relevant_images: int
     ) -> pd.DataFrame:
         labels_matrix = self.create_labels_matrix()
-        precision_list = []
-        recall_list = []
+        precision_list, recall_list, f1_list = [], [], []
         cumulative_correct_images = 0
         cumulative_retrieved_images = 0
 
@@ -278,6 +277,13 @@ class LabelBasedEvaluator:
                 else 0
             )
             recall_list.append(recall)
+            f1 = (
+                precision * recall * 2 / (precision + recall)
+                if precision + recall > 0
+                else 0
+            )
+            f1_list.append(f1)
+        
         pr_df = pd.DataFrame(
             {
                 "Image Index": [
@@ -285,12 +291,13 @@ class LabelBasedEvaluator:
                 ],  # Index of retrieved images
                 "Cumulative Precision": precision_list,
                 "Cumulative Recall": recall_list,
+                "F1 Score": f1_list,
             }
         )
         return pr_df
 
     def plot_pr_curve(self, total_relevant_images):
-        pr_df = self.calculate_cumulative_precision_recall(total_relevant_images)
+        pr_df = self.calculate_cumulative_precision_recall_f1(total_relevant_images)
 
         fig = go.Figure()
         fig.add_trace(
@@ -310,6 +317,27 @@ class LabelBasedEvaluator:
             hovermode="closest",
             yaxis=dict(range=[0, 1]),
             xaxis=dict(range=[0, 1]),
+        )
+
+        st.plotly_chart(fig)
+    
+    def plot_f1_score(self, total_relevant_images):
+        pr_df = self.calculate_cumulative_precision_recall_f1(total_relevant_images)
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=pr_df["Image Index"],
+                y=pr_df["F1 Score"],
+                mode="lines+markers",
+                name="F1 Score",
+                hovertemplate="F1 Score: %{y}<extra></extra>",
+            )
+        )
+
+        fig.update_layout(
+            title="F1 Score (Instance-Level Evaluation)",
+            xaxis_title="Image Index",
+            yaxis_title="F1 Score",
         )
 
         st.plotly_chart(fig)

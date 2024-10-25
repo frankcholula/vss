@@ -313,6 +313,7 @@ def main():
             good_label_based = True
         lbe.plot_labels_matrix(lm)
         lbe.plot_pr_curve(min_tri)
+        lbe.plot_f1_score(min_tri)
     if good_class_based and good_label_based:
         st.balloons()
 
