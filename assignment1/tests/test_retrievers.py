@@ -4,7 +4,7 @@ import cv2
 from assignment1.retrievers import Retriever
 from assignment1.descriptors import Extractor
 
-class TestRetriever(unittest.TestCase):
+class TestRetrievers(unittest.TestCase):
     def setUp(self):
         DATASET_FOLDER = "MSRC_ObjCategImageDatabase_v2_local"
         self.img1 = cv2.imread(f"{DATASET_FOLDER}/Images/1_1_s.bmp").astype(np.float64) / 255.0

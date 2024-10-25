@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 from assignment1.descriptors import Descriptor, Extractor
 
-class TestDescriptor(unittest.TestCase):
+class TestDescriptors(unittest.TestCase):
     def setUp(self):
         DATASET_FOLDER = "MSRC_ObjCategImageDatabase_v2_local"
         self.img1 = cv2.imread(f"{DATASET_FOLDER}/Images/1_1_s.bmp").astype(np.float64) / 255.0
@@ -25,7 +25,7 @@ class TestDescriptor(unittest.TestCase):
         self.assertEqual(len(mapping), 591, "The number of images should be 591.")
 
 
-class TestExtractor(unittest.TestCase):
+class TestExtractors(unittest.TestCase):
     def setUp(self):
         DATASET_FOLDER = "MSRC_ObjCategImageDatabase_v2_local"
         self.img1 = cv2.imread(f"{DATASET_FOLDER}/Images/1_1_s.bmp").astype(np.float64) / 255.0
