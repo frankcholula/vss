@@ -1,6 +1,4 @@
 import unittest
-import numpy as np
-import cv2
 from assignment1.ground_truth import ImageLabeler
 
 class TestImageLabeler(unittest.TestCase):

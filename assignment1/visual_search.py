@@ -4,8 +4,8 @@ import time
 import logging
 import streamlit as st
 from data_sources import FirebaseConnection
-from descriptor import Descriptor
-from retriever import Retriever
+from descriptors import Descriptor
+from assignment1.retrievers import Retriever
 from ground_truth import ImageLabeler
 from metrics import ClassBasedEvaluator, LabelBasedEvaluator
 from session_state_manager import SessionStateManager

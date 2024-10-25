@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 import cv2
-from assignment1.descriptor import Descriptor, Extractor
+from assignment1.descriptors import Descriptor, Extractor
 
 class TestDescriptor(unittest.TestCase):
     def setUp(self):
@@ -54,4 +54,3 @@ class TestExtractor(unittest.TestCase):
     
     def test_extract_gridEOhisto(self):
         result1 = Extractor.extract_gridEOhisto(self.img1, 4, 3)
-        
