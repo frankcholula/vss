@@ -78,6 +78,7 @@ def main():
     descriptor_method = header_cols[1].selectbox(
         "**🎨 Choose a Descriptor...**",
         options=[
+            "SIFT",
             "gridCombined",
             "gridEOhisto",
             "gridRGB",
@@ -173,6 +174,8 @@ def main():
                 key="norm_method_radio",
                 on_change=session_manager.update_norm_method,
             )
+        case "SIFT":
+            pass
 
     # TODO: Add new descriptor options here
     descriptor = Descriptor(
@@ -185,6 +188,8 @@ def main():
         sobel_filter_size=st.session_state["sobel_filter_size"],
         ang_quant_lvl=st.session_state["ang_quant_lvl"],
         norm_method=st.session_state["norm_method"],
+        # TODO: add feature detection method here
+        feature_detector="SIFT",
     )
     if st.session_state["recompute"]:
         logging.info("Recomputing descriptors...")

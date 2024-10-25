@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 from typing import Dict
 import logging
+from feature_detectors import FeatureDetector
 
 logging.basicConfig(level=logging.INFO)
 
@@ -15,6 +16,8 @@ class Descriptor:
         self.DATASET_FOLDER = dataset_folder
         self.DESCRIPTOR_FOLDER = descriptor_folder
         self.extract_method = extract_method
+        if kwargs.get("feature_detector") == "SIFT":
+            self.feature_detector = FeatureDetector("SIFT")
         # TODO: add new descriptors here
         self.AVAILABLE_EXTRACTORS = {
             "rgb": {
@@ -69,6 +72,12 @@ class Descriptor:
                 ),
                 "log_message": logging_message + f"{kwargs}",
             },
+            "SIFT": {
+                "path": os.path.join(self.DESCRIPTOR_FOLDER, "SIFT"),
+                # TODO: implement here
+                "method":lambda img: self.feature_detector.detect_keypoints_compute_descriptors(img)[1],
+                "log_message": logging_message + "using SIFT"
+            }
         }
         logging.info(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])
 

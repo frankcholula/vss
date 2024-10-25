@@ -15,6 +15,7 @@ class FeatureDetector:
                 raise ValueError(f"Invalid detector type: {self.detector_type}")
 
     def detect_keypoints_compute_descriptors(self, img: np.ndarray):
+        img = img.astype(np.uint8)
         gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
         match self.detector_type:
             case "SIFT":
