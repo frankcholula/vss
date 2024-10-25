@@ -424,10 +424,10 @@ def main():
         kp, desc = fd.detect_keypoints_compute_descriptors(selected_img_obj,)
         img_with_kp = cv2.drawKeypoints(selected_img_obj, kp, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
         img_with_kp_rgb = cv2.cvtColor(img_with_kp, cv2.COLOR_BGR2RGB)
-        st.image(img_with_kp_rgb, use_column_width=True)
+        # st.image(img_with_kp_rgb, use_column_width=True)
         ghost_img_rgb = visualize_sift_ghostlike(selected_img_obj)[0]
         ghost_img_rgb_avg_color = visualize_sift_ghostlike_avg_color(selected_img_obj)[0]
-        st.image(ghost_img_rgb, use_column_width=True)
+        # st.image(ghost_img_rgb, use_column_width=True)
         st.image(ghost_img_rgb_avg_color, use_column_width=True)
 
 if __name__ == "__main__":
