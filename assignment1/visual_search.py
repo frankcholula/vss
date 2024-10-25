@@ -8,7 +8,7 @@ from descriptors import Descriptor
 from assignment1.retrievers import Retriever
 from ground_truth import ImageLabeler
 from metrics import ClassBasedEvaluator, LabelBasedEvaluator
-from session_state_manager import SessionStateManager
+from assignment1.session_state_managers import SessionStateManager
 
 logging.basicConfig(level=logging.INFO)
 
