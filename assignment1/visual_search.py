@@ -324,14 +324,25 @@ def main():
         st.balloons()
 
     sv.title("SIFT Visualizer 🪄")
-    sv_select_image = sv.selectbox(
-        "**🖼️ Choose an Image...**",
-        image_files,
-        key="sv_select_image",
+    sv_header_cols = sv.columns([3, 1])
+    # TODO: standardize key names
+    sv_selected_image = sv_header_cols[0].selectbox(
+        "**🖼️ Choose an Image...**", image_files, key="sv_box",
+        index=image_files.index(st.session_state["sv_selected_image"]),
     )
+    query_img = cv2.imread(os.path.join(DATASET_FOLDER, "Images", sv_selected_image))
+
+    with sv_header_cols[1]:
+        st.markdown(
+            "<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True
+        )
+        if sv_header_cols[1].button("🎲 I'm Feeling Lucky", key="ifl_button"):
+            # TODO: fix this part
+            st.session_state["sv_selected_image"] = random.choice(image_files)
+            sv_selected_image = st.session_state["sv_selected_image"]
+            st.rerun()
     sv_left_col, sv_right_col = sv.columns([1, 1])
     with sv_left_col:
-        query_img = cv2.imread(os.path.join(DATASET_FOLDER, "Images", sv_select_image))
         st.header("Query Image")
         st.image(cv2.cvtColor(query_img, cv2.COLOR_BGR2RGB), use_column_width=True)
         st.header("Greyscale")
@@ -341,7 +352,7 @@ def main():
         fd = FeatureDetector("SIFT")
 
         selected_img_obj = cv2.imread(
-            os.path.join(DATASET_FOLDER, "Images", sv_select_image)
+            os.path.join(DATASET_FOLDER, "Images", sv_selected_image)
         )
         kp, desc = fd.detect_keypoints_compute_descriptors(
             selected_img_obj,

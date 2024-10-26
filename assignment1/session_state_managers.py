@@ -16,6 +16,8 @@ class SessionStateManager:
             st.session_state["bins"] = 32
         if "selected_image" not in st.session_state:
             st.session_state["selected_image"] = self.image_files[0]
+        if "sv_selected_image" not in st.session_state:
+            st.session_state["sv_selected_image"] = self.image_files[0]
         if "quant_lvl" not in st.session_state:
             st.session_state["quant_lvl"] = 8
         if "metric" not in st.session_state:
@@ -34,6 +36,7 @@ class SessionStateManager:
             st.session_state["ang_quant_lvl"] = 8
         if "norm_method" not in st.session_state:
             st.session_state["norm_method"] = "minmax"
+        
 
     def update_metric(self):
         st.session_state["metric"] = st.session_state["metric_radio"]
