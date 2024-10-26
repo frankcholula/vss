@@ -1,3 +1,4 @@
+import cv2
 import os
 import random
 import time
@@ -10,12 +11,12 @@ from ground_truth import ImageLabeler
 from metrics import ClassBasedEvaluator, LabelBasedEvaluator
 from session_state_managers import SessionStateManager
 from feature_detectors import FeatureDetector
-from matplotlib import pyplot as plt
-import numpy as np
-import cv2
+from sift_visualizer import visualize_sift
+
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
+
 
 @st.cache_resource(show_spinner=False)
 def load_data():
@@ -68,16 +69,15 @@ def main():
     header_cols[3].toggle(
         "Debug",
         key="debug_mode",
-        help="Toggle to display the ground truth labels for the images."
+        help="Toggle to display the ground truth labels for the images.",
     )
     with vse.expander("**Expand to tweak hyper-parameters!**", icon="🎛️"):
         option_cols = st.columns([3, 3, 2])
-    
-    
+
     selected_image = header_cols[0].selectbox(
         "**🖼️ Choose an Image...**",
         image_files,
-        index=image_files.index(st.session_state["selected_image"])
+        index=image_files.index(st.session_state["selected_image"]),
     )
 
     # TODO: Add new descriptor options here
@@ -143,7 +143,7 @@ def main():
             )
             option_cols[1].select_slider(
                 "Select the Angular Quantization Level...",
-                options=range(8,33),
+                options=range(8, 33),
                 value=st.session_state["ang_quant_lvl"],
                 key="ang_quant_slider",
                 on_change=session_manager.update_ang_quant_lvl,
@@ -167,7 +167,7 @@ def main():
             )
             option_cols[1].select_slider(
                 "Select the Angular Quantization Level...",
-                options=range(8,33),
+                options=range(8, 33),
                 value=st.session_state["ang_quant_lvl"],
                 help="The higher the quantizatino, the finder the edge orientation histogram, but also more prone to noise.",
                 key="ang_quant_slider",
@@ -235,7 +235,7 @@ def main():
     )
 
     # Section to display the query image and the top similar images
-    left_col, right_col = vse.columns([1,1])
+    left_col, right_col = vse.columns([1, 1])
     with left_col:
         st.header("Query Image:")
         st.image(
@@ -323,8 +323,6 @@ def main():
     if good_class_based and good_label_based:
         st.balloons()
 
-
-
     sv.title("SIFT Visualizer 🪄")
     sv_select_image = sv.selectbox(
         "**🖼️ Choose an Image...**",
@@ -338,97 +336,31 @@ def main():
             os.path.join(DATASET_FOLDER, "Images", sv_select_image),
             use_column_width=True,
         )
-    
-    def visualize_sift_ghostlike(img):
-        # Create a black background image with the same dimensions as the original
-        black_background = np.zeros_like(img)
-
-        # Split into B, G, R channels
-        b_channel, g_channel, r_channel = cv2.split(img)
-
-        # Initialize SIFT detector
-        sift = cv2.SIFT_create()
-
-        # Detect keypoints in each channel
-        keypoints_b, _ = sift.detectAndCompute(b_channel, None)
-        keypoints_g, _ = sift.detectAndCompute(g_channel, None)
-        keypoints_r, _ = sift.detectAndCompute(r_channel, None)
-
-        # Draw filled circles for keypoints on the black background
-        ghost_img = black_background.copy()
-        
-        # Draw keypoints from the blue channel
-        for kp in keypoints_b:
-            x, y = int(kp.pt[0]), int(kp.pt[1])
-            radius = int(kp.size / 2)  # Scale the radius based on keypoint size
-            cv2.circle(ghost_img, (x, y), radius, (255, 0, 0), thickness=-1)  # Blue filled circle
-
-        # Draw keypoints from the green channel
-        for kp in keypoints_g:
-            x, y = int(kp.pt[0]), int(kp.pt[1])
-            radius = int(kp.size / 2)
-            cv2.circle(ghost_img, (x, y), radius, (0, 255, 0), thickness=-1)  # Green filled circle
-
-        # Draw keypoints from the red channel
-        for kp in keypoints_r:
-            x, y = int(kp.pt[0]), int(kp.pt[1])
-            radius = int(kp.size / 2)
-            cv2.circle(ghost_img, (x, y), radius, (0, 0, 255), thickness=-1)  # Red filled circle
-
-        # Convert to RGB for displaying in Streamlit
-        ghost_img_rgb = cv2.cvtColor(ghost_img, cv2.COLOR_BGR2RGB)
-
-        return ghost_img_rgb, keypoints_r, keypoints_g, keypoints_b
-
-
-    def visualize_sift_ghostlike_avg_color(img):
-        # Create a black background image with the same dimensions as the original
-        black_background = np.zeros_like(img)
-
-        # Initialize SIFT detector
-        sift = cv2.SIFT_create()
-
-        # Detect keypoints and descriptors in the grayscale version for consistent keypoints
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        keypoints, _ = sift.detectAndCompute(gray, None)
-
-        # Draw filled circles for each keypoint using the average color around the keypoint
-        ghost_img = black_background.copy()
-        
-        for kp in keypoints:
-            x, y = int(kp.pt[0]), int(kp.pt[1])
-            radius = int(kp.size / 2)  # Radius based on keypoint size
-            
-            # Define a square region around the keypoint to calculate the average color
-            x_start = max(0, x - radius)
-            y_start = max(0, y - radius)
-            x_end = min(img.shape[1], x + radius)
-            y_end = min(img.shape[0], y + radius)
-            
-            # Get the region and calculate the mean color
-            region = img[y_start:y_end, x_start:x_end]
-            mean_color = region.mean(axis=(0, 1)).astype(np.uint8)  # Ensure integer format (B, G, R)
-            
-            # Draw the filled circle with the mean color
-            cv2.circle(ghost_img, (x, y), radius, (int(mean_color[0]), int(mean_color[1]), int(mean_color[2])), thickness=-1)
-
-        # Convert to RGB for displaying in Streamlit
-        ghost_img_rgb = cv2.cvtColor(ghost_img, cv2.COLOR_BGR2RGB)
-
-        return ghost_img_rgb, keypoints
+        st.image(
+            os.path.join(DATASET_FOLDER, "Images", sv_select_image),
+            use_column_width=True,
+        )
 
     with sv_right_col:
         st.header("Keypoints:")
         fd = FeatureDetector("SIFT")
-        selected_img_obj = cv2.imread(os.path.join(DATASET_FOLDER, "Images", sv_select_image))
-        kp, desc = fd.detect_keypoints_compute_descriptors(selected_img_obj,)
-        img_with_kp = cv2.drawKeypoints(selected_img_obj, kp, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        selected_img_obj = cv2.imread(
+            os.path.join(DATASET_FOLDER, "Images", sv_select_image)
+        )
+        kp, desc = fd.detect_keypoints_compute_descriptors(
+            selected_img_obj,
+        )
+        img_with_kp = cv2.drawKeypoints(
+            selected_img_obj, kp, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
+        )
         img_with_kp_rgb = cv2.cvtColor(img_with_kp, cv2.COLOR_BGR2RGB)
-        # st.image(img_with_kp_rgb, use_column_width=True)
-        ghost_img_rgb = visualize_sift_ghostlike(selected_img_obj)[0]
-        ghost_img_rgb_avg_color = visualize_sift_ghostlike_avg_color(selected_img_obj)[0]
-        # st.image(ghost_img_rgb, use_column_width=True)
-        st.image(ghost_img_rgb_avg_color, use_column_width=True)
+ 
+        st.image(img_with_kp_rgb, use_column_width=True)
+        ghost_img_rgb = visualize_sift(
+            selected_img_obj
+        )[0]
+        st.image(ghost_img_rgb, use_column_width=True)
+
 
 if __name__ == "__main__":
     main()
