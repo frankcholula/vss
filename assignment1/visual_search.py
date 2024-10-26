@@ -237,7 +237,7 @@ def main():
     # Section to display the query image and the top similar images
     left_col, right_col = vse.columns([1, 1])
     with left_col:
-        st.header("Query Image:")
+        st.header("Query")
         st.image(
             os.path.join(DATASET_FOLDER, "Images", selected_image),
             use_column_width=True,
@@ -252,14 +252,14 @@ def main():
     )
 
     with right_col:
-        st.header("Ground Truth:")
+        st.header("Ground Truth")
         gt_img = labeler.load_img(selected_image)
         st.image(gt_img, use_column_width=True)
         if st.session_state["debug_mode"]:
             st.write(f"Class: {labeler.get_class(selected_image)}")
             st.write(labeler.get_labels(selected_image))
 
-    vse.header(f"Top {result_num} Similar Images:")
+    vse.header(f"Top {result_num} Similar Images")
     for i in range(0, len(similar_images), 5):
         cols = vse.columns(5)
         for col, img_path in zip(cols, similar_images[i : i + 5]):
@@ -331,19 +331,15 @@ def main():
     )
     sv_left_col, sv_right_col = sv.columns([1, 1])
     with sv_left_col:
-        st.header("Query Image:")
-        st.image(
-            os.path.join(DATASET_FOLDER, "Images", sv_select_image),
-            use_column_width=True,
-        )
-        st.image(
-            os.path.join(DATASET_FOLDER, "Images", sv_select_image),
-            use_column_width=True,
-        )
+        query_img = cv2.imread(os.path.join(DATASET_FOLDER, "Images", sv_select_image))
+        st.header("Query Image")
+        st.image(cv2.cvtColor(query_img, cv2.COLOR_BGR2RGB), use_column_width=True)
+        st.header("Greyscale")
+        st.image(cv2.cvtColor(query_img, cv2.COLOR_BGR2GRAY), use_column_width=True)
 
     with sv_right_col:
-        st.header("Keypoints:")
         fd = FeatureDetector("SIFT")
+
         selected_img_obj = cv2.imread(
             os.path.join(DATASET_FOLDER, "Images", sv_select_image)
         )
@@ -353,12 +349,12 @@ def main():
         img_with_kp = cv2.drawKeypoints(
             selected_img_obj, kp, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
         )
+
         img_with_kp_rgb = cv2.cvtColor(img_with_kp, cv2.COLOR_BGR2RGB)
- 
+        st.header("Keypoints")
         st.image(img_with_kp_rgb, use_column_width=True)
-        ghost_img_rgb = visualize_sift(
-            selected_img_obj
-        )[0]
+        ghost_img_rgb = visualize_sift(selected_img_obj)[0]
+        st.header("SIFT")
         st.image(ghost_img_rgb, use_column_width=True)
 
 
