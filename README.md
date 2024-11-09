@@ -1,6 +1,25 @@
-# cvpr
-Assignments for Computer Vision and Pattern Recogition
+# Computer Vision & Pattern Recognition
+Hello! This is an assignment repository for the University of Surrey's SAPR class regarding speech synthesis and recognition.
+The assignment 1 write-up: Visual Search System can be found [here](https://www.notion.so/frankcholula/Visual-Search-System-1223b40fbcd5801abc19e3ceadf9cb6e?pvs=4).
 
+If you are a **University of Surrey student**, you are welcome to use this project as a learning resource and reference for your coursework. A simple credit to the OC (wee! that's me, [Frank](https://frankcholula.notion.site/)) would be greatly appreciated. However, please note that submitting this work as your own academic assignment is not permitted and may lead to [academic misconduct penalties](https://www.surrey.ac.uk/office-student-complaints-appeals-and-regulation/academic-misconduct-and-appeals). Just make sure you're submitting your orignal work.
+## Directory Layout
+To get started, you'll need to install the dependencies. I'm using [Poetry](https://python-poetry.org/) to manage the dependencies and [Pyenv](https://github.com/pyenv/pyenv) to manage the Python version.
+
+For Mac users, you can install both using homebrew:
+```bash
+brew install pyenv poetry
+```
+
+## Running Locally
+Clone the repository, start a poetry virtual environment and install the dependencies.
+```bash
+poetry shell
+poetry install
+make run
+```
+The `make run` command should start a streamlit interactive GUI on `localhost:8501`.
+![interactive GUI](assets/image.png)
 
 ## Checklist
 - [x] **Req No. 1: Global Colour Histogram** (30%)  
