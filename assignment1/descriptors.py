@@ -6,6 +6,7 @@ import logging
 from feature_detectors import FeatureDetector
 
 LOGGER = logging.getLogger(__name__)
+LOGGER.setLevel(logging.DEBUG)
 
 class Descriptor:
     def __init__(
@@ -78,7 +79,7 @@ class Descriptor:
                 "log_message": logging_message + "using SIFT"
             }
         }
-        LOGGER.info(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])
+        LOGGER.debug(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])
 
     def extract(self, recompute: bool = False):
         if self.extract_method not in self.AVAILABLE_EXTRACTORS:

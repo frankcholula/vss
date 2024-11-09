@@ -9,6 +9,7 @@ import logging
 
 LOGGER = logging.getLogger(__name__)
 
+LOGGER.setLevel(logging.INFO)
 class ClassBasedEvaluator:
     def __init__(self, input_image_class: str, retrieved_image_classes: List):
         self.input_image_class = input_image_class

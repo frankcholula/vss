@@ -1,4 +1,3 @@
-import cv2
 import numpy as np
 from numpy.linalg import LinAlgError
 from matplotlib import pyplot as plt
@@ -6,9 +5,11 @@ from typing import Dict, List, Tuple
 import logging
 import streamlit as st
 import os
+from sklearn.decomposition import PCA
 
 LOGGER = logging.getLogger(__name__)
 
+LOGGER.setLevel(logging.INFO)
 class Retriever:
     def __init__(self, img_desc_dict: Dict[str, np.ndarray], metric: str):
         self.img_desc_dict = img_desc_dict
@@ -62,7 +63,6 @@ class Retriever:
                     query_img_desc, candidate_desc, self.metric, self.cov_matrix_inv
                 )
                 dst.append((distance, img_path))
-
         dst.sort(key=lambda x: x[0])
         return dst
 

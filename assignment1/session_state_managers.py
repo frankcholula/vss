@@ -3,7 +3,7 @@ import logging
 import os
 
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
+LOGGER.setLevel(logging.DEBUG)
 
 class SessionStateManager:
     def __init__(self, image_files):
@@ -68,7 +68,7 @@ class SessionStateManager:
 
     def update_descriptor(self):
         if st.session_state["descriptor"] != st.session_state["descriptor_selectbox"]:
-            LOGGER.info(
+            LOGGER.debug(
                 f"Updating descriptor to {st.session_state['descriptor_selectbox']}"
             )
             st.session_state["descriptor"] = st.session_state["descriptor_selectbox"]

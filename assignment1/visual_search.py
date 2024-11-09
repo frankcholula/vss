@@ -15,7 +15,7 @@ from sift_visualizer import visualize_sift
 
 
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
+LOGGER.setLevel(logging.DEBUG)
 
 
 @st.cache_resource(show_spinner=False)
@@ -248,7 +248,7 @@ def main():
 
     retriever = Retriever(img2descriptors, metric)
     tri = labeler.get_total_relevant_images(selected_image)
-    LOGGER.info(f"This selected image has {tri} relevant images.")
+    LOGGER.debug(f"This selected image has {tri} relevant images.")
     similar_images, find_all_images_at = retriever.retrieve(
         os.path.join(DATASET_FOLDER, "Images", selected_image), total_relevant_images=tri
     )
