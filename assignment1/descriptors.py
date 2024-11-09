@@ -6,7 +6,7 @@ import logging
 from feature_detectors import FeatureDetector
 
 LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.DEBUG)
+LOGGER.setLevel(logging.INFO)
 
 class Descriptor:
     def __init__(

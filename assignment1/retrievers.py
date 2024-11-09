@@ -8,8 +8,8 @@ import os
 from sklearn.decomposition import PCA
 
 LOGGER = logging.getLogger(__name__)
-
 LOGGER.setLevel(logging.INFO)
+
 class Retriever:
     def __init__(self, img_desc_dict: Dict[str, np.ndarray], metric: str):
         self.img_desc_dict = img_desc_dict

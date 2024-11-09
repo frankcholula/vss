@@ -14,10 +14,6 @@ from feature_detectors import FeatureDetector
 from sift_visualizer import visualize_sift
 
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.DEBUG)
-
-
 @st.cache_resource(show_spinner=False)
 def load_data():
     firebase_conn = FirebaseConnection()
@@ -370,4 +366,6 @@ def main():
 
 
 if __name__ == "__main__":
+    LOGGER = logging.getLogger(__name__)
+    LOGGER.setLevel(logging.DEBUG)
     main()
