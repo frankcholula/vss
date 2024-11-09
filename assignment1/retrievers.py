@@ -76,20 +76,19 @@ class Retriever:
         distances = self.compute_distance(query_img)
         target_class = self.get_image_class(query_img)
         seen_count = 0
-        top_similar_images = []
+        find_all_images_at = 0
         for distance, img_path in distances:
             seen_class = self.get_image_class(img_path)
-            top_similar_images.append((distance, img_path))
+            find_all_images_at +=1
             if seen_class == target_class:
                 seen_count += 1
             if seen_count >= total_relevant_images:
                 break
-        print(f"Found all images after {len(top_similar_images)} images.")
+        print(f"Found all images after {find_all_images_at} images.")
         # edge case: if the Mahalanobis distance is infinite for some images
         # if float("inf") in [distance for distance, _ in top_similar_images]:
         #     return []
-        return [img_path for _, img_path in distances]
-        # return [img_path for _, img_path in top_similar_images]
+        return [img_path for _, img_path in distances], find_all_images_at
 
     def display_images(self, vse, similar_images: list, result_num: int):
         images_to_display = similar_images[:result_num]

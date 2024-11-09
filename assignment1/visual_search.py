@@ -249,7 +249,7 @@ def main():
     retriever = Retriever(img2descriptors, metric)
     tri = labeler.get_total_relevant_images(selected_image)
     print(f"This selected image has {tri} relevant images.")
-    similar_images = retriever.retrieve(
+    similar_images, find_all_images_at = retriever.retrieve(
         os.path.join(DATASET_FOLDER, "Images", selected_image), total_relevant_images=tri
     )
 
@@ -290,6 +290,7 @@ def main():
             good_class_based = True
 
         cbe.plot_class_matrix(cm, input_class)
+        st.write(f"**You'll find all the images after `{find_all_images_at}` searches.**")
         precisions, recalls, f1_scores = cbe.calculate_pr_f1_values(
             input_class, all_retrieved_image_classes, tri
         )
