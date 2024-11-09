@@ -26,7 +26,6 @@ The `make run` command should start a streamlit interactive GUI on `localhost:85
 ## Deployment
 A stripped-down version of this project is currently live on Streamlit at [visual-search.streamlit.app](https://visual-search.streamlit.app/). I'll publish the complete version after the assignment deadline to comply with the University of Surrey's academic integrity policy. The goal of this project is to serve as a learning resource and reference for future students.
 
-```bash
 ## Checklist
 - [x] **Req No. 1: Global Colour Histogram** (30%)  
   - Implement the global colour histogram from lecture 7 (slides 4,5) using a Euclidean distance metric.  
