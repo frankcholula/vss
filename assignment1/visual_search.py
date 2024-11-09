@@ -71,7 +71,7 @@ def main():
         key="debug_mode",
         help="Toggle to display the ground truth labels for the images.",
     )
-    with vse.expander("**Expand to tweak hyper-parameters!**", icon="🎛️"):
+    with vse.expander("**Expand to tweak hyper-parameters!**", icon="🛠️"):
         option_cols = st.columns([3, 3, 2])
 
     selected_image = header_cols[0].selectbox(
@@ -290,7 +290,7 @@ def main():
             good_class_based = True
 
         cbe.plot_class_matrix(cm, input_class)
-        st.write(f"**You'll find all the images after `{find_all_images_at}` searches.**")
+        st.write(f"**You'll find all the images in `class {input_class}` after `{find_all_images_at}` searches.**")
         precisions, recalls, f1_scores = cbe.calculate_pr_f1_values(
             input_class, all_retrieved_image_classes, tri
         )
