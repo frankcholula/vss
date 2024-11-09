@@ -263,18 +263,7 @@ def main():
             st.write(labeler.get_labels(selected_image))
 
     vse.header(f"Top {result_num} Similar Images")
-    images_to_display = similar_images[:result_num]
-    for i in range(0, len(images_to_display), 5):
-        cols = vse.columns(5)
-        for col, img_path in zip(cols, images_to_display[i : i + 5]):
-            col.image(
-                img_path, use_column_width=True, caption=os.path.basename(img_path)
-            )
-            if st.session_state["debug_mode"]:
-                col.write(f"Class: {labeler.get_class(os.path.basename(img_path))}")
-                col.write(labeler.get_labels(os.path.basename(img_path)))
-    
-    
+    images_to_display = retriever.display_images(vse, similar_images, result_num)
     
     tab1, tab2 = vse.tabs(["Class-based Performance", "Label-based Performance"])
     good_class_based = False
@@ -283,7 +272,7 @@ def main():
         input_class = labeler.get_class(selected_image)
         labels_dict = labeler.get_labels_dict()
         retrieved_image_classes = [
-            labeler.get_class(os.path.basename(img_path)) for img_path in similar_images
+            labeler.get_class(os.path.basename(img_path)) for img_path in images_to_display
         ]
         cbe = ClassBasedEvaluator(input_class, retrieved_image_classes)
         cm = cbe.create_class_matrix(input_class, retrieved_image_classes)

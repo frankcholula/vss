@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 from typing import Dict, List, Tuple
 import logging
 import streamlit as st
+import os
 
 LOGGER = logging.getLogger(__name__)
 
@@ -89,8 +90,19 @@ class Retriever:
         #     return []
         return [img_path for _, img_path in top_similar_images]
 
-    def display_images(self, vse, top_similar_images: list, result_number: int):
-        pass
+    def display_images(self, vse, similar_images: list, result_num: int):
+        images_to_display = similar_images[:result_num]
+        for i in range(0, len(images_to_display), 5):
+            cols = vse.columns(5)
+            for col, img_path in zip(cols, images_to_display[i : i + 5]):
+                col.image(
+                    img_path, use_column_width=True, caption=os.path.basename(img_path)
+                )
+                if st.session_state["debug_mode"]:
+                    col.write(f"Class: {self.get_image_class(os.path.basename(img_path))}")
+                    col.write(self.get_image_class(os.path.basename(img_path)))
+            pass
+        return images_to_display
     #     fig, axes = plt.subplots(1, number + 1, figsize=(20, 5))
     #     distances = []
     #     # Display the query image
