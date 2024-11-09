@@ -67,11 +67,27 @@ class Retriever:
         dst.sort(key=lambda x: x[0])
         return dst
 
-    def retrieve(self, query_img: str, number: int = 10) -> list:
-        # Compute distances
+    def get_image_class(self, img_path: str) -> str:
+        imagename = img_path.split("/")[2]
+        return imagename.split("_")[0]
+
+    def retrieve(self, query_img: str, total_relevant_images: int) -> list:
+        # Subtract 1 because the query image is included in the total_relevant_images
+        total_relevant_images -= 1
         distances = self.compute_distance(query_img)
-        top_similar_images = distances[:number]
-        self.display_images(query_img, top_similar_images, number)
+        target_class = self.get_image_class(query_img)
+        seen_count = 0
+        top_similar_images = []
+        for distance, img_path in distances:
+            seen_class = self.get_image_class(img_path)
+            top_similar_images.append((distance, img_path))
+            if seen_class == target_class:
+                seen_count += 1
+            if seen_count >= total_relevant_images:
+                break
+        print(f"Found all images after {len(top_similar_images)} images.")
+        self.display_images(query_img, top_similar_images, 10)
+        # edge case: if the Mahalanobis distance is infinite for some images
         if float("inf") in [distance for distance, _ in top_similar_images]:
             return []
         return [img_path for _, img_path in top_similar_images]

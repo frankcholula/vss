@@ -125,3 +125,12 @@ class ImageLabeler:
                     print(f"Error processing {image_file}: {e}")
             result[image_file] = {"labels": labels, "class": class_id}
         return result
+
+    def get_total_relevant_images(self, query_img: str) -> int:
+        img_class = self.get_class(query_img)
+        labels_dict = self.get_labels_dict()
+        count = 0   
+        for k, v in labels_dict.items():
+            if v["class"] == img_class:
+               count +=1
+        return count

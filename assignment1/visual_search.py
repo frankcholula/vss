@@ -247,8 +247,9 @@ def main():
             st.write(labeler.get_labels(selected_image))
 
     retriever = Retriever(img2descriptors, metric)
+    tri = labeler.get_total_relevant_images(selected_image)
     similar_images = retriever.retrieve(
-        os.path.join(DATASET_FOLDER, "Images", selected_image), number=result_num
+        os.path.join(DATASET_FOLDER, "Images", selected_image), total_relevant_images=tri
     )
 
     with right_col:
@@ -323,50 +324,51 @@ def main():
     if good_class_based and good_label_based:
         st.balloons()
 
-    sv.title("SIFT Visualizer 🪄")
-    sv_header_cols = sv.columns([3, 1])
-    # TODO: standardize key names
-    sv_selected_image = sv_header_cols[0].selectbox(
-        "**🖼️ Choose an Image...**", image_files, key="sv_box",
-        index=image_files.index(st.session_state["sv_selected_image"]),
-    )
-    query_img = cv2.imread(os.path.join(DATASET_FOLDER, "Images", sv_selected_image))
+    # TODO : Move this to a different class
+    # sv.title("SIFT Visualizer 🪄")
+    # sv_header_cols = sv.columns([3, 1])
+    # # TODO: standardize key names
+    # sv_selected_image = sv_header_cols[0].selectbox(
+    #     "**🖼️ Choose an Image...**", image_files, key="sv_box",
+    #     index=image_files.index(st.session_state["sv_selected_image"]),
+    # )
+    # query_img = cv2.imread(os.path.join(DATASET_FOLDER, "Images", sv_selected_image))
 
-    with sv_header_cols[1]:
-        st.markdown(
-            "<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True
-        )
-        if sv_header_cols[1].button("🎲 I'm Feeling Lucky", key="ifl_button"):
-            # TODO: fix this part
-            st.session_state["sv_selected_image"] = random.choice(image_files)
-            sv_selected_image = st.session_state["sv_selected_image"]
-            st.rerun()
-    sv_left_col, sv_right_col = sv.columns([1, 1])
-    with sv_left_col:
-        st.header("Query Image")
-        st.image(cv2.cvtColor(query_img, cv2.COLOR_BGR2RGB), use_column_width=True)
-        st.header("Greyscale")
-        st.image(cv2.cvtColor(query_img, cv2.COLOR_BGR2GRAY), use_column_width=True)
+    # with sv_header_cols[1]:
+    #     st.markdown(
+    #         "<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True
+    #     )
+    #     if sv_header_cols[1].button("🎲 I'm Feeling Lucky", key="ifl_button"):
+    #         # TODO: fix this part
+    #         st.session_state["sv_selected_image"] = random.choice(image_files)
+    #         sv_selected_image = st.session_state["sv_selected_image"]
+    #         st.rerun()
+    # sv_left_col, sv_right_col = sv.columns([1, 1])
+    # with sv_left_col:
+    #     st.header("Query Image")
+    #     st.image(cv2.cvtColor(query_img, cv2.COLOR_BGR2RGB), use_column_width=True)
+    #     st.header("Greyscale")
+    #     st.image(cv2.cvtColor(query_img, cv2.COLOR_BGR2GRAY), use_column_width=True)
 
-    with sv_right_col:
-        fd = FeatureDetector("SIFT")
+    # with sv_right_col:
+    #     fd = FeatureDetector("SIFT")
 
-        selected_img_obj = cv2.imread(
-            os.path.join(DATASET_FOLDER, "Images", sv_selected_image)
-        )
-        kp, desc = fd.detect_keypoints_compute_descriptors(
-            selected_img_obj,
-        )
-        img_with_kp = cv2.drawKeypoints(
-            selected_img_obj, kp, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
-        )
+    #     selected_img_obj = cv2.imread(
+    #         os.path.join(DATASET_FOLDER, "Images", sv_selected_image)
+    #     )
+    #     kp, desc = fd.detect_keypoints_compute_descriptors(
+    #         selected_img_obj,
+    #     )
+    #     img_with_kp = cv2.drawKeypoints(
+    #         selected_img_obj, kp, None, flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
+    #     )
 
-        img_with_kp_rgb = cv2.cvtColor(img_with_kp, cv2.COLOR_BGR2RGB)
-        st.header("Keypoints")
-        st.image(img_with_kp_rgb, use_column_width=True)
-        ghost_img_rgb = visualize_sift(selected_img_obj)[0]
-        st.header("SIFT")
-        st.image(ghost_img_rgb, use_column_width=True)
+    #     img_with_kp_rgb = cv2.cvtColor(img_with_kp, cv2.COLOR_BGR2RGB)
+    #     st.header("Keypoints")
+    #     st.image(img_with_kp_rgb, use_column_width=True)
+    #     ghost_img_rgb = visualize_sift(selected_img_obj)[0]
+    #     st.header("SIFT")
+    #     st.image(ghost_img_rgb, use_column_width=True)
 
 
 if __name__ == "__main__":

@@ -82,6 +82,7 @@ class ClassBasedEvaluator:
         plt.tight_layout()
         st.pyplot(plt)
 
+
     def count_total_relevant_images(self, selected_image, labels_dict) -> int:
         count = 0
         for k, v in labels_dict.items():
