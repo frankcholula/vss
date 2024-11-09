@@ -4,6 +4,7 @@ import numpy as np
 from typing import Dict
 import logging
 from feature_detectors import FeatureDetector
+from sklearn.decomposition import PCA
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -80,6 +81,7 @@ class Descriptor:
             }
         }
         LOGGER.debug(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])
+        self.descriptors = None
 
     def extract(self, recompute: bool = False):
         if self.extract_method not in self.AVAILABLE_EXTRACTORS:
@@ -110,8 +112,34 @@ class Descriptor:
                 )
                 descriptor_data = np.load(os.path.join(descriptor_path, filename))
                 img_to_descriptor[img_path] = descriptor_data
+        self.descriptors = img_to_descriptor
         return img_to_descriptor
 
+    def perform_pca(self, n_components: int = None, variance_ratio: float = 0.99) -> Dict[str, np.ndarray]:
+        if self.descriptors is None:
+            raise ValueError("Descriptors have not been extracted yet.")
+        descriptor_list = []
+        image_paths = []
+        for img_path, descriptor in self.descriptors.items():
+            descriptor_list.append(descriptor)
+            image_paths.append(img_path)
+        descriptor_matrix = np.vstack(descriptor_list)
+
+        # Initialize PCA
+        if n_components is None:
+            pca = PCA(n_components=variance_ratio)
+        else:
+            pca = PCA(n_components=n_components)
+
+        # Fit PCA and transform descriptors
+        reduced_matrix = pca.fit_transform(descriptor_matrix)
+        LOGGER.info(f"PCA reduced dimensions from {descriptor_matrix.shape[1]} to {reduced_matrix.shape[1]}")
+
+        # Map reduced descriptors back to their image paths
+        reduced_descriptors = {
+            img_path: reduced_matrix[i, :] for i, img_path in enumerate(image_paths)
+        }
+        return reduced_descriptors
 
 class Extractor:
     @staticmethod
@@ -262,6 +290,7 @@ class Extractor:
         )[0]
         hist_flat = hist.flatten()
         hist_normalized = hist_flat / np.sum(hist_flat)
+        LOGGER.debug(f"Dimensions of the descriptor: {hist_normalized.shape}")
         return hist_normalized
 
     @staticmethod
