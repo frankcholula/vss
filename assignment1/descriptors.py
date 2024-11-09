@@ -91,16 +91,30 @@ class Descriptor:
         if not os.path.exists(descriptor_path) or recompute:
             # compute the descriptors if they don't exist, otherwise load them
             os.makedirs(descriptor_path, exist_ok=True)
+            descriptors = {}
             for filename in os.listdir(os.path.join(self.DATASET_FOLDER, "Images")):
                 if filename.endswith(".bmp"):
                     img_path = os.path.join(self.DATASET_FOLDER, "Images", filename)
                     # TODO: maybe change the image loading functionalities uint8 or float32
                     img = cv2.imread(img_path).astype(np.float64)
-                    fout = os.path.join(descriptor_path, filename).replace(
-                        ".bmp", ".npy"
-                    )
+
                     F = self.AVAILABLE_EXTRACTORS[self.extract_method]["method"](img)
-                    np.save(fout, F)
+                    descriptors[img_path] = F
+            self.save_descriptors(descriptors, descriptor_path)
+
+    def save_descriptors(self, descriptors: Dict[str, np.ndarray], save_path: str):
+        """
+        Save descriptors to the specified path.
+
+        Args:
+            descriptors (Dict[str, np.ndarray]): A dictionary of descriptors to save.
+            save_path (str): Directory where the descriptors will be saved.
+        """
+        os.makedirs(save_path, exist_ok=True)
+        for img_path, descriptor in descriptors.items():
+            file_name = os.path.basename(img_path).replace(".bmp", ".npy")
+            np.save(os.path.join(save_path, file_name), descriptor)
+        LOGGER.info(f"Saved descriptors to {save_path}")
 
     def get_image_descriptor_mapping(self) -> Dict[str, np.ndarray]:
         descriptor_path = os.path.join(self.DESCRIPTOR_FOLDER, self.extract_method)
