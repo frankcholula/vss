@@ -1,11 +1,10 @@
 import numpy as np
 from numpy.linalg import LinAlgError
-from matplotlib import pyplot as plt
 from typing import Dict, List, Tuple
 import logging
 import streamlit as st
 import os
-from sklearn.decomposition import PCA
+from scipy.spatial.distance import mahalanobis
 
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
@@ -22,6 +21,10 @@ class Retriever:
         all_descriptors = np.array(list(self.img_desc_dict.values()))
         try:
             cov_matrix = np.cov(all_descriptors.T)
+            # enforcing symmetry here
+            cov_matrix = (cov_matrix + cov_matrix.T) / 2
+            # ensuring invertibility in case of singular matrices
+            cov_matrix += np.eye(cov_matrix.shape[0]) * 1e-6
             cov_matrix_inv = np.linalg.inv(cov_matrix)
         except LinAlgError as e:
             LOGGER.error(f"Error in calculating the inverse covariance matrix: {str(e)}")
@@ -29,7 +32,7 @@ class Retriever:
         return cov_matrix_inv
 
     @staticmethod
-    def cvpr_compare(F1, F2, metric, cov_matrix_inv=None) -> float:
+    def cvpr_compare(F1, F2, metric, cov_matrix_inv=None, use_scipy=False) -> float:
         # This function should compare F1 to F2 - i.e. compute the distance
         # between the two descriptors
         if F1.shape != F2.shape:
@@ -43,13 +46,16 @@ class Retriever:
             case "L1":
                 dst = np.linalg.norm(F1 - F2, ord=1)
             case "Mahalanobis":
-                try:
-                    # sqrt((F1 - F2)^T * cov_matrix_inv * (F1 - F2))
-                    diff = F1 - F2
-                    dst = np.sqrt(np.dot(diff.T, np.dot(cov_matrix_inv, diff)))
-                except Exception as e:
-                    LOGGER.error(f"Error in calculating Mahalanobis distance: {str(e)}")
-                    dst = float("inf")
+                if use_scipy:
+                    dst = mahalanobis(F1, F2, cov_matrix_inv)
+                else:
+                    try:
+                        # sqrt((F1 - F2)^T * cov_matrix_inv * (F1 - F2))
+                        diff = F1 - F2
+                        dst = np.sqrt(np.dot(diff.T, np.dot(cov_matrix_inv, diff)))
+                    except Exception as e:
+                        LOGGER.error(f"Error in calculating Mahalanobis distance: {str(e)}")
+                        dst = float("inf")
         return dst
 
     def compute_distance(self, query_img: str) -> List[Tuple[float, str]]:
@@ -59,8 +65,9 @@ class Retriever:
 
         for img_path, candidate_desc in self.img_desc_dict.items():
             if img_path != query_img:  # Skip the query image itself
+                # TODO: change use_scipy to True to use scipy's mahalanobis function
                 distance = Retriever.cvpr_compare(
-                    query_img_desc, candidate_desc, self.metric, self.cov_matrix_inv
+                    query_img_desc, candidate_desc, self.metric, self.cov_matrix_inv, False
                 )
                 dst.append((distance, img_path))
         dst.sort(key=lambda x: x[0])
