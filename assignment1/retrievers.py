@@ -95,10 +95,10 @@ class Retriever:
                 col.image(
                     img_path, use_column_width=True, caption=os.path.basename(img_path)
                 )
+                # TODO: try to take out labeler.get_labels() from here
                 if st.session_state["debug_mode"]:
                     col.write(f"Class: {self.get_image_class(img_path)}")
                     col.write(labeler.get_labels(os.path.basename(img_path)))
-                    # col.write(self.get_image_class(os.path.basename(img_path)))
             pass
         return images_to_display
     #     fig, axes = plt.subplots(1, number + 1, figsize=(20, 5))
