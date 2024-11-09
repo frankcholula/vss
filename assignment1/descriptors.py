@@ -130,6 +130,7 @@ class Descriptor:
         return img_to_descriptor
 
     def perform_pca(self, n_components: int = None, variance_ratio: float = 0.99) -> Dict[str, np.ndarray]:
+        descriptor_pca_path = os.path.join(self.DESCRIPTOR_FOLDER, self.extract_method + "_pca")
         if self.descriptors is None:
             raise ValueError("Descriptors have not been extracted yet.")
         descriptor_list = []
@@ -153,6 +154,7 @@ class Descriptor:
         reduced_descriptors = {
             img_path: reduced_matrix[i, :] for i, img_path in enumerate(image_paths)
         }
+        self.save_descriptors(reduced_descriptors, descriptor_pca_path)
         return reduced_descriptors
 
 class Extractor:

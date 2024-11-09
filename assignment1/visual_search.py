@@ -55,18 +55,25 @@ def main():
     labeler = ImageLabeler(DATASET_FOLDER)
 
     # Section to choose the image and the descriptor
+    with st.container():
+        vse_left, vse_right = st.columns([4, 1])
+
+        vse_left.title("Visual Search Engine 👀")
+        vse_right.markdown(
+            "<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True
+        )
+        vse_right.toggle(
+            "Debug",
+            key="debug_mode",
+            help="Toggle to display the ground truth labels for the images.",
+        )
     vse, sv = st.tabs(["Visual Search Engine", "SIFT Visualizer"])
-    vse.title("Visual Search Engine 👀")
 
     header_cols = vse.columns([3, 3, 3, 2])
     header_cols[3].markdown(
         "<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True
     )
-    header_cols[3].toggle(
-        "Debug",
-        key="debug_mode",
-        help="Toggle to display the ground truth labels for the images.",
-    )
+
     with vse.expander("**Expand to tweak hyper-parameters!**", icon="🛠️"):
         option_cols = st.columns([3, 3, 2])
 
@@ -210,6 +217,12 @@ def main():
         selected_image = st.session_state["selected_image"]
         # need rerun here to refresh selected image value
         st.rerun()
+    
+    header_cols[3].checkbox(
+        "Perform PCA",
+        key="perform_pca",
+        help="Reduce the dimensionality of the descriptors using PCA.",
+    )
 
     metric = option_cols[2].radio(
         "Comparison Metric",
@@ -246,7 +259,8 @@ def main():
     tri = labeler.get_total_relevant_images(selected_image)
     LOGGER.debug(f"This selected image has {tri} relevant images.")
     similar_images, find_all_images_at = retriever.retrieve(
-        os.path.join(DATASET_FOLDER, "Images", selected_image), total_relevant_images=tri
+        os.path.join(DATASET_FOLDER, "Images", selected_image),
+        total_relevant_images=tri,
     )
 
     with right_col:
@@ -258,8 +272,10 @@ def main():
             st.write(labeler.get_labels(selected_image))
 
     vse.header(f"Top {result_num} Similar Images")
-    images_to_display = retriever.display_images(vse, similar_images, result_num, labeler)
-    
+    images_to_display = retriever.display_images(
+        vse, similar_images, result_num, labeler
+    )
+
     tab1, tab2 = vse.tabs(["Class-based Performance", "Label-based Performance"])
     good_class_based = False
     good_label_based = False
@@ -267,7 +283,8 @@ def main():
         input_class = labeler.get_class(selected_image)
         labels_dict = labeler.get_labels_dict()
         retrieved_image_classes = [
-            labeler.get_class(os.path.basename(img_path)) for img_path in images_to_display
+            labeler.get_class(os.path.basename(img_path))
+            for img_path in images_to_display
         ]
         all_retrieved_image_classes = [
             labeler.get_class(os.path.basename(img_path)) for img_path in similar_images
@@ -286,7 +303,9 @@ def main():
             good_class_based = True
 
         cbe.plot_class_matrix(cm, input_class)
-        st.write(f"**You'll find all the images in `class {input_class}` after `{find_all_images_at}` searches.**")
+        st.write(
+            f"**You'll find all the images in `class {input_class}` after `{find_all_images_at}` searches.**"
+        )
         precisions, recalls, f1_scores = cbe.calculate_pr_f1_values(
             input_class, all_retrieved_image_classes, tri
         )
