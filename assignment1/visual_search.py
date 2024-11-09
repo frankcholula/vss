@@ -248,9 +248,11 @@ def main():
 
     retriever = Retriever(img2descriptors, metric)
     tri = labeler.get_total_relevant_images(selected_image)
+    print(f"This selected image has {tri} relevant images.")
     similar_images = retriever.retrieve(
-        os.path.join(DATASET_FOLDER, "Images", selected_image), total_relevant_images=tri, display_number=result_num
+        os.path.join(DATASET_FOLDER, "Images", selected_image), total_relevant_images=tri
     )
+    print(f"Found {len(similar_images)} similar images.")
 
     with right_col:
         st.header("Ground Truth")
@@ -261,15 +263,19 @@ def main():
             st.write(labeler.get_labels(selected_image))
 
     vse.header(f"Top {result_num} Similar Images")
-    for i in range(0, len(similar_images), 5):
+    images_to_display = similar_images[:result_num]
+    for i in range(0, len(images_to_display), 5):
         cols = vse.columns(5)
-        for col, img_path in zip(cols, similar_images[i : i + 5]):
+        for col, img_path in zip(cols, images_to_display[i : i + 5]):
             col.image(
                 img_path, use_column_width=True, caption=os.path.basename(img_path)
             )
             if st.session_state["debug_mode"]:
                 col.write(f"Class: {labeler.get_class(os.path.basename(img_path))}")
                 col.write(labeler.get_labels(os.path.basename(img_path)))
+    
+    
+    
     tab1, tab2 = vse.tabs(["Class-based Performance", "Label-based Performance"])
     good_class_based = False
     good_label_based = False
@@ -281,7 +287,7 @@ def main():
         ]
         cbe = ClassBasedEvaluator(input_class, retrieved_image_classes)
         cm = cbe.create_class_matrix(input_class, retrieved_image_classes)
-        tri = cbe.count_total_relevant_images(selected_image, labels_dict)
+        # tri = cbe.count_total_relevant_images(selected_image, labels_dict)
         min_tri = min(tri, result_num)
         fetched = cm[input_class].iloc[0]
 

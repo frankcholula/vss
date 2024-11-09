@@ -71,7 +71,7 @@ class Retriever:
         imagename = img_path.split("/")[2]
         return imagename.split("_")[0]
 
-    def retrieve(self, query_img: str, total_relevant_images: int, display_number: int) -> list:
+    def retrieve(self, query_img: str, total_relevant_images: int) -> list:
         distances = self.compute_distance(query_img)
         target_class = self.get_image_class(query_img)
         seen_count = 0
@@ -84,31 +84,30 @@ class Retriever:
             if seen_count >= total_relevant_images:
                 break
         print(f"Found all images after {len(top_similar_images)} images.")
-        top_similar_images = top_similar_images[:display_number]
-        self.display_images(query_img, top_similar_images, display_number)
         # edge case: if the Mahalanobis distance is infinite for some images
-        if float("inf") in [distance for distance, _ in top_similar_images]:
-            return []
+        # if float("inf") in [distance for distance, _ in top_similar_images]:
+        #     return []
         return [img_path for _, img_path in top_similar_images]
 
-    def display_images(self, query_img: str, top_similar_images: list, number: int):
-        fig, axes = plt.subplots(1, number + 1, figsize=(20, 5))
-        distances = []
-        # Display the query image
-        query_img_data = cv2.imread(query_img)
-        query_img_data = cv2.cvtColor(query_img_data, cv2.COLOR_BGR2RGB)
-        axes[0].imshow(query_img_data)
-        axes[0].set_title("Query Image")
-        axes[0].axis("off")
+    def display_images(self, vse, top_similar_images: list, result_number: int):
+        pass
+    #     fig, axes = plt.subplots(1, number + 1, figsize=(20, 5))
+    #     distances = []
+    #     # Display the query image
+    #     query_img_data = cv2.imread(query_img)
+    #     query_img_data = cv2.cvtColor(query_img_data, cv2.COLOR_BGR2RGB)
+    #     axes[0].imshow(query_img_data)
+    #     axes[0].set_title("Query Image")
+    #     axes[0].axis("off")
 
-        # Display the top similar images
-        for ax, (distance, img_path) in zip(axes[1:], top_similar_images):
-            img = cv2.imread(img_path)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-            ax.imshow(img)
-            ax.axis("off")
-            distances.append(distance)
-        if float("inf") in distances:
-            LOGGER.error(f"Mahalanobis distance is infinite for some images.")
-            st.error(f"Error in calculating {self.metric} distances for some images. Please try another metric or use PCA to lower the dimensionality.", icon="🚨")
-        LOGGER.info(f"{self.metric} Distances: {distances} \n ")
+    #     # Display the top similar images
+    #     for ax, (distance, img_path) in zip(axes[1:], top_similar_images):
+    #         img = cv2.imread(img_path)
+    #         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    #         ax.imshow(img)
+    #         ax.axis("off")
+    #         distances.append(distance)
+    #     if float("inf") in distances:
+    #         LOGGER.error(f"Mahalanobis distance is infinite for some images.")
+    #         st.error(f"Error in calculating {self.metric} distances for some images. Please try another metric or use PCA to lower the dimensionality.", icon="🚨")
+    #     LOGGER.info(f"{self.metric} Distances: {distances} \n ")
