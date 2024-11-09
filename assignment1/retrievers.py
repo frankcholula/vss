@@ -88,7 +88,8 @@ class Retriever:
         # edge case: if the Mahalanobis distance is infinite for some images
         # if float("inf") in [distance for distance, _ in top_similar_images]:
         #     return []
-        return [img_path for _, img_path in top_similar_images]
+        return [img_path for _, img_path in distances]
+        # return [img_path for _, img_path in top_similar_images]
 
     def display_images(self, vse, similar_images: list, result_num: int):
         images_to_display = similar_images[:result_num]

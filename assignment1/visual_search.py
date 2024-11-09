@@ -252,7 +252,6 @@ def main():
     similar_images = retriever.retrieve(
         os.path.join(DATASET_FOLDER, "Images", selected_image), total_relevant_images=tri
     )
-    print(f"Found {len(similar_images)} similar images.")
 
     with right_col:
         st.header("Ground Truth")
