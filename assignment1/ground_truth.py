@@ -133,4 +133,6 @@ class ImageLabeler:
         for k, v in labels_dict.items():
             if v["class"] == img_class:
                count +=1
+        # Subtract 1 because the query image is included in the total_relevant_images 
+        count = count - 1
         return count

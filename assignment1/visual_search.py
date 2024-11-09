@@ -249,7 +249,7 @@ def main():
     retriever = Retriever(img2descriptors, metric)
     tri = labeler.get_total_relevant_images(selected_image)
     similar_images = retriever.retrieve(
-        os.path.join(DATASET_FOLDER, "Images", selected_image), total_relevant_images=tri
+        os.path.join(DATASET_FOLDER, "Images", selected_image), total_relevant_images=tri, display_number=result_num
     )
 
     with right_col:
