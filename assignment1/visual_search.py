@@ -70,8 +70,14 @@ def main():
     vse, sv = st.tabs(["Visual Search Engine", "SIFT Visualizer"])
 
     header_cols = vse.columns([3, 3, 3, 2])
+    
     header_cols[3].markdown(
         "<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True
+    )
+    pca_checkbox = header_cols[3].checkbox(
+        "Perform PCA",
+        key="perform_pca",
+        help="Reduce the dimensionality of the descriptors using PCA.",
     )
 
     with vse.expander("**Expand to tweak hyper-parameters!**", icon="🛠️"):
@@ -207,6 +213,12 @@ def main():
 
     # Debug the descriptors here
     img2descriptors = descriptor.get_image_descriptor_mapping()
+    dim_before = len(next(iter(img2descriptors.values())))
+    if st.session_state["perform_pca"]:
+        img2descriptors = descriptor.perform_pca(variance_ratio=0.99)
+        dim_after = len(next(iter(img2descriptors.values())))
+        st.toast(f"Descriptor Dimensionality reduced from {dim_before} to {dim_after}.", icon="📉")
+
 
     # Button to select a random image
     header_cols[2].markdown(
@@ -217,12 +229,6 @@ def main():
         selected_image = st.session_state["selected_image"]
         # need rerun here to refresh selected image value
         st.rerun()
-    
-    header_cols[3].checkbox(
-        "Perform PCA",
-        key="perform_pca",
-        help="Reduce the dimensionality of the descriptors using PCA.",
-    )
 
     metric = option_cols[2].radio(
         "Comparison Metric",
