@@ -18,8 +18,12 @@ Clone the repository, start a poetry virtual environment and install the depende
 poetry shell
 poetry install
 make run
+make test
 ```
+
 The `make run` command should start a streamlit interactive GUI on `localhost:8501`.
+
+The `make test` command will run the tests in the `tests` directory. It should encompass some unit tests for descriptors, distance metrics and other utility functions.
 
 
 ## Deployment
