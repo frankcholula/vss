@@ -49,8 +49,6 @@ class Retriever:
                 except Exception as e:
                     LOGGER.error(f"Error in calculating Mahalanobis distance: {str(e)}")
                     dst = float("inf")
-
-                
         return dst
 
     def compute_distance(self, query_img: str) -> List[Tuple[float, str]]:
@@ -84,13 +82,12 @@ class Retriever:
                 seen_count += 1
             if seen_count >= total_relevant_images:
                 break
-        print(f"Found all images after {find_all_images_at} images.")
         # edge case: if the Mahalanobis distance is infinite for some images
         # if float("inf") in [distance for distance, _ in top_similar_images]:
         #     return []
         return [img_path for _, img_path in distances], find_all_images_at
 
-    def display_images(self, vse, similar_images: list, result_num: int):
+    def display_images(self, vse, similar_images: list, result_num: int, labeler):
         images_to_display = similar_images[:result_num]
         for i in range(0, len(images_to_display), 5):
             cols = vse.columns(5)
@@ -99,8 +96,9 @@ class Retriever:
                     img_path, use_column_width=True, caption=os.path.basename(img_path)
                 )
                 if st.session_state["debug_mode"]:
-                    col.write(f"Class: {self.get_image_class(os.path.basename(img_path))}")
-                    col.write(self.get_image_class(os.path.basename(img_path)))
+                    col.write(f"Class: {self.get_image_class(img_path)}")
+                    col.write(labeler.get_labels(os.path.basename(img_path)))
+                    # col.write(self.get_image_class(os.path.basename(img_path)))
             pass
         return images_to_display
     #     fig, axes = plt.subplots(1, number + 1, figsize=(20, 5))

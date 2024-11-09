@@ -248,7 +248,7 @@ def main():
 
     retriever = Retriever(img2descriptors, metric)
     tri = labeler.get_total_relevant_images(selected_image)
-    print(f"This selected image has {tri} relevant images.")
+    LOGGER.info(f"This selected image has {tri} relevant images.")
     similar_images, find_all_images_at = retriever.retrieve(
         os.path.join(DATASET_FOLDER, "Images", selected_image), total_relevant_images=tri
     )
@@ -262,7 +262,7 @@ def main():
             st.write(labeler.get_labels(selected_image))
 
     vse.header(f"Top {result_num} Similar Images")
-    images_to_display = retriever.display_images(vse, similar_images, result_num)
+    images_to_display = retriever.display_images(vse, similar_images, result_num, labeler)
     
     tab1, tab2 = vse.tabs(["Class-based Performance", "Label-based Performance"])
     good_class_based = False
