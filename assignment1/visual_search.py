@@ -274,10 +274,12 @@ def main():
         retrieved_image_classes = [
             labeler.get_class(os.path.basename(img_path)) for img_path in images_to_display
         ]
+        all_retrieved_image_classes = [
+            labeler.get_class(os.path.basename(img_path)) for img_path in similar_images
+        ]
         cbe = ClassBasedEvaluator(input_class, retrieved_image_classes)
         cm = cbe.create_class_matrix(input_class, retrieved_image_classes)
         # tri = cbe.count_total_relevant_images(selected_image, labels_dict)
-        min_tri = min(tri, result_num)
         fetched = cm[input_class].iloc[0]
 
         st.write(
@@ -290,7 +292,7 @@ def main():
 
         cbe.plot_class_matrix(cm, input_class)
         precisions, recalls, f1_scores = cbe.calculate_pr_f1_values(
-            input_class, retrieved_image_classes, min_tri
+            input_class, all_retrieved_image_classes, tri
         )
         cbe.plot_pr_curve(precisions, recalls)
         cbe.plot_f1_score(f1_scores)
