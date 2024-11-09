@@ -1,5 +1,5 @@
 # Computer Vision & Pattern Recognition
-Hello! This is an assignment repository for the University of Surrey's CVPR class regarding visual search. I have built a GUI with some visualizations and interactive elements using [`Streamlit`](https://streamlit.io/) and [`Firebase`](https://firebase.google.com/).The assignment 1 write-up: Visual Search System can be found on my personal Notion page [here](https://www.notion.so/frankcholula/Visual-Search-System-1223b40fbcd5801abc19e3ceadf9cb6e?pvs=4).
+Hello! This is an assignment repository for the University of Surrey's CVPR class regarding visual search. I have built a GUI with some visualizations and interactive elements using [`Streamlit`](https://streamlit.io/) and [`Firebase`](https://firebase.google.com/). The assignment 1 write-up: Visual Search System can be found on my personal Notion page [here](https://www.notion.so/frankcholula/Visual-Search-System-1223b40fbcd5801abc19e3ceadf9cb6e?pvs=4).
 
 The stripped-down, beta version has been deployed [here](https://visual-search.streamlit.app/) and will have more functionalities added soon. If you want a fully working version, please run it locally using the instruction below.
 
