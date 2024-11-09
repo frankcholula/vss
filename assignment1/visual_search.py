@@ -299,30 +299,31 @@ def main():
         )
         cbe.plot_pr_curve(precisions, recalls)
         cbe.plot_f1_score(f1_scores)
-    with tab2:
-        input_class_labels = labeler.get_labels(selected_image)
-        retrieved_image_labels = [
-            labeler.get_labels(os.path.basename(img_path))
-            for img_path in similar_images
-        ]
-        lbe = LabelBasedEvaluator(input_class_labels, retrieved_image_labels)
-        lm = lbe.create_labels_matrix()
-        tri = lbe.count_total_relevant_images(selected_image, labeler.get_labels_dict())
-        fetched = (lm == 1).any().sum()
-        min_tri = min(tri, result_num)
-        st.write(
-            f"**In the top `{min_tri}` results, you retrieved `{fetched}` with one of these labels:`{input_class_labels}`.**"
-        )
-        st.write(f"**There are `{tri}` total relevant images.**")
-        if fetched == result_num:
-            st.toast("Good label-based performance!", icon="😍")
-            time.sleep(0.5)
-            good_label_based = True
-        lbe.plot_labels_matrix(lm)
-        lbe.plot_pr_curve(min_tri)
-        lbe.plot_f1_score(min_tri)
-    if good_class_based and good_label_based:
-        st.balloons()
+    # TODO: refactor this part as well
+    # with tab2:
+    #     input_class_labels = labeler.get_labels(selected_image)
+    #     retrieved_image_labels = [
+    #         labeler.get_labels(os.path.basename(img_path))
+    #         for img_path in similar_images
+    #     ]
+    #     lbe = LabelBasedEvaluator(input_class_labels, retrieved_image_labels)
+    #     lm = lbe.create_labels_matrix()
+    #     tri = lbe.count_total_relevant_images(selected_image, labeler.get_labels_dict())
+    #     fetched = (lm == 1).any().sum()
+    #     min_tri = min(tri, result_num)
+    #     st.write(
+    #         f"**In the top `{min_tri}` results, you retrieved `{fetched}` with one of these labels:`{input_class_labels}`.**"
+    #     )
+    #     st.write(f"**There are `{tri}` total relevant images.**")
+    #     if fetched == result_num:
+    #         st.toast("Good label-based performance!", icon="😍")
+    #         time.sleep(0.5)
+    #         good_label_based = True
+    #     lbe.plot_labels_matrix(lm)
+    #     lbe.plot_pr_curve(min_tri)
+    #     lbe.plot_f1_score(min_tri)
+    # if good_class_based and good_label_based:
+    #     st.balloons()
 
     # TODO : Move this to a different class
     # sv.title("SIFT Visualizer 🪄")
