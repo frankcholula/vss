@@ -7,6 +7,7 @@ import os
 import logging
 from typing import Dict
 logging.basicConfig(level=logging.INFO)
+import pickle
 
 class BoVW:
     def __init__(self, dataset_folder:str , descriptor_folder: str, vocab_size: int = 500, random_state: int = 42):
@@ -49,8 +50,7 @@ class BoVW:
 
     def save_sift_descriptors(self, descriptors: Dict[str, np.ndarray]):
         save_folder = os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW")
-        os.makedirs(save_folder, exist_ok=True)  # Ensure folder exists
-
+        os.makedirs(save_folder, exist_ok=True)
         for img_path, descriptor in descriptors.items():
             filename = os.path.basename(img_path).replace(".bmp", ".npy")
             save_path = os.path.join(save_folder, filename)
@@ -58,13 +58,16 @@ class BoVW:
             logging.info(f"Saved descriptor for {img_path} to {save_path}")
 
     def build_codebook(self):
-        """
-        Build a codebook (visual vocabulary) using KMeans clustering on all extracted SIFT descriptors.
-        """
-        if os.path.exists(os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW", "codebook.npy")):
+        codebook_folder = os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW")
+        codebook_path = os.path.join(codebook_folder, "kmeans.pkl")
+        os.makedirs(codebook_folder, exist_ok=True)
+
+        if os.path.exists(codebook_path):
             logging.info("Codebook already exists. Loading existing codebook...")
-            self.codebook = np.load(os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW", "codebook.npy"))
-            return self.codebook
+            with open(codebook_path, "rb") as f:
+                self.kmeans = pickle.load(f)
+            self.codebook = self.kmeans.cluster_centers_
+            logging.info(f"Codebook loaded with size: {self.codebook.shape}.")
         else:
             logging.info("Building codebook...")
             all_descriptors = np.vstack([
@@ -74,13 +77,15 @@ class BoVW:
             if all_descriptors.size == 0:
                 raise ValueError("No SIFT descriptors found to build codebook.")
             logging.info(f"Collected {all_descriptors.shape[0]} descriptors for clustering.")
-            self.kmeans = KMeans(n_clusters=self.vocab_size, random_state=self.random_state).fit(all_descriptors)
+            self.kmeans = KMeans(n_clusters=self.vocab_size, random_state=self.random_state)
+            self.kmeans.fit(all_descriptors)
             self.codebook = self.kmeans.cluster_centers_
-            codebook_folder = os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW")
-            codebook_path = os.path.join(codebook_folder, "codebook.npy")
-            np.save(codebook_path, self.codebook)
+            with open(codebook_path, "wb") as f:
+                pickle.dump(self.kmeans, f)
             logging.info(f"Codebook built and saved to {codebook_path}.")
-            return self.codebook
+
+        return self.codebook
+    
 
     def quantize_descriptors(self, descriptors: np.ndarray):
         words = self.kmeans.predict(descriptors)
@@ -102,3 +107,7 @@ if __name__ == "__main__":
                 descriptor_folder="descriptors",
                 vocab_size=500, random_state=42)
     bovw.build_codebook()
+    # query_image = "MSRC_ObjCategImageDatabase_v2_local/Images/1_1_s.bmp"
+    # query_histogram = bovw.build_histogram(query_image)
+    # print(query_histogram)
+
