@@ -7,11 +7,13 @@ from descriptors import Extractor
 class TestMetrics(unittest.TestCase):
     def setUp(self):
         DATASET_FOLDER = "MSRC_ObjCategImageDatabase_v2_local"
-        self.img1 = cv2.imread(f"{DATASET_FOLDER}/Images/1_1_s.bmp").astype(np.float64) / 255.0
-        self.img2 = cv2.imread(f"{DATASET_FOLDER}/Images/5_24_s.bmp").astype(np.float64) / 255.0
+        self.img1_path = f"{DATASET_FOLDER}/Images/1_1_s.bmp"
+        self.img2_path = f"{DATASET_FOLDER}/Images/5_24_s.bmp"
+        # self.img1 = cv2.imread(f"{DATASET_FOLDER}/Images/1_1_s.bmp").astype(np.float64) / 255.0
+        # self.img2 = cv2.imread(f"{DATASET_FOLDER}/Images/5_24_s.bmp").astype(np.float64) / 255.0
         base = 256
-        self.desc1 = Extractor.extract_globalRGBhisto_quant(self.img1, base)
-        self.desc2 = Extractor.extract_globalRGBhisto_quant(self.img2, base)
+        self.desc1 = Extractor.extract_globalRGBhisto_quant(self.img1_path, base)
+        self.desc2 = Extractor.extract_globalRGBhisto_quant(self.img2_path, base)
 
     def test_cvpr_compare(self):
         result = Retriever.cvpr_compare(self.desc1, self.desc2, metric="L2")

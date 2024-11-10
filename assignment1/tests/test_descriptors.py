@@ -3,7 +3,6 @@ import numpy as np
 import cv2
 from descriptors import Descriptor, Extractor
 
-
 class TestDescriptors(unittest.TestCase):
     def setUp(self):
         DATASET_FOLDER = "MSRC_ObjCategImageDatabase_v2_local"
@@ -53,26 +52,29 @@ class TestDescriptors(unittest.TestCase):
 class TestExtractors(unittest.TestCase):
     def setUp(self):
         DATASET_FOLDER = "MSRC_ObjCategImageDatabase_v2_local"
-        self.img1 = (
-            cv2.imread(f"{DATASET_FOLDER}/Images/1_1_s.bmp").astype(np.float64) / 255.0
-        )
-        # specifically choose an image of different sizes
-        self.img2 = (
-            cv2.imread(f"{DATASET_FOLDER}/Images/16_19_s.bmp").astype(np.float64)
-            / 255.0
-        )
+        self.img1_path = f"{DATASET_FOLDER}/Images/1_1_s.bmp"
+        print(self.img1_path)
+        self.img2_path = f"{DATASET_FOLDER}/Images/16_19_s.bmp"
+        # self.img1 = (
+        #     cv2.imread(f"{DATASET_FOLDER}/Images/1_1_s.bmp").astype(np.float64) / 255.0
+        # )
+        # # specifically choose an image of different sizes
+        # self.img2 = (
+        #     cv2.imread(f"{DATASET_FOLDER}/Images/16_19_s.bmp").astype(np.float64)
+        #     / 255.0
+        # )
 
     def test_extract_globalRGBhisto_equality(self):
-        result1 = Extractor.extract_globalRGBhisto(self.img1)
-        result2 = Extractor.extract_globalRGBhisto(self.img2)
+        result1 = Extractor.extract_globalRGBhisto(self.img1_path)
+        result2 = Extractor.extract_globalRGBhisto(self.img2_path)
         self.assertTrue(
             np.array_equal(result1, result2),
             "The histograms extracted should be equal.",
         )
 
     def test_extract_globalRGBhisto_quant_equality(self):
-        result1 = Extractor.extract_globalRGBhisto_quant(self.img1, 8)
-        result2 = Extractor.extract_globalRGBhisto_quant(self.img2, 8)
+        result1 = Extractor.extract_globalRGBhisto_quant(self.img1_path, 8)
+        result2 = Extractor.extract_globalRGBhisto_quant(self.img2_path, 8)
         self.assertTrue(
             result1.shape[0] == 512, "The Dimension of the histogram should be 512."
         )
@@ -82,8 +84,8 @@ class TestExtractors(unittest.TestCase):
         )
 
     def test_extract_gridRGB(self):
-        result1 = Extractor.extract_gridRGB(self.img1, 4)
-        result2 = Extractor.extract_gridRGB(self.img2, 8)
+        result1 = Extractor.extract_gridRGB(self.img1_path, 4)
+        result2 = Extractor.extract_gridRGB(self.img2_path, 8)
         # 4 by 4 grid, 3 channels = 48 final length
         self.assertEqual(result1.shape[0], 48, "The dimension of result1 should be 48.")
         # 8 by 8 grid, 3 channels = 192 final length
@@ -92,4 +94,5 @@ class TestExtractors(unittest.TestCase):
         )
 
     def test_extract_gridEOhisto(self):
-        result1 = Extractor.extract_gridEOhisto(self.img1, 4, 3)
+        result1 = Extractor.extract_gridEOhisto(self.img1_path, 4, 3)
+        # TODO: add test condition here for edge orientation histogram
