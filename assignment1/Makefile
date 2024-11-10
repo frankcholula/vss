@@ -6,6 +6,11 @@ run:
 test:
 	pytest -s
 
+
+.PHONY: bovw
+bovw:
+	python bovw.py
+
 .PHONY: clean
 clean:
 	rm -rf __pycache__ .pytest_cache

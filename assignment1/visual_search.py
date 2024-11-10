@@ -12,6 +12,10 @@ from metrics import ClassBasedEvaluator, LabelBasedEvaluator
 from session_state_managers import SessionStateManager
 from feature_detectors import FeatureDetector
 from sift_visualizer import visualize_sift
+from bovw import BoVW
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 @st.cache_resource(show_spinner=False)
@@ -70,7 +74,7 @@ def main():
     vse, sv = st.tabs(["Visual Search Engine", "SIFT Visualizer"])
 
     header_cols = vse.columns([3, 3, 3, 2])
-    
+
     header_cols[3].markdown(
         "<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True
     )
@@ -93,7 +97,7 @@ def main():
     descriptor_method = header_cols[1].selectbox(
         "**🎨 Choose a Descriptor...**",
         options=[
-            "SIFT",
+            "boVW",
             "gridCombined",
             "gridEOhisto",
             "gridRGB",
@@ -189,8 +193,21 @@ def main():
                 key="norm_method_radio",
                 on_change=session_manager.update_norm_method,
             )
-        case "SIFT":
-            pass
+        case "boVW":
+            option_cols[1].select_slider(
+                "Number of Vocabulary Words...",
+                options=[100, 250, 500, 1000],
+                value=st.session_state["vocab_size"],
+                key="vocab_size_slider",
+                on_change=session_manager.update_vocab_size
+            )
+            option_cols[1].number_input(
+                "Random State",
+                value=st.session_state["random_state"],
+                help="Seed used by the random number generator.",
+                key="random_state_slider",
+                on_change=session_manager.update_random_state,
+            )
 
     # TODO: Add new descriptor options here
     descriptor = Descriptor(
@@ -203,11 +220,11 @@ def main():
         sobel_filter_size=st.session_state["sobel_filter_size"],
         ang_quant_lvl=st.session_state["ang_quant_lvl"],
         norm_method=st.session_state["norm_method"],
-        # TODO: add feature detection method here
-        feature_detector="SIFT",
+        vocab_size = st.session_state["vocab_size"],
+        random_state = st.session_state["random_state"],
     )
     if st.session_state["recompute"]:
-        LOGGER.info("Recomputing descriptors...")
+        logging.info("Recomputing descriptors...")
         descriptor.extract(st.session_state["recompute"])
         session_manager.update_recompute(False)
 
@@ -217,8 +234,10 @@ def main():
     if st.session_state["perform_pca"]:
         img2descriptors = descriptor.perform_pca(variance_ratio=0.99)
         dim_after = len(next(iter(img2descriptors.values())))
-        st.toast(f"Descriptor Dimensionality reduced from {dim_before} to {dim_after}.", icon="📉")
-
+        st.toast(
+            f"Descriptor Dimensionality reduced from {dim_before} to {dim_after}.",
+            icon="📉",
+        )
 
     # Button to select a random image
     header_cols[2].markdown(
@@ -263,7 +282,7 @@ def main():
 
     retriever = Retriever(img2descriptors, metric)
     tri = labeler.get_total_relevant_images(selected_image)
-    LOGGER.debug(f"This selected image has {tri} relevant images.")
+    logging.debug(f"This selected image has {tri} relevant images.")
     similar_images, find_all_images_at = retriever.retrieve(
         os.path.join(DATASET_FOLDER, "Images", selected_image),
         total_relevant_images=tri,
@@ -391,6 +410,4 @@ def main():
 
 
 if __name__ == "__main__":
-    LOGGER = logging.getLogger(__name__)
-    LOGGER.setLevel(logging.DEBUG)
     main()

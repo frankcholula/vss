@@ -2,8 +2,7 @@ import streamlit as st
 import logging
 import os
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
 class SessionStateManager:
     def __init__(self, image_files):
@@ -38,6 +37,18 @@ class SessionStateManager:
             st.session_state["norm_method"] = "minmax"
         if "perform_pca" not in st.session_state:
             st.session_state["perform_pca"] = False
+        if "vocab_size" not in st.session_state:
+            st.session_state["vocab_size"] = 500
+        if "random_state" not in st.session_state:
+            st.session_state["random_state"] = 42
+    
+    def update_random_state(self):
+        st.session_state["random_state"] = st.session_state["random_state_slider"]
+        self.update_recompute(True)
+        
+    def update_vocab_size(self):
+        st.session_state["vocab_size"] = st.session_state["vocab_size_slider"]
+        self.update_recompute(True)
 
     def update_metric(self):
         st.session_state["metric"] = st.session_state["metric_radio"]
@@ -69,7 +80,7 @@ class SessionStateManager:
 
     def update_descriptor(self):
         if st.session_state["descriptor"] != st.session_state["descriptor_selectbox"]:
-            LOGGER.debug(
+            logging.debug(
                 f"Updating descriptor to {st.session_state['descriptor_selectbox']}"
             )
             st.session_state["descriptor"] = st.session_state["descriptor_selectbox"]

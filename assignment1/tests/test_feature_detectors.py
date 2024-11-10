@@ -3,7 +3,7 @@ import unittest
 from feature_detectors import FeatureDetector
 import logging
 
-LOGGER = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG)
 class TestFeatureDetectors(unittest.TestCase):
     def setUp(self):
         DATASET_FOLDER = "MSRC_ObjCategImageDatabase_v2_local"
@@ -20,6 +20,6 @@ class TestFeatureDetectors(unittest.TestCase):
         keypoints2, descriptors2 = self.fd.detect_keypoints_compute_descriptors(self.img2)
         self.assertTrue(all(descriptor.shape[0] == 128 for descriptor in descriptors2), "Each descriptor should have a shape of 128.")
         self.assertNotEqual(descriptors1.shape, descriptors2.shape, "The descriptors should not have the same shape.")
-        LOGGER.debug(f"Number of keypoints in image 1: {len(keypoints1)}")
-        LOGGER.debug(f"Number of keypoints in image 2: {len(keypoints2)}")
+        logging.debug(f"Number of keypoints in image 1: {len(keypoints1)}")
+        logging.debug(f"Number of keypoints in image 2: {len(keypoints2)}")
         self.assertNotEqual(len(keypoints1), len(keypoints2), "The number of keypoints should not be the same.")

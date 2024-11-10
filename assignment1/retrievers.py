@@ -6,9 +6,7 @@ import streamlit as st
 import os
 from scipy.spatial.distance import mahalanobis
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
-
+logging.basicConfig(level=logging.INFO)
 class Retriever:
     def __init__(self, img_desc_dict: Dict[str, np.ndarray], metric: str):
         self.img_desc_dict = img_desc_dict
@@ -27,7 +25,7 @@ class Retriever:
             cov_matrix += np.eye(cov_matrix.shape[0]) * 1e-6
             cov_matrix_inv = np.linalg.inv(cov_matrix)
         except LinAlgError as e:
-            LOGGER.error(f"Error in calculating the inverse covariance matrix: {str(e)}")
+            logging.error(f"Error in calculating the inverse covariance matrix: {str(e)}")
             cov_matrix_inv = None
         return cov_matrix_inv
 
@@ -54,7 +52,7 @@ class Retriever:
                         diff = F1 - F2
                         dst = np.sqrt(np.dot(diff.T, np.dot(cov_matrix_inv, diff)))
                     except Exception as e:
-                        LOGGER.error(f"Error in calculating Mahalanobis distance: {str(e)}")
+                        logging.error(f"Error in calculating Mahalanobis distance: {str(e)}")
                         dst = float("inf")
         return dst
 
@@ -125,6 +123,6 @@ class Retriever:
     #         ax.axis("off")
     #         distances.append(distance)
     #     if float("inf") in distances:
-    #         LOGGER.error(f"Mahalanobis distance is infinite for some images.")
+    #         logging.error(f"Mahalanobis distance is infinite for some images.")
     #         st.error(f"Error in calculating {self.metric} distances for some images. Please try another metric or use PCA to lower the dimensionality.", icon="🚨")
-    #     LOGGER.info(f"{self.metric} Distances: {distances} \n ")
+    #     logging.info(f"{self.metric} Distances: {distances} \n ")

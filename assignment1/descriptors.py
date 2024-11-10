@@ -5,9 +5,9 @@ from typing import Dict
 import logging
 from feature_detectors import FeatureDetector
 from sklearn.decomposition import PCA
+from bovw import BoVW
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 class Descriptor:
     def __init__(
@@ -17,8 +17,11 @@ class Descriptor:
         self.DATASET_FOLDER = dataset_folder
         self.DESCRIPTOR_FOLDER = descriptor_folder
         self.extract_method = extract_method
-        if kwargs.get("feature_detector") == "SIFT":
-            self.feature_detector = FeatureDetector("SIFT")
+        vocab_size = kwargs.get("vocab_size", 500)
+        random_state = kwargs.get("random_state", 42)
+        if vocab_size:
+            self.bovw = BoVW(dataset_folder, descriptor_folder, vocab_size=vocab_size, random_state=random_state)
+            self.bovw.build_codebook()
         # TODO: add new descriptors here
         self.AVAILABLE_EXTRACTORS = {
             "rgb": {
@@ -73,14 +76,15 @@ class Descriptor:
                 ),
                 "log_message": logging_message + f"{kwargs}",
             },
-            "SIFT": {
-                "path": os.path.join(self.DESCRIPTOR_FOLDER, "SIFT"),
-                # TODO: implement here
-                "method":lambda img: self.feature_detector.detect_keypoints_compute_descriptors(img)[1],
-                "log_message": logging_message + "using SIFT"
+            "boVW": {
+                "path": os.path.join(self.DESCRIPTOR_FOLDER, "boVW"),
+                "method":lambda img: self.bovw.build_histogram(
+                    img
+                ),
+                "log_message": logging_message + "using SIFT with BoVW"
             }
         }
-        LOGGER.debug(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])
+        logging.debug(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])
         self.descriptors = None
 
     def extract(self, recompute: bool = False):
@@ -95,10 +99,8 @@ class Descriptor:
             for filename in os.listdir(os.path.join(self.DATASET_FOLDER, "Images")):
                 if filename.endswith(".bmp"):
                     img_path = os.path.join(self.DATASET_FOLDER, "Images", filename)
-                    # TODO: maybe change the image loading functionalities uint8 or float32
-                    img = cv2.imread(img_path).astype(np.float64)
-
-                    F = self.AVAILABLE_EXTRACTORS[self.extract_method]["method"](img)
+                    # TODO: pass in img_path to the method instead of the image
+                    F = self.AVAILABLE_EXTRACTORS[self.extract_method]["method"](img_path)
                     descriptors[img_path] = F
             self.save_descriptors(descriptors, descriptor_path)
 
@@ -114,7 +116,7 @@ class Descriptor:
         for img_path, descriptor in descriptors.items():
             file_name = os.path.basename(img_path).replace(".bmp", ".npy")
             np.save(os.path.join(save_path, file_name), descriptor)
-        LOGGER.info(f"Saved descriptors to {save_path}")
+        logging.info(f"Saved descriptors to {save_path}")
 
     def get_image_descriptor_mapping(self) -> Dict[str, np.ndarray]:
         descriptor_path = os.path.join(self.DESCRIPTOR_FOLDER, self.extract_method)
@@ -148,7 +150,7 @@ class Descriptor:
 
         # Fit PCA and transform descriptors
         reduced_matrix = pca.fit_transform(descriptor_matrix)
-        LOGGER.info(f"PCA reduced dimensions from {descriptor_matrix.shape[1]} to {reduced_matrix.shape[1]}")
+        logging.info(f"PCA reduced dimensions from {descriptor_matrix.shape[1]} to {reduced_matrix.shape[1]}")
 
         # Map reduced descriptors back to their image paths
         reduced_descriptors = {
@@ -163,7 +165,8 @@ class Extractor:
         return np.random.rand(1, 30)
 
     @staticmethod
-    def extract_rgb(img) -> np.ndarray:
+    def extract_rgb(img_path) -> np.ndarray:
+        img = cv2.imread(img_path).astype(np.float64)
         img = img / 255.0  # normalize the image to [0, 1]
         B = np.mean(img[:, :, 0])
         G = np.mean(img[:, :, 1])
@@ -171,7 +174,8 @@ class Extractor:
         return np.array([R, G, B])
 
     @staticmethod
-    def extract_gridRGB(img, grid_size: int = 4) -> np.ndarray:
+    def extract_gridRGB(img_path, grid_size: int = 4) -> np.ndarray:
+        img = cv2.imread(img_path).astype(np.float64)
         img_height, img_width, img_channel = img.shape
         grid_height = img_height // grid_size
         grid_width = img_width // grid_size
@@ -191,8 +195,9 @@ class Extractor:
 
     @staticmethod
     def extract_gridEOhisto(
-        img, grid_size: int = 4, sobel_filter_size: int = 3, ang_quant_lvl=8
+        img_path, grid_size: int = 4, sobel_filter_size: int = 3, ang_quant_lvl=8
     ) -> np.ndarray:
+        img = cv2.imread(img_path).astype(np.float64)
         img_height, img_width, channel = img.shape
         grid_height = img_height // grid_size
         grid_width = img_width // grid_size
@@ -256,13 +261,14 @@ class Extractor:
     # TODO: Try out z-score normalization for gridCombined
     @staticmethod
     def extract_grid_combined(
-        img,
+        img_path,
         grid_size: int = 4,
         sobel_filter_size: int = 3,
         ang_quant_lvl: int = 8,
         norm_method: str = "minmax",
     ) -> np.ndarray:
         # Reuse the individual functions for RGB and Edge Orientation
+        img = cv2.imread(img_path).astype(np.float64)
         rgb_features = Extractor.extract_gridRGB(img, grid_size)
         eohisto_features = Extractor.extract_gridEOhisto(
             img, grid_size, sobel_filter_size, ang_quant_lvl
@@ -285,7 +291,8 @@ class Extractor:
         return combined_features
 
     @staticmethod
-    def extract_globalRGBhisto(img, bins=32) -> np.ndarray:
+    def extract_globalRGBhisto(img_path, bins=32) -> np.ndarray:
+        img = cv2.imread(img_path).astype(np.float64)
         hist = [
             np.histogram(img[:, :, i], bins=bins, range=(0, 256))[0] for i in range(3)
         ]
@@ -294,7 +301,8 @@ class Extractor:
         return hist_normalized
 
     @staticmethod
-    def extract_globalRGBhisto_quant(img, quant_lvl=4) -> np.ndarray:
+    def extract_globalRGBhisto_quant(img_path, quant_lvl=4) -> np.ndarray:
+        img = cv2.imread(img_path).astype(np.float64)
         # Quantize the RGB values
         R = np.floor(img[:, :, 0] * quant_lvl / 256).astype(int)
         G = np.floor(img[:, :, 1] * quant_lvl / 256).astype(int)
@@ -306,10 +314,11 @@ class Extractor:
         )[0]
         hist_flat = hist.flatten()
         hist_normalized = hist_flat / np.sum(hist_flat)
-        LOGGER.debug(f"Dimensions of the descriptor: {hist_normalized.shape}")
+        logging.debug(f"Dimensions of the descriptor: {hist_normalized.shape}")
         return hist_normalized
 
     @staticmethod
-    def extract_SIFT(img):
+    def extract_SIFT(img_path):
+        img = cv2.imread(img_path).astype(np.float64)
         fd = FeatureDetector("SIFT")
         return fd.detect_keypoints_compute_descriptors(img)[1]
