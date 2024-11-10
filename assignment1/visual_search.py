@@ -199,7 +199,7 @@ def main():
                 options=[100, 250, 500, 1000],
                 value=st.session_state["vocab_size"],
                 key="vocab_size_slider",
-                on_change=session_manager.update_vocab_size
+                on_change=session_manager.update_vocab_size,
             )
             option_cols[1].number_input(
                 "Random State",
@@ -220,8 +220,8 @@ def main():
         sobel_filter_size=st.session_state["sobel_filter_size"],
         ang_quant_lvl=st.session_state["ang_quant_lvl"],
         norm_method=st.session_state["norm_method"],
-        vocab_size = st.session_state["vocab_size"],
-        random_state = st.session_state["random_state"],
+        vocab_size=st.session_state["vocab_size"],
+        random_state=st.session_state["random_state"],
     )
     if st.session_state["recompute"]:
         logging.info("Recomputing descriptors...")
@@ -351,15 +351,17 @@ def main():
         total_lm = lbe.create_labels_matrix(all_retrieved_image_labels)
         tri = lbe.count_total_relevant_images(selected_image, labeler.get_labels_dict())
         fetched = (lm == 1).any().sum()
-        st.write(
-            f"**In the top `{result_num}` results, you retrieved `{fetched}`. There are `{tri}` total relevant images with one of these labels:`{input_class_labels}`.**")
+        st.write(f"**In the top `{result_num}` results, you retrieved `{fetched}`.**")
         if fetched == result_num:
             st.toast("Good label-based performance!", icon="😍")
             time.sleep(0.5)
             good_label_based = True
         lbe.plot_labels_matrix(lm)
-        lbe.plot_pr_curve(tri,total_lm)
-        lbe.plot_f1_score(tri,total_lm)
+        st.write(
+            f"**There are `{tri}` total relevant images with one of these labels:`{input_class_labels}`.**"
+        )
+        lbe.plot_pr_curve(tri, total_lm)
+        lbe.plot_f1_score(tri, total_lm)
     if good_class_based and good_label_based:
         st.balloons()
 
