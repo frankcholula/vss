@@ -6,8 +6,7 @@ import logging
 from feature_detectors import FeatureDetector
 from sklearn.decomposition import PCA
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 class Descriptor:
     def __init__(
@@ -80,7 +79,7 @@ class Descriptor:
                 "log_message": logging_message + "using SIFT"
             }
         }
-        LOGGER.debug(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])
+        logging.debug(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])
         self.descriptors = None
 
     def extract(self, recompute: bool = False):
@@ -114,7 +113,7 @@ class Descriptor:
         for img_path, descriptor in descriptors.items():
             file_name = os.path.basename(img_path).replace(".bmp", ".npy")
             np.save(os.path.join(save_path, file_name), descriptor)
-        LOGGER.info(f"Saved descriptors to {save_path}")
+        logging.info(f"Saved descriptors to {save_path}")
 
     def get_image_descriptor_mapping(self) -> Dict[str, np.ndarray]:
         descriptor_path = os.path.join(self.DESCRIPTOR_FOLDER, self.extract_method)
@@ -148,7 +147,7 @@ class Descriptor:
 
         # Fit PCA and transform descriptors
         reduced_matrix = pca.fit_transform(descriptor_matrix)
-        LOGGER.info(f"PCA reduced dimensions from {descriptor_matrix.shape[1]} to {reduced_matrix.shape[1]}")
+        logging.info(f"PCA reduced dimensions from {descriptor_matrix.shape[1]} to {reduced_matrix.shape[1]}")
 
         # Map reduced descriptors back to their image paths
         reduced_descriptors = {
@@ -306,7 +305,7 @@ class Extractor:
         )[0]
         hist_flat = hist.flatten()
         hist_normalized = hist_flat / np.sum(hist_flat)
-        LOGGER.debug(f"Dimensions of the descriptor: {hist_normalized.shape}")
+        logging.debug(f"Dimensions of the descriptor: {hist_normalized.shape}")
         return hist_normalized
 
     @staticmethod

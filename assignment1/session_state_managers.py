@@ -2,8 +2,7 @@ import streamlit as st
 import logging
 import os
 
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
 class SessionStateManager:
     def __init__(self, image_files):
@@ -69,7 +68,7 @@ class SessionStateManager:
 
     def update_descriptor(self):
         if st.session_state["descriptor"] != st.session_state["descriptor_selectbox"]:
-            LOGGER.debug(
+            logging.debug(
                 f"Updating descriptor to {st.session_state['descriptor_selectbox']}"
             )
             st.session_state["descriptor"] = st.session_state["descriptor_selectbox"]

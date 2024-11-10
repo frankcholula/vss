@@ -13,6 +13,7 @@ from session_state_managers import SessionStateManager
 from feature_detectors import FeatureDetector
 from sift_visualizer import visualize_sift
 
+logging.basicConfig(level=logging.DEBUG)
 
 @st.cache_resource(show_spinner=False)
 def load_data():
@@ -207,7 +208,7 @@ def main():
         feature_detector="SIFT",
     )
     if st.session_state["recompute"]:
-        LOGGER.info("Recomputing descriptors...")
+        logging.info("Recomputing descriptors...")
         descriptor.extract(st.session_state["recompute"])
         session_manager.update_recompute(False)
 
@@ -263,7 +264,7 @@ def main():
 
     retriever = Retriever(img2descriptors, metric)
     tri = labeler.get_total_relevant_images(selected_image)
-    LOGGER.debug(f"This selected image has {tri} relevant images.")
+    logging.debug(f"This selected image has {tri} relevant images.")
     similar_images, find_all_images_at = retriever.retrieve(
         os.path.join(DATASET_FOLDER, "Images", selected_image),
         total_relevant_images=tri,
@@ -391,6 +392,4 @@ def main():
 
 
 if __name__ == "__main__":
-    LOGGER = logging.getLogger(__name__)
-    LOGGER.setLevel(logging.DEBUG)
     main()

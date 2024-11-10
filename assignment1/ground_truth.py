@@ -6,7 +6,7 @@ import logging
 import json
 from typing import Dict, List
 
-LOGGER = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 class ImageLabeler:
     def __init__(self, dataset_folder: str):
@@ -100,7 +100,7 @@ class ImageLabeler:
         if os.path.exists(self.labels_path):
             labels_dict = self.load_labels()
         else:
-            LOGGER.info(f"No labels found. Computing labels for all images...")
+            logging.info(f"No labels found. Computing labels for all images...")
             labels_dict = self.compute_all_labels()
             self.save_labels(labels_dict)
         return labels_dict
@@ -112,7 +112,7 @@ class ImageLabeler:
     def save_labels(self, labels_dict):
         with open(self.labels_path, "w") as f:
             json.dump(labels_dict, f, indent=4)
-            LOGGER.info(f"Labels saved to {self.labels_path}")
+            logging.info(f"Labels saved to {self.labels_path}")
 
     def compute_all_labels(self) -> Dict[str, Dict]:
         result = {}
