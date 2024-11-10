@@ -8,6 +8,8 @@ import plotly.graph_objects as go
 import logging
 
 logging.basicConfig(level=logging.INFO)
+
+
 class ClassBasedEvaluator:
     def __init__(self, input_image_class: str, retrieved_image_classes: List):
         self.input_image_class = input_image_class
@@ -81,7 +83,6 @@ class ClassBasedEvaluator:
         plt.tight_layout()
         st.pyplot(plt)
 
-
     def count_total_relevant_images(self, selected_image, labels_dict) -> int:
         count = 0
         for k, v in labels_dict.items():
@@ -104,9 +105,12 @@ class ClassBasedEvaluator:
         fn = total_relevant_images - tp
         precision = tp / (tp + fp) if (tp + fp) > 0 else 0
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0
-        f1 = precision * recall * 2 / (precision + recall) if precision + recall > 0 else 0
+        f1 = (
+            precision * recall * 2 / (precision + recall)
+            if precision + recall > 0
+            else 0
+        )
         return (precision, recall, f1)
-
 
     def calculate_pr_f1_values(
         self,
@@ -156,8 +160,7 @@ class ClassBasedEvaluator:
             xaxis=dict(range=[0, 1.1]),
         )
         st.plotly_chart(fig)
-    
-        
+
     def plot_f1_score(self, f1_values: List):
         data = pd.DataFrame(
             {
@@ -175,13 +178,13 @@ class ClassBasedEvaluator:
                 hovertemplate="Threshold: %{x}<br>F1 Score: %{y}<extra></extra>",
             )
         )
-        
+
         fig.update_layout(
             title="F1 Score",
             xaxis_title="Threshold",
             yaxis_title="F1 Score",
         )
-        
+
         st.plotly_chart(fig)
 
 
@@ -192,16 +195,16 @@ class LabelBasedEvaluator:
         self.input_image_labels = input_image_labels
         self.retrieved_image_labels = retrieved_image_labels
 
-    def create_labels_matrix(self) -> pd.DataFrame:
+    def create_labels_matrix(self, retrieved_image_labels) -> pd.DataFrame:
         input_image_labels = sorted(self.input_image_labels)
         unique_retrieved_labels = sorted(
-            set(input_image_labels).union(*self.retrieved_image_labels)
+            set(input_image_labels).union(*retrieved_image_labels)
         )
         labels_matrix = []
         input_labels_set = set(input_image_labels)
         for label in unique_retrieved_labels:
             row = []
-            for retrieved_labels in self.retrieved_image_labels:
+            for retrieved_labels in retrieved_image_labels:
                 retrieved_labels_set = set(retrieved_labels)
                 if label in input_labels_set and label in retrieved_labels_set:
                     row.append(1)
@@ -213,7 +216,7 @@ class LabelBasedEvaluator:
         labels_df = pd.DataFrame(
             labels_matrix,
             index=unique_retrieved_labels,
-            columns=[f"Image {i+1}" for i in range(len(self.retrieved_image_labels))],
+            columns=[f"Image {i+1}" for i in range(len(retrieved_image_labels))],
         )
         return labels_df
 
@@ -250,9 +253,8 @@ class LabelBasedEvaluator:
         return count
 
     def calculate_cumulative_precision_recall_f1(
-        self, total_relevant_images: int
+        self, total_relevant_images: int, labels_matrix: pd.DataFrame
     ) -> pd.DataFrame:
-        labels_matrix = self.create_labels_matrix()
         precision_list, recall_list, f1_list = [], [], []
         cumulative_correct_images = 0
         cumulative_retrieved_images = 0
@@ -295,8 +297,8 @@ class LabelBasedEvaluator:
         )
         return pr_df
 
-    def plot_pr_curve(self, total_relevant_images):
-        pr_df = self.calculate_cumulative_precision_recall_f1(total_relevant_images)
+    def plot_pr_curve(self, total_relevant_images, labels_matrix):
+        pr_df = self.calculate_cumulative_precision_recall_f1(total_relevant_images, labels_matrix)
 
         fig = go.Figure()
         fig.add_trace(
@@ -315,13 +317,13 @@ class LabelBasedEvaluator:
             yaxis_title="Precision",
             hovermode="closest",
             yaxis=dict(range=[0, 1.1]),
-            xaxis=dict(range=[0, 1.1])
+            xaxis=dict(range=[0, 1.1]),
         )
 
         st.plotly_chart(fig)
-    
-    def plot_f1_score(self, total_relevant_images):
-        pr_df = self.calculate_cumulative_precision_recall_f1(total_relevant_images)
+
+    def plot_f1_score(self, total_relevant_images, labels_matrix: pd.DataFrame):
+        pr_df = self.calculate_cumulative_precision_recall_f1(total_relevant_images, labels_matrix)
         fig = go.Figure()
         fig.add_trace(
             go.Scatter(
