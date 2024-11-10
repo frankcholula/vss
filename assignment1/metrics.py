@@ -287,7 +287,7 @@ class LabelBasedEvaluator:
         # TODO: maybe iterate until recall reaches 1
         pr_df = pd.DataFrame(
             {
-                "Image Index": [
+                "Threshold": [
                     i + 1 for i in range(labels_matrix.shape[1])
                 ],  # Index of retrieved images
                 "Cumulative Precision": precision_list,
@@ -299,15 +299,16 @@ class LabelBasedEvaluator:
 
     def plot_pr_curve(self, total_relevant_images, labels_matrix):
         pr_df = self.calculate_cumulative_precision_recall_f1(total_relevant_images, labels_matrix)
-
+        print(pr_df)
         fig = go.Figure()
         fig.add_trace(
             go.Scatter(
                 x=pr_df["Cumulative Recall"],
                 y=pr_df["Cumulative Precision"],
+                text=pr_df["Threshold"],
                 mode="lines+markers",
                 name="Precision-Recall Curve",
-                hovertemplate="Precision: %{y}<br>Recall: %{x}<extra></extra>",
+                hovertemplate="Precision: %{y}<br>Recall: %{x}<br>Threshold: %{text}<extra></extra>",
             )
         )
 
@@ -327,17 +328,17 @@ class LabelBasedEvaluator:
         fig = go.Figure()
         fig.add_trace(
             go.Scatter(
-                x=pr_df["Image Index"],
+                x=pr_df["Threshold"],
                 y=pr_df["F1 Score"],
                 mode="lines+markers",
                 name="F1 Score",
-                hovertemplate="F1 Score: %{y}<extra></extra>",
+                hovertemplate="F1 Score: %{y}<br>Threshold: %{x}<extra></extra>",
             )
         )
 
         fig.update_layout(
             title="F1 Score (Instance-Level Evaluation)",
-            xaxis_title="Image Index",
+            xaxis_title="Threshold",
             yaxis_title="F1 Score",
         )
 
