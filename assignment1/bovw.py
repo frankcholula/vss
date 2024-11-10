@@ -25,27 +25,38 @@ class BoVW:
 
     def extract_all_sift_features(self) -> Dict[str, np.ndarray]:
         all_descriptors = {}
-        logging.debug(f"Processing all images in {self.DATASET_FOLDER}")
+        save_descriptors = True
+        sift_descriptor_folder = os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW")
+        os.makedirs(sift_descriptor_folder, exist_ok=True)  # Ensure folder exists once
+
+        logging.info(f"Processing all images in {self.DATASET_FOLDER}")
         for filename in os.listdir(self.DATASET_FOLDER):
             if filename.endswith(".bmp"):  # Adjust file type as needed
                 img_path = os.path.join(self.DATASET_FOLDER, filename)
+                descriptor_path = os.path.join(sift_descriptor_folder, filename.replace(".bmp", ".npy"))
+                
+                if os.path.exists(descriptor_path):
+                    save_descriptors = False
+                    logging.info(f"Loading SIFT descriptor from {descriptor_path}")
+                    all_descriptors[img_path] = np.load(descriptor_path)
+                    continue
+
+                logging.info(f"Computing SIFT descriptor for {img_path}")
                 descriptors = self.extract_sift_features(img_path)
                 if descriptors is not None:
                     all_descriptors[img_path] = descriptors
-        self.save_sift_descriptors(all_descriptors)
+        self.save_sift_descriptors(all_descriptors) if save_descriptors else None
         return all_descriptors
 
-    def save_sift_descriptors(self, descriptors):
-        logging.debug(f"Saving SIFT descriptors to {self.DESCRIPTOR_FOLDER}")
+    def save_sift_descriptors(self, descriptors: Dict[str, np.ndarray]):
         save_folder = os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW")
-        if not os.path.exists(save_folder):
-            os.makedirs(save_folder)
+        os.makedirs(save_folder, exist_ok=True)  # Ensure folder exists
+
         for img_path, descriptor in descriptors.items():
-            # Generate the .npy file name based on the image file name
             filename = os.path.basename(img_path).replace(".bmp", ".npy")
-            save_path = os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW", filename)
+            save_path = os.path.join(save_folder, filename)
             np.save(save_path, descriptor)
-            logging.info(f"Saved descriptors for {img_path} to {save_path}")
+            logging.info(f"Saved descriptor for {img_path} to {save_path}")
 
     def build_codebook(self, img_paths: list):
         all_descriptors = self.extract_all_sift_features(img_paths)
@@ -73,4 +84,3 @@ if __name__ == "__main__":
                 descriptor_folder="descriptors",
                 vocab_size=500, random_state=42)
     bovw.extract_all_sift_features()
-    logging.info("hello")
