@@ -73,8 +73,8 @@ class Descriptor:
                 ),
                 "log_message": logging_message + f"{kwargs}",
             },
-            "SIFT": {
-                "path": os.path.join(self.DESCRIPTOR_FOLDER, "SIFT"),
+            "SIFT_BoVW": {
+                "path": os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW"),
                 # TODO: implement here
                 "method":lambda img: self.feature_detector.detect_keypoints_compute_descriptors(img)[1],
                 "log_message": logging_message + "using SIFT"

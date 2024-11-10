@@ -93,7 +93,7 @@ def main():
     descriptor_method = header_cols[1].selectbox(
         "**🎨 Choose a Descriptor...**",
         options=[
-            "SIFT",
+            "SIFT_BoVW",
             "gridCombined",
             "gridEOhisto",
             "gridRGB",
