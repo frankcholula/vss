@@ -18,8 +18,9 @@ class Descriptor:
         self.DESCRIPTOR_FOLDER = descriptor_folder
         self.extract_method = extract_method
         vocab_size = kwargs.get("vocab_size", 500)
+        random_state = kwargs.get("random_state", 42)
         if vocab_size:
-            self.bovw = BoVW(dataset_folder, descriptor_folder, vocab_size=vocab_size)
+            self.bovw = BoVW(dataset_folder, descriptor_folder, vocab_size=vocab_size, random_state=random_state)
             self.bovw.build_codebook()
         # TODO: add new descriptors here
         self.AVAILABLE_EXTRACTORS = {

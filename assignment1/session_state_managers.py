@@ -39,11 +39,17 @@ class SessionStateManager:
             st.session_state["perform_pca"] = False
         if "vocab_size" not in st.session_state:
             st.session_state["vocab_size"] = 500
-
+        if "random_state" not in st.session_state:
+            st.session_state["random_state"] = 42
+    
+    def update_random_state(self):
+        st.session_state["random_state"] = st.session_state["random_state_slider"]
+        self.update_recompute(True)
+        
     def update_vocab_size(self):
         st.session_state["vocab_size"] = st.session_state["vocab_size_slider"]
         self.update_recompute(True)
-        
+
     def update_metric(self):
         st.session_state["metric"] = st.session_state["metric_radio"]
 

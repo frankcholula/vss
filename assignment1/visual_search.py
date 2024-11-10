@@ -195,11 +195,18 @@ def main():
             )
         case "boVW":
             option_cols[1].select_slider(
-                "Select the Number of Vocabulary Words...",
+                "Number of Vocabulary Words...",
                 options=[100, 250, 500, 1000],
                 value=st.session_state["vocab_size"],
                 key="vocab_size_slider",
                 on_change=session_manager.update_vocab_size
+            )
+            option_cols[1].number_input(
+                "Random State",
+                value=st.session_state["random_state"],
+                help="Seed used by the random number generator.",
+                key="random_state_slider",
+                on_change=session_manager.update_random_state,
             )
 
     # TODO: Add new descriptor options here
@@ -214,7 +221,7 @@ def main():
         ang_quant_lvl=st.session_state["ang_quant_lvl"],
         norm_method=st.session_state["norm_method"],
         vocab_size = st.session_state["vocab_size"],
-        random_state = 42,
+        random_state = st.session_state["random_state"],
     )
     if st.session_state["recompute"]:
         logging.info("Recomputing descriptors...")
