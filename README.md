@@ -54,7 +54,7 @@ A stripped-down version of this project is currently live on Streamlit at [visua
   - Experiment with different choices of distance measures (e.g., L1 norm) and note their effect on performance.  
   - Discover and try out other distance measures or descriptors not covered in the module.
 
-- [ ] **Req No. 6: Bag of Visual Words Retrieval (Hard)** (40%)  
+- [x] **Req No. 6: Bag of Visual Words Retrieval (Hard)** (40%)  
   - Implement a basic BoVW system using a sparse feature detector (e.g., Harris or SIFT keypoint detector) and a descriptor (e.g., SIFT descriptor).  
   - Use k-Means to create the codebook.  
   - Compare the performance with other descriptors you have tried.
