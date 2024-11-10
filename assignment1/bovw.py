@@ -62,11 +62,11 @@ class BoVW:
         os.makedirs(codebook_folder, exist_ok=True)
 
         if os.path.exists(codebook_path):
-            logging.info("Codebook already exists. Loading existing codebook...")
+            logging.debug("Codebook already exists. Loading existing codebook...")
             with open(codebook_path, "rb") as f:
                 self.kmeans = pickle.load(f)
             self.codebook = self.kmeans.cluster_centers_
-            logging.info(f"Codebook loaded with size: {self.codebook.shape}.")
+            logging.debug(f"Codebook loaded with size: {self.codebook.shape}.")
         else:
             logging.info("Building codebook...")
             all_descriptors = np.vstack([
@@ -99,13 +99,3 @@ class BoVW:
     def build_histograms(self, img_paths: list) -> np.ndarray:
         histograms = [self.build_histogram(img_path) for img_path in img_paths]
         return np.array(histograms)
-
-
-# if __name__ == "__main__":
-#     bovw = BoVW(dataset_folder="MSRC_ObjCategImageDatabase_v2_local/Images",
-#                 descriptor_folder="descriptors",
-#                 vocab_size=500, random_state=42)
-#     bovw.build_codebook()
-#     query_image = "MSRC_ObjCategImageDatabase_v2_local/Images/1_1_s.bmp"
-#     query_histogram = bovw.build_histogram(query_image)
-#     logging.debug(f"Query histogram shape: {query_histogram.shape}")

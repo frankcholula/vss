@@ -97,7 +97,7 @@ def main():
     descriptor_method = header_cols[1].selectbox(
         "**🎨 Choose a Descriptor...**",
         options=[
-            "SIFT_BoVW",
+            "boVW",
             "gridCombined",
             "gridEOhisto",
             "gridRGB",
@@ -193,7 +193,7 @@ def main():
                 key="norm_method_radio",
                 on_change=session_manager.update_norm_method,
             )
-        case "SIFT_boVW":
+        case "boVW":
             option_cols[1].select_slider(
                 "Select the Number of Vocabulary Words...",
                 options=[100, 250, 500, 1000],

@@ -75,13 +75,12 @@ class Descriptor:
                 ),
                 "log_message": logging_message + f"{kwargs}",
             },
-            "SIFT_BoVW": {
-                "path": os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW"),
-                # TODO: implement here
+            "boVW": {
+                "path": os.path.join(self.DESCRIPTOR_FOLDER, "boVW"),
                 "method":lambda img: self.bovw.build_histogram(
-                    img,
+                    img
                 ),
-                "log_message": logging_message + "using SIFT"
+                "log_message": logging_message + "using SIFT with BoVW"
             }
         }
         logging.debug(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])
