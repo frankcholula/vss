@@ -12,8 +12,11 @@ from metrics import ClassBasedEvaluator, LabelBasedEvaluator
 from session_state_managers import SessionStateManager
 from feature_detectors import FeatureDetector
 from sift_visualizer import visualize_sift
+from bovw import BoVW
 
-logging.basicConfig(level=logging.DEBUG)
+
+logging.basicConfig(level=logging.INFO)
+
 
 @st.cache_resource(show_spinner=False)
 def load_data():
@@ -71,7 +74,7 @@ def main():
     vse, sv = st.tabs(["Visual Search Engine", "SIFT Visualizer"])
 
     header_cols = vse.columns([3, 3, 3, 2])
-    
+
     header_cols[3].markdown(
         "<div style='width: 1px; height: 28px'></div>", unsafe_allow_html=True
     )
@@ -190,8 +193,14 @@ def main():
                 key="norm_method_radio",
                 on_change=session_manager.update_norm_method,
             )
-        case "SIFT":
-            pass
+        case "SIFT_boVW":
+            option_cols[1].select_slider(
+                "Select the Number of Vocabulary Words...",
+                options=[100, 250, 500, 1000],
+                value=st.session_state["vocab_size"],
+                key="vocab_size_slider",
+                on_change=session_manager.update_vocab_size
+            )
 
     # TODO: Add new descriptor options here
     descriptor = Descriptor(
@@ -204,8 +213,8 @@ def main():
         sobel_filter_size=st.session_state["sobel_filter_size"],
         ang_quant_lvl=st.session_state["ang_quant_lvl"],
         norm_method=st.session_state["norm_method"],
-        # TODO: add feature detection method here
-        feature_detector="SIFT",
+        vocab_size = st.session_state["vocab_size"],
+        random_state = 42,
     )
     if st.session_state["recompute"]:
         logging.info("Recomputing descriptors...")
@@ -218,8 +227,10 @@ def main():
     if st.session_state["perform_pca"]:
         img2descriptors = descriptor.perform_pca(variance_ratio=0.99)
         dim_after = len(next(iter(img2descriptors.values())))
-        st.toast(f"Descriptor Dimensionality reduced from {dim_before} to {dim_after}.", icon="📉")
-
+        st.toast(
+            f"Descriptor Dimensionality reduced from {dim_before} to {dim_after}.",
+            icon="📉",
+        )
 
     # Button to select a random image
     header_cols[2].markdown(

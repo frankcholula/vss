@@ -2,7 +2,6 @@ import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.svm import SVC
-from descriptors import Descriptor
 import os
 import logging
 from typing import Dict
@@ -27,7 +26,7 @@ class BoVW:
     def extract_all_sift_features(self) -> Dict[str, np.ndarray]:
         all_descriptors = {}
         save_descriptors = True
-        sift_descriptor_folder = os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW")
+        sift_descriptor_folder = os.path.join(self.DESCRIPTOR_FOLDER, "SIFT")
         os.makedirs(sift_descriptor_folder, exist_ok=True)  # Ensure folder exists once
         logging.info(f"Processing all images in {self.DATASET_FOLDER}")
         for filename in os.listdir(self.DATASET_FOLDER):
@@ -49,7 +48,7 @@ class BoVW:
         return all_descriptors
 
     def save_sift_descriptors(self, descriptors: Dict[str, np.ndarray]):
-        save_folder = os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW")
+        save_folder = os.path.join(self.DESCRIPTOR_FOLDER, "SIFT")
         os.makedirs(save_folder, exist_ok=True)
         for img_path, descriptor in descriptors.items():
             filename = os.path.basename(img_path).replace(".bmp", ".npy")
@@ -102,11 +101,11 @@ class BoVW:
         return np.array(histograms)
 
 
-if __name__ == "__main__":
-    bovw = BoVW(dataset_folder="MSRC_ObjCategImageDatabase_v2_local/Images",
-                descriptor_folder="descriptors",
-                vocab_size=500, random_state=42)
-    bovw.build_codebook()
-    query_image = "MSRC_ObjCategImageDatabase_v2_local/Images/1_1_s.bmp"
-    query_histogram = bovw.build_histogram(query_image)
-    logging.debug(f"Query histogram shape: {query_histogram.shape}")
+# if __name__ == "__main__":
+#     bovw = BoVW(dataset_folder="MSRC_ObjCategImageDatabase_v2_local/Images",
+#                 descriptor_folder="descriptors",
+#                 vocab_size=500, random_state=42)
+#     bovw.build_codebook()
+#     query_image = "MSRC_ObjCategImageDatabase_v2_local/Images/1_1_s.bmp"
+#     query_histogram = bovw.build_histogram(query_image)
+#     logging.debug(f"Query histogram shape: {query_histogram.shape}")

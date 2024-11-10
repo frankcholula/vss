@@ -37,6 +37,8 @@ class SessionStateManager:
             st.session_state["norm_method"] = "minmax"
         if "perform_pca" not in st.session_state:
             st.session_state["perform_pca"] = False
+        if "vocab_size" not in st.session_state:
+            st.session_state["vocab_size"] = 500
 
     def update_metric(self):
         st.session_state["metric"] = st.session_state["metric_radio"]
