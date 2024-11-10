@@ -150,7 +150,7 @@ class Descriptor:
 
         # Fit PCA and transform descriptors
         reduced_matrix = pca.fit_transform(descriptor_matrix)
-        logging.info(f"PCA reduced dimensions from {descriptor_matrix.shape[1]} to {reduced_matrix.shape[1]}")
+        logging.debug(f"PCA reduced dimensions from {descriptor_matrix.shape[1]} to {reduced_matrix.shape[1]}")
 
         # Map reduced descriptors back to their image paths
         reduced_descriptors = {
