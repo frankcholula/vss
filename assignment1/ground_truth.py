@@ -122,7 +122,7 @@ class ImageLabeler:
                 try:
                     labels = self.get_labels(image_file)
                 except Exception as e:
-                    print(f"Error processing {image_file}: {e}")
+                    logging.error(f"Error processing {image_file}: {e}")
             result[image_file] = {"labels": labels, "class": class_id}
         return result
 

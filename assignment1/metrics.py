@@ -299,7 +299,6 @@ class LabelBasedEvaluator:
 
     def plot_pr_curve(self, total_relevant_images, labels_matrix):
         pr_df = self.calculate_cumulative_precision_recall_f1(total_relevant_images, labels_matrix)
-        print(pr_df)
         fig = go.Figure()
         fig.add_trace(
             go.Scatter(
