@@ -99,3 +99,13 @@ class BoVW:
     def build_histograms(self, img_paths: list) -> np.ndarray:
         histograms = [self.build_histogram(img_path) for img_path in img_paths]
         return np.array(histograms)
+
+# Script for testing BoVW
+# if __name__ == "__main__":
+#     bovw = BoVW(dataset_folder="MSRC_ObjCategImageDatabase_v2_local/Images",
+#                 descriptor_folder="descriptors",
+#                 vocab_size=500, random_state=42)
+#     bovw.build_codebook()
+#     query_image = "MSRC_ObjCategImageDatabase_v2_local/Images/1_1_s.bmp"
+#     query_histogram = bovw.build_histogram(query_image)
+#     logging.debug(f"Query histogram shape: {query_histogram.shape}")
