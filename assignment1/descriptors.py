@@ -36,29 +36,29 @@ class Descriptor:
             },
             "globalRGBhisto": {
                 "path": os.path.join(self.DESCRIPTOR_FOLDER, "globalRGBhisto"),
-                "method": lambda img: Extractor.extract_globalRGBhisto(
-                    img, bins=kwargs.get("bins")
+                "method": lambda img_path: Extractor.extract_globalRGBhisto(
+                    img_path, bins=kwargs.get("bins")
                 ),
                 "log_message": logging_message + f"{kwargs}",
             },
             "globalRGBhisto_quant": {
                 "path": os.path.join(self.DESCRIPTOR_FOLDER, "globalRGBhisto_quant"),
-                "method": lambda img: Extractor.extract_globalRGBhisto_quant(
-                    img, quant_lvl=kwargs.get("quant_lvl")
+                "method": lambda img_path: Extractor.extract_globalRGBhisto_quant(
+                    img_path, quant_lvl=kwargs.get("quant_lvl")
                 ),
                 "log_message": logging_message + f"{kwargs}",
             },
             "gridRGB": {
                 "path": os.path.join(self.DESCRIPTOR_FOLDER, "gridRGB"),
-                "method": lambda img: Extractor.extract_gridRGB(
-                    img, grid_size=kwargs.get("grid_size")
+                "method": lambda img_path: Extractor.extract_gridRGB(
+                    img_path, grid_size=kwargs.get("grid_size")
                 ),
                 "log_message": logging_message + f"{kwargs}",
             },
             "gridEOhisto": {
                 "path": os.path.join(self.DESCRIPTOR_FOLDER, "gridEOhisto"),
-                "method": lambda img: Extractor.extract_gridEOhisto(
-                    img,
+                "method": lambda img_path: Extractor.extract_gridEOhisto(
+                    img_path,
                     grid_size=kwargs.get("grid_size"),
                     sobel_filter_size=kwargs.get("sobel_filter_size"),
                     ang_quant_lvl=kwargs.get("ang_quant_lvl"),
@@ -67,8 +67,8 @@ class Descriptor:
             },
             "gridCombined": {
                 "path": os.path.join(self.DESCRIPTOR_FOLDER, "gridCombined"),
-                "method": lambda img: Extractor.extract_grid_combined(
-                    img,
+                "method": lambda img_path: Extractor.extract_grid_combined(
+                    img_path,
                     grid_size=kwargs.get("grid_size"),
                     sobel_filter_size=kwargs.get("sobel_filter_size"),
                     ang_quant_lvl=kwargs.get("ang_quant_lvl"),
@@ -78,8 +78,8 @@ class Descriptor:
             },
             "boVW": {
                 "path": os.path.join(self.DESCRIPTOR_FOLDER, "boVW"),
-                "method":lambda img: self.bovw.build_histogram(
-                    img
+                "method":lambda img_path: self.bovw.build_histogram(
+                    img_path
                 ),
                 "log_message": logging_message + "using SIFT with BoVW"
             }
@@ -150,7 +150,7 @@ class Descriptor:
 
         # Fit PCA and transform descriptors
         reduced_matrix = pca.fit_transform(descriptor_matrix)
-        logging.info(f"PCA reduced dimensions from {descriptor_matrix.shape[1]} to {reduced_matrix.shape[1]}")
+        logging.debug(f"PCA reduced dimensions from {descriptor_matrix.shape[1]} to {reduced_matrix.shape[1]}")
 
         # Map reduced descriptors back to their image paths
         reduced_descriptors = {
@@ -267,11 +267,9 @@ class Extractor:
         ang_quant_lvl: int = 8,
         norm_method: str = "minmax",
     ) -> np.ndarray:
-        # Reuse the individual functions for RGB and Edge Orientation
-        img = cv2.imread(img_path).astype(np.float64)
-        rgb_features = Extractor.extract_gridRGB(img, grid_size)
+        rgb_features = Extractor.extract_gridRGB(img_path, grid_size)
         eohisto_features = Extractor.extract_gridEOhisto(
-            img, grid_size, sobel_filter_size, ang_quant_lvl
+            img_path, grid_size, sobel_filter_size, ang_quant_lvl
         )
         match norm_method:
             case "minmax":
