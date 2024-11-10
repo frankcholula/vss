@@ -107,7 +107,6 @@ if __name__ == "__main__":
                 descriptor_folder="descriptors",
                 vocab_size=500, random_state=42)
     bovw.build_codebook()
-    # query_image = "MSRC_ObjCategImageDatabase_v2_local/Images/1_1_s.bmp"
-    # query_histogram = bovw.build_histogram(query_image)
-    # print(query_histogram)
-
+    query_image = "MSRC_ObjCategImageDatabase_v2_local/Images/1_1_s.bmp"
+    query_histogram = bovw.build_histogram(query_image)
+    logging.debug(f"Query histogram shape: {query_histogram.shape}")
