@@ -267,11 +267,9 @@ class Extractor:
         ang_quant_lvl: int = 8,
         norm_method: str = "minmax",
     ) -> np.ndarray:
-        # Reuse the individual functions for RGB and Edge Orientation
-        img = cv2.imread(img_path).astype(np.float64)
-        rgb_features = Extractor.extract_gridRGB(img, grid_size)
+        rgb_features = Extractor.extract_gridRGB(img_path, grid_size)
         eohisto_features = Extractor.extract_gridEOhisto(
-            img, grid_size, sobel_filter_size, ang_quant_lvl
+            img_path, grid_size, sobel_filter_size, ang_quant_lvl
         )
         match norm_method:
             case "minmax":
