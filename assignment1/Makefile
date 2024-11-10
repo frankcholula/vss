@@ -4,8 +4,7 @@ run:
 
 .PHONY: test
 test:
-	pytest -s
-
+	pytest -s --log-disable=root
 
 .PHONY: bovw
 bovw:

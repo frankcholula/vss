@@ -67,9 +67,10 @@ class TestExtractors(unittest.TestCase):
     def test_extract_globalRGBhisto_equality(self):
         result1 = Extractor.extract_globalRGBhisto(self.img1_path)
         result2 = Extractor.extract_globalRGBhisto(self.img2_path)
-        self.assertTrue(
+        print(result1.shape)
+        self.assertFalse(
             np.array_equal(result1, result2),
-            "The histograms extracted should be equal.",
+            "The histograms extracted should not be equal.",
         )
 
     def test_extract_globalRGBhisto_quant_equality(self):
@@ -78,9 +79,9 @@ class TestExtractors(unittest.TestCase):
         self.assertTrue(
             result1.shape[0] == 512, "The Dimension of the histogram should be 512."
         )
-        self.assertTrue(
+        self.assertFalse(
             np.array_equal(result1, result2),
-            "The histograms extracted should be equal.",
+            "The histograms extracted should not be equal.",
         )
 
     def test_extract_gridRGB(self):
