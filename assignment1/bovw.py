@@ -28,7 +28,6 @@ class BoVW:
         save_descriptors = True
         sift_descriptor_folder = os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW")
         os.makedirs(sift_descriptor_folder, exist_ok=True)  # Ensure folder exists once
-
         logging.info(f"Processing all images in {self.DATASET_FOLDER}")
         for filename in os.listdir(self.DATASET_FOLDER):
             if filename.endswith(".bmp"):  # Adjust file type as needed
@@ -62,26 +61,26 @@ class BoVW:
         """
         Build a codebook (visual vocabulary) using KMeans clustering on all extracted SIFT descriptors.
         """
-        logging.info("Building codebook...")
-
-        # Flatten descriptors into a single 2D array for KMeans
-        all_descriptors = np.vstack([
-            descriptors for descriptors in self.extract_all_sift_features().values()
-            if descriptors is not None
-        ])
-
-        # if all_descriptors.size == 0:
-            # raise ValueError("No SIFT descriptors found to build codebook.")
-
-        # Fit KMeans
-        logging.info(f"Collected {all_descriptors.shape[0]} descriptors for clustering.")
-        self.kmeans = KMeans(n_clusters=self.vocab_size, random_state=self.random_state).fit(all_descriptors)
-        self.codebook = self.kmeans.cluster_centers_
-
-        # Save codebook
-        codebook_path = os.path.join(self.DESCRIPTOR_FOLDER, "codebook.npy")
-        # np.save(codebook_path, self.codebook)
-        # logging.info(f"Codebook built and saved to {codebook_path}.")
+        if os.path.exists(os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW", "codebook.npy")):
+            logging.info("Codebook already exists. Loading existing codebook...")
+            self.codebook = np.load(os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW", "codebook.npy"))
+            return self.codebook
+        else:
+            logging.info("Building codebook...")
+            all_descriptors = np.vstack([
+                descriptors for descriptors in self.extract_all_sift_features().values()
+                if descriptors is not None
+            ])
+            if all_descriptors.size == 0:
+                raise ValueError("No SIFT descriptors found to build codebook.")
+            logging.info(f"Collected {all_descriptors.shape[0]} descriptors for clustering.")
+            self.kmeans = KMeans(n_clusters=self.vocab_size, random_state=self.random_state).fit(all_descriptors)
+            self.codebook = self.kmeans.cluster_centers_
+            codebook_folder = os.path.join(self.DESCRIPTOR_FOLDER, "SIFT_BoVW")
+            codebook_path = os.path.join(codebook_folder, "codebook.npy")
+            np.save(codebook_path, self.codebook)
+            logging.info(f"Codebook built and saved to {codebook_path}.")
+            return self.codebook
 
     def quantize_descriptors(self, descriptors: np.ndarray):
         words = self.kmeans.predict(descriptors)
