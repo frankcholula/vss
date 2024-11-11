@@ -25,7 +25,7 @@ class ResNet:
                 input_shape=(224, 224, 3),
             )
         elif self.model_name == "resnet34":
-            resnet34 = models.resnet34(pretrained=True)
+            resnet34 = models.resnet34(weights=models.ResNet34_Weights.DEFAULT)
             self.feature_extractor = nn.Sequential(*list(resnet34.children())[:-1])
             self.feature_extractor.eval()
 

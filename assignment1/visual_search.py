@@ -98,7 +98,7 @@ def main():
         "**🎨 Choose a Descriptor...**",
         options=[
             "boVW",
-            "ResNet50",
+            "ResNet",
             "gridCombined",
             "gridEOhisto",
             "gridRGB",
@@ -209,8 +209,14 @@ def main():
                 key="random_state_slider",
                 on_change=session_manager.update_random_state,
             )
-        case "ResNet50":
+        case "ResNet":
             st.toast("This is pretty much cheating 😂")
+            option_cols[1].radio(
+                "Choose a ResNet Model",
+                options=[ "ResNet18", "ResNet34", "ResNet50"],
+                key="resnet_radio",
+                on_change=session_manager.update_resnet_model,
+            )
 
     # TODO: Add new descriptor options here
     descriptor = Descriptor(
@@ -225,6 +231,7 @@ def main():
         norm_method=st.session_state["norm_method"],
         vocab_size=st.session_state["vocab_size"],
         random_state=st.session_state["random_state"],
+        resnet_model=st.session_state["resnet_model"],
     )
     if st.session_state["recompute"]:
         logging.info("Recomputing descriptors...")

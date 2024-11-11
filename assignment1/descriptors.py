@@ -25,7 +25,7 @@ class Descriptor:
             self.bovw.build_codebook()
         self.resnet_model = ResNet("resnet34")
         self.pretrained_feature_extractor = self.resnet_model.use_pretrained_feature_extractor()
-        logging.info("Loaded ResNet 50 model")
+        logging.info("Loaded ResNet 34 model")
         # TODO: add new descriptors here
         self.AVAILABLE_EXTRACTORS = {
             "rgb": {
@@ -87,12 +87,12 @@ class Descriptor:
                 ),
                 "log_message": logging_message + "using SIFT with BoVW"
             },
-            "ResNet50": {
-                "path": os.path.join(self.DESCRIPTOR_FOLDER, "ResNet50"),
+            "ResNet": {
+                "path": os.path.join(self.DESCRIPTOR_FOLDER, "ResNet"),
                 "method": lambda img_path: self.resnet_model.generate_single_feature(
                     img_path
                 ),
-                "log_message": logging_message + "using ResNet50",
+                "log_message": logging_message + "using ResNet",
             }
         }
         logging.debug(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])
