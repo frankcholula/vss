@@ -326,8 +326,6 @@ def main():
             f"**In the top `{result_num}` results, you retrieved `{fetched}` images in `class {input_class}`. There are `{tri}` total relevant images.**"
         )
         if fetched == result_num:
-            st.toast("Good class-based performance!", icon="😍")
-            time.sleep(0.5)
             good_class_based = True
 
         cbe.plot_class_matrix(cm, input_class)
@@ -356,8 +354,6 @@ def main():
         fetched = (lm == 1).any().sum()
         st.write(f"**In the top `{result_num}` results, you retrieved `{fetched}`.**")
         if fetched == result_num:
-            st.toast("Good label-based performance!", icon="😍")
-            time.sleep(0.5)
             good_label_based = True
         lbe.plot_labels_matrix(lm)
         st.write(
@@ -366,7 +362,13 @@ def main():
         lbe.plot_pr_curve(tri, total_lm)
         lbe.plot_f1_score(tri, total_lm)
     if good_class_based and good_label_based:
+        st.toast("Good class-based and label-based performance!", icon="🎉")
         st.balloons()
+    elif good_class_based:
+        st.toast("Good class-based performance!", icon="😍")
+    elif good_label_based:
+        st.toast("Good label-based performance!", icon="😍")
+
 
     # TODO : Move this to a different class
     # sv.title("SIFT Visualizer 🪄")

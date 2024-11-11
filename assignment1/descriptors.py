@@ -23,7 +23,7 @@ class Descriptor:
         if vocab_size:
             self.bovw = BoVW(dataset_folder, descriptor_folder, vocab_size=vocab_size, random_state=random_state)
             self.bovw.build_codebook()
-        self.resnet_model = ResNet()
+        self.resnet_model = ResNet("resnet34")
         self.pretrained_feature_extractor = self.resnet_model.use_pretrained_feature_extractor()
         logging.info("Loaded ResNet 50 model")
         # TODO: add new descriptors here
@@ -90,8 +90,7 @@ class Descriptor:
             "ResNet50": {
                 "path": os.path.join(self.DESCRIPTOR_FOLDER, "ResNet50"),
                 "method": lambda img_path: self.resnet_model.generate_single_feature(
-                    img_path,
-                    self.feature_extractor
+                    img_path
                 ),
                 "log_message": logging_message + "using ResNet50",
             }
