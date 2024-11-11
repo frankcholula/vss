@@ -17,29 +17,29 @@ class ResNet:
         self.model_name = model_name
 
     def use_pretrained_feature_extractor(self):
-        if self.model_name == "resnet50":
+        if self.model_name == "ResNet50":
             self.feature_extractor = ResNet50(
                 weights="imagenet",
                 include_top=False,
                 pooling="avg",
                 input_shape=(224, 224, 3),
             )
-        elif self.model_name == "resnet34":
+        elif self.model_name == "ResNet34":
             resnet34 = models.resnet34(weights=models.ResNet34_Weights.DEFAULT)
             self.feature_extractor = nn.Sequential(*list(resnet34.children())[:-1])
             self.feature_extractor.eval()
-        elif self.model_name == "resnet18":
+        elif self.model_name == "ResNet18":
             resnet18 = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
             self.feature_extractor = nn.Sequential(*list(resnet18.children())[:-1])
             self.feature_extractor.eval()
 
     def preprocess_image(self, img_path: str):
-        if self.model_name == "resnet50":
+        if self.model_name == "ResNet50":
             img = load_img(img_path, target_size=(224, 224))
             img_array = img_to_array(img)
             img_array = np.expand_dims(img_array, axis=0)
             return img_array / 255.0
-        elif self.model_name == "resnet34":
+        elif self.model_name == "ResNet34" or self.model_name == "ResNet18":
             img = cv2.imread(img_path, cv2.COLOR_BGR2RGB)
             img = cv2.resize(img, (224, 224))
             img_tensor = to_tensor(img)
@@ -56,9 +56,9 @@ class ResNet:
 
         preprocessed_image = self.preprocess_image(img_path)
 
-        if self.model_name == "resnet50":
+        if self.model_name == "ResNet50":
             feature_vector = self.feature_extractor.predict(preprocessed_image)
-        elif self.model_name == "resnet34":
+        elif self.model_name == "ResNet34" or self.model_name == "ResNet18":
             with torch.no_grad():
                 feature_vector = self.feature_extractor(preprocessed_image).squeeze()
                 feature_vector = feature_vector.numpy()
