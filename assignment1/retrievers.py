@@ -54,6 +54,8 @@ class Retriever:
                     except Exception as e:
                         logging.error(f"Error in calculating Mahalanobis distance: {str(e)}")
                         dst = float("inf")
+            case "Cosine":
+                dst = 1 - np.dot(F1, F2) / (np.linalg.norm(F1) * np.linalg.norm(F2))
         return dst
 
     def compute_distance(self, query_img: str) -> List[Tuple[float, str]]:

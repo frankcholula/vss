@@ -254,8 +254,8 @@ def main():
 
     metric = option_cols[2].radio(
         "Comparison Metric",
-        options=["L2", "L1", "Mahalanobis"],
-        index=["L2", "L1", "Mahalanobis"].index(st.session_state["metric"]),
+        options=["L2", "L1", "Mahalanobis", "Cosine"],
+        index=["L2", "L1", "Mahalanobis", "Cosine"].index(st.session_state["metric"]),
         key="metric_radio",
         on_change=session_manager.update_metric,
     )

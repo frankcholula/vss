@@ -57,7 +57,9 @@ class ResNet:
         return img_array
 
     def generate_single_feature(self, img_path: str, feature_extractor):
-        pass
+        img_array = self.preprocess_image(img_path)
+        feature_vector = feature_extractor.predict(img_array)
+        return feature_vector.flatten()
 
     def prepare_data(self, dataset_dir, batch_size=32, validation_split=0.2):
         datagen = ImageDataGenerator(

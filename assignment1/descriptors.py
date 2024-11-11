@@ -24,7 +24,7 @@ class Descriptor:
             self.bovw = BoVW(dataset_folder, descriptor_folder, vocab_size=vocab_size, random_state=random_state)
             self.bovw.build_codebook()
         self.resnet_model = ResNet()
-        self.resnet_model.build_feature_extractor("resnet50_trained_model.keras")
+        self.feature_extractor = self.resnet_model.build_feature_extractor("resnet50_trained_model.keras")
         logging.info("Pre-trained ResNet50 model loaded.")
         # TODO: add new descriptors here
         self.AVAILABLE_EXTRACTORS = {
@@ -88,9 +88,10 @@ class Descriptor:
                 "log_message": logging_message + "using SIFT with BoVW"
             },
             "ResNet50": {
-                "path": os.path.join(self.DESCRIPTOR_FOLDER, "resnet"),
+                "path": os.path.join(self.DESCRIPTOR_FOLDER, "ResNet50"),
                 "method": lambda img_path: self.resnet_model.generate_single_feature(
-                    img_path
+                    img_path,
+                    self.feature_extractor
                 ),
                 "log_message": logging_message + "using ResNet",
             }
