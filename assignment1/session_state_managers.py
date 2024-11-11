@@ -42,7 +42,7 @@ class SessionStateManager:
         if "random_state" not in st.session_state:
             st.session_state["random_state"] = 42
         if "resnet_model" not in st.session_state:
-            st.session_state["resnet_model"] = "ResNet34"
+            st.session_state["resnet_model"] = "ResNet18"
     
     def update_resnet_model(self):
         st.session_state["resnet_model"] = st.session_state["resnet_radio"]
