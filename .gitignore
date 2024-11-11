@@ -168,3 +168,7 @@ cython_debug/
 MSRC_ObjCategImageDatabase_v2/
 MSRC_ObjCategImageDatabase_v2_local/
 descriptors/
+resnet_dataset/
+
+# models
+*.keras
