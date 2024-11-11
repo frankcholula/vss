@@ -43,6 +43,10 @@ class ResNet:
             loss="categorical_crossentropy",
             metrics=["accuracy"],
         )
+    
+    def use_pretrained_feature_extractor(self):
+        feature_extractor = ResNet50(weights="imagenet", include_top=False, pooling="avg", input_shape=(224, 224, 3))
+        return feature_extractor
 
     def build_feature_extractor(self, model_path):
         model = tf.keras.models.load_model(model_path)
@@ -117,4 +121,4 @@ if __name__ == "__main__":
     )
     resnet.build_model(num_classes=resnet.num_classes)
     history = resnet.train_model(train_gen, val_gen, epochs=10)
-    resnet.save_model("resnet50_trained_model.keras")
+    resnet.save_model("custom_resnet.keras")
