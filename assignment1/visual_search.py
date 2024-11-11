@@ -98,6 +98,7 @@ def main():
         "**🎨 Choose a Descriptor...**",
         options=[
             "boVW",
+            "ResNet50",
             "gridCombined",
             "gridEOhisto",
             "gridRGB",
@@ -208,6 +209,8 @@ def main():
                 key="random_state_slider",
                 on_change=session_manager.update_random_state,
             )
+        case "ResNet50":
+            option_cols[0].write("Well, this is pretty much cheating 😉")
 
     # TODO: Add new descriptor options here
     descriptor = Descriptor(
