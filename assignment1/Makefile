@@ -12,7 +12,7 @@ bovw:
 
 .PHONY: resnet
 resnet:
-	python train_resnet.py
+	python resnet.py
 
 .PHONY: clean
 clean:

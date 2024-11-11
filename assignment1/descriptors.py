@@ -6,7 +6,7 @@ import logging
 from feature_detectors import FeatureDetector
 from sklearn.decomposition import PCA
 from bovw import BoVW
-from train_resnet import ResNet
+from resnet import ResNet
 
 logging.basicConfig(level=logging.DEBUG)
 
