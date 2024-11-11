@@ -54,6 +54,8 @@ class Retriever:
                     except Exception as e:
                         logging.error(f"Error in calculating Mahalanobis distance: {str(e)}")
                         dst = float("inf")
+            case "Cosine":
+                dst = 1 - np.dot(F1, F2) / (np.linalg.norm(F1) * np.linalg.norm(F2))
         return dst
 
     def compute_distance(self, query_img: str) -> List[Tuple[float, str]]:
@@ -88,8 +90,8 @@ class Retriever:
             if seen_count >= total_relevant_images:
                 break
         # edge case: if the Mahalanobis distance is infinite for some images
-        # if float("inf") in [distance for distance, _ in top_similar_images]:
-        #     return []
+        if float("inf") in [distance for distance, _ in distances]:
+            return []
         return [img_path for _, img_path in distances], find_all_images_at
 
     def display_images(self, vse, similar_images: list, result_num: int, labeler):
@@ -106,23 +108,3 @@ class Retriever:
                     col.write(labeler.get_labels(os.path.basename(img_path)))
             pass
         return images_to_display
-    #     fig, axes = plt.subplots(1, number + 1, figsize=(20, 5))
-    #     distances = []
-    #     # Display the query image
-    #     query_img_data = cv2.imread(query_img)
-    #     query_img_data = cv2.cvtColor(query_img_data, cv2.COLOR_BGR2RGB)
-    #     axes[0].imshow(query_img_data)
-    #     axes[0].set_title("Query Image")
-    #     axes[0].axis("off")
-
-    #     # Display the top similar images
-    #     for ax, (distance, img_path) in zip(axes[1:], top_similar_images):
-    #         img = cv2.imread(img_path)
-    #         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    #         ax.imshow(img)
-    #         ax.axis("off")
-    #         distances.append(distance)
-    #     if float("inf") in distances:
-    #         logging.error(f"Mahalanobis distance is infinite for some images.")
-    #         st.error(f"Error in calculating {self.metric} distances for some images. Please try another metric or use PCA to lower the dimensionality.", icon="🚨")
-    #     logging.info(f"{self.metric} Distances: {distances} \n ")

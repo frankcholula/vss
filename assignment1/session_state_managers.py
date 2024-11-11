@@ -41,7 +41,13 @@ class SessionStateManager:
             st.session_state["vocab_size"] = 500
         if "random_state" not in st.session_state:
             st.session_state["random_state"] = 42
+        if "resnet_model" not in st.session_state:
+            st.session_state["resnet_model"] = "ResNet18"
     
+    def update_resnet_model(self):
+        st.session_state["resnet_model"] = st.session_state["resnet_radio"]
+        self.update_recompute(True)
+
     def update_random_state(self):
         st.session_state["random_state"] = st.session_state["random_state_slider"]
         self.update_recompute(True)

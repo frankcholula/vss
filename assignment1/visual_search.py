@@ -98,6 +98,7 @@ def main():
         "**🎨 Choose a Descriptor...**",
         options=[
             "boVW",
+            "ResNet",
             "gridCombined",
             "gridEOhisto",
             "gridRGB",
@@ -208,6 +209,14 @@ def main():
                 key="random_state_slider",
                 on_change=session_manager.update_random_state,
             )
+        case "ResNet":
+            st.toast("This is pretty much cheating 😂")
+            option_cols[1].radio(
+                "Choose a ResNet Model",
+                options=[ "ResNet18", "ResNet34", "ResNet50"],
+                key="resnet_radio",
+                on_change=session_manager.update_resnet_model,
+            )
 
     # TODO: Add new descriptor options here
     descriptor = Descriptor(
@@ -222,6 +231,7 @@ def main():
         norm_method=st.session_state["norm_method"],
         vocab_size=st.session_state["vocab_size"],
         random_state=st.session_state["random_state"],
+        resnet_model=st.session_state["resnet_model"],
     )
     if st.session_state["recompute"]:
         logging.info("Recomputing descriptors...")
@@ -251,8 +261,8 @@ def main():
 
     metric = option_cols[2].radio(
         "Comparison Metric",
-        options=["L2", "L1", "Mahalanobis"],
-        index=["L2", "L1", "Mahalanobis"].index(st.session_state["metric"]),
+        options=["L2", "L1", "Mahalanobis", "Cosine"],
+        index=["L2", "L1", "Mahalanobis", "Cosine"].index(st.session_state["metric"]),
         key="metric_radio",
         on_change=session_manager.update_metric,
     )
@@ -323,8 +333,6 @@ def main():
             f"**In the top `{result_num}` results, you retrieved `{fetched}` images in `class {input_class}`. There are `{tri}` total relevant images.**"
         )
         if fetched == result_num:
-            st.toast("Good class-based performance!", icon="😍")
-            time.sleep(0.5)
             good_class_based = True
 
         cbe.plot_class_matrix(cm, input_class)
@@ -353,8 +361,6 @@ def main():
         fetched = (lm == 1).any().sum()
         st.write(f"**In the top `{result_num}` results, you retrieved `{fetched}`.**")
         if fetched == result_num:
-            st.toast("Good label-based performance!", icon="😍")
-            time.sleep(0.5)
             good_label_based = True
         lbe.plot_labels_matrix(lm)
         st.write(
@@ -363,7 +369,13 @@ def main():
         lbe.plot_pr_curve(tri, total_lm)
         lbe.plot_f1_score(tri, total_lm)
     if good_class_based and good_label_based:
+        st.toast("Good class-based and label-based performance!", icon="🎉")
         st.balloons()
+    elif good_class_based:
+        st.toast("Good class-based performance!", icon="😍")
+    elif good_label_based:
+        st.toast("Good label-based performance!", icon="😍")
+
 
     # TODO : Move this to a different class
     # sv.title("SIFT Visualizer 🪄")

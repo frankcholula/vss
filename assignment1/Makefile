@@ -10,6 +10,10 @@ test:
 bovw:
 	python bovw.py
 
+.PHONY: resnet
+resnet:
+	python resnet.py
+
 .PHONY: clean
 clean:
 	rm -rf __pycache__ .pytest_cache

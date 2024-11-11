@@ -6,6 +6,7 @@ import logging
 from feature_detectors import FeatureDetector
 from sklearn.decomposition import PCA
 from bovw import BoVW
+from resnet import ResNet
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -19,9 +20,14 @@ class Descriptor:
         self.extract_method = extract_method
         vocab_size = kwargs.get("vocab_size", 500)
         random_state = kwargs.get("random_state", 42)
+        resnet_model = kwargs.get("resnet_model", "resnet34")
         if vocab_size:
             self.bovw = BoVW(dataset_folder, descriptor_folder, vocab_size=vocab_size, random_state=random_state)
             self.bovw.build_codebook()
+        if extract_method == "ResNet":
+            self.resnet_model = ResNet(resnet_model)
+            self.pretrained_feature_extractor = self.resnet_model.use_pretrained_feature_extractor()
+            logging.info(f"Using ResNet model: {resnet_model}")
         # TODO: add new descriptors here
         self.AVAILABLE_EXTRACTORS = {
             "rgb": {
@@ -82,6 +88,13 @@ class Descriptor:
                     img_path
                 ),
                 "log_message": logging_message + "using SIFT with BoVW"
+            },
+            "ResNet": {
+                "path": os.path.join(self.DESCRIPTOR_FOLDER, "ResNet"),
+                "method": lambda img_path: self.resnet_model.generate_single_feature(
+                    img_path
+                ),
+                "log_message": logging_message + "using ResNet",
             }
         }
         logging.debug(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])
@@ -99,7 +112,6 @@ class Descriptor:
             for filename in os.listdir(os.path.join(self.DATASET_FOLDER, "Images")):
                 if filename.endswith(".bmp"):
                     img_path = os.path.join(self.DATASET_FOLDER, "Images", filename)
-                    # TODO: pass in img_path to the method instead of the image
                     F = self.AVAILABLE_EXTRACTORS[self.extract_method]["method"](img_path)
                     descriptors[img_path] = F
             self.save_descriptors(descriptors, descriptor_path)
@@ -258,7 +270,6 @@ class Extractor:
             return features
         return (features - mean) / std
 
-    # TODO: Try out z-score normalization for gridCombined
     @staticmethod
     def extract_grid_combined(
         img_path,
