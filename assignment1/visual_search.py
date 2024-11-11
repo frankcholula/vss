@@ -99,7 +99,6 @@ def main():
         options=[
             "boVW",
             "ResNet50",
-            "ResNet",
             "gridCombined",
             "gridEOhisto",
             "gridRGB",
@@ -210,8 +209,6 @@ def main():
                 key="random_state_slider",
                 on_change=session_manager.update_random_state,
             )
-        case "ResNet":
-            pass
         case "ResNet50":
             st.toast("This is pretty much cheating 😂")
 
