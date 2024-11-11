@@ -20,12 +20,14 @@ class Descriptor:
         self.extract_method = extract_method
         vocab_size = kwargs.get("vocab_size", 500)
         random_state = kwargs.get("random_state", 42)
+        resnet_model = kwargs.get("resnet_model", "resnet34")
         if vocab_size:
             self.bovw = BoVW(dataset_folder, descriptor_folder, vocab_size=vocab_size, random_state=random_state)
             self.bovw.build_codebook()
-        self.resnet_model = ResNet("resnet34")
-        self.pretrained_feature_extractor = self.resnet_model.use_pretrained_feature_extractor()
-        logging.info("Loaded ResNet 34 model")
+        if extract_method == "ResNet":
+            self.resnet_model = ResNet(resnet_model)
+            self.pretrained_feature_extractor = self.resnet_model.use_pretrained_feature_extractor()
+            logging.info(f"Using ResNet model: {resnet_model}")
         # TODO: add new descriptors here
         self.AVAILABLE_EXTRACTORS = {
             "rgb": {

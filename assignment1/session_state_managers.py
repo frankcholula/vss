@@ -45,7 +45,7 @@ class SessionStateManager:
             st.session_state["resnet_model"] = "ResNet34"
     
     def update_resnet_model(self):
-        st.session_state["resnet_model"] = st.session_state["resnet_model_radio"]
+        st.session_state["resnet_model"] = st.session_state["resnet_radio"]
         self.update_recompute(True)
 
     def update_random_state(self):

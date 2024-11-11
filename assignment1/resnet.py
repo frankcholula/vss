@@ -1,11 +1,11 @@
-import logging
+import cv2
 import numpy as np
+import logging
 from keras.api.applications import ResNet50
 from keras.api.preprocessing.image import load_img, img_to_array
-import torchvision.models as models
 import torch
 import torch.nn as nn
-import cv2
+import torchvision.models as models
 from torchvision.transforms.functional import normalize, to_tensor
 
 logging.basicConfig(level=logging.DEBUG)
@@ -27,6 +27,10 @@ class ResNet:
         elif self.model_name == "resnet34":
             resnet34 = models.resnet34(weights=models.ResNet34_Weights.DEFAULT)
             self.feature_extractor = nn.Sequential(*list(resnet34.children())[:-1])
+            self.feature_extractor.eval()
+        elif self.model_name == "resnet18":
+            resnet18 = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+            self.feature_extractor = nn.Sequential(*list(resnet18.children())[:-1])
             self.feature_extractor.eval()
 
     def preprocess_image(self, img_path: str):
