@@ -63,6 +63,6 @@ A stripped-down version of this project is currently live on Streamlit at [visua
   - Apply an SVM to classify image categories (e.g., “bike” or “sheep”) based on extracted descriptors.  
   - Note: This is classification, not strictly visual search.
 
-- [ ] **Req No. 8: Extra Credit** (20%)  
+- [x] **Req No. 8: Extra Credit** (20%)  
   - Propose and implement your own idea based on the above themes or an entirely new concept.  
   - Focus on technical merit related to Computer Vision, not UI or fancy coding.
