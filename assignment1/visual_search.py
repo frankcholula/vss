@@ -12,7 +12,6 @@ from metrics import ClassBasedEvaluator, LabelBasedEvaluator
 from session_state_managers import SessionStateManager
 from feature_detectors import FeatureDetector
 from sift_visualizer import visualize_sift
-from bovw import BoVW
 
 
 logging.basicConfig(level=logging.INFO)
