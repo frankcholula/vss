@@ -95,6 +95,13 @@ class Descriptor:
                     img_path
                 ),
                 "log_message": logging_message + "using ResNet",
+            },
+            "tfidf": {
+                "path": os.path.join(self.DESCRIPTOR_FOLDER, "tfidf"),
+                "method": lambda img_path: self.bovw.build_tf_idf_histogram(
+                    self.bovw.build_histogram(img_path)
+                ),
+                "log_message": logging_message + "using TF-IDF",
             }
         }
         logging.debug(self.AVAILABLE_EXTRACTORS[self.extract_method]["log_message"])

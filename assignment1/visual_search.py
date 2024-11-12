@@ -97,6 +97,7 @@ def main():
         "**🎨 Choose a Descriptor...**",
         options=[
             "boVW",
+            "tfidf",
             "ResNet",
             "gridCombined",
             "gridEOhisto",
