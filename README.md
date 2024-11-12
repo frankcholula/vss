@@ -3,6 +3,8 @@ Hello! This is an assignment repository for the University of Surrey's CVPR clas
 ![interactive GUI](assets/gui.png)
 The stripped-down, beta version has been deployed [here](https://visual-search.streamlit.app/) and will have more functionalities added soon. If you want a fully working version, please run it locally using the instruction below.
 
+I have also implmented a poc on visual search using a vector database and the [hnsw index](https://weaviate.io/developers/academy/py/vector_index/hnsw) in `Node.js`. You can find it in my other [repository](https://github.com/frankcholula/vector-db-playground) titled `vector-db-playground`.
+
 If you are a **University of Surrey student**, you are welcome to use this project as a learning resource and reference for your coursework. A simple credit to the OC (wee! that's me, [Frank](https://frankcholula.notion.site/)) would be greatly appreciated. However, please note that submitting this work as your own academic assignment is not permitted and may lead to [academic misconduct penalties](https://www.surrey.ac.uk/office-student-complaints-appeals-and-regulation/academic-misconduct-and-appeals). Just make sure you're submitting your orignal work.
 ## Directory Layout
 To get started, you'll need to install the dependencies. I'm using [Poetry](https://python-poetry.org/) to manage the dependencies and [Pyenv](https://github.com/pyenv/pyenv) to manage the Python version.
