@@ -284,7 +284,6 @@ class LabelBasedEvaluator:
                 else 0
             )
             f1_list.append(f1)
-        # TODO: maybe iterate until recall reaches 1
         pr_df = pd.DataFrame(
             {
                 "Threshold": [
