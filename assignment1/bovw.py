@@ -153,26 +153,26 @@ class BoVW:
         return np.array(tfidf_histograms)
 
 
-# if __name__ == "__main__":
-#     bovw = BoVW(
-#         dataset_folder="MSRC_ObjCategImageDatabase_v2_local/Images",
-#         descriptor_folder="descriptors",
-#         vocab_size=500,
-#         random_state=42,
-#     )
+if __name__ == "__main__":
+    bovw = BoVW(
+        dataset_folder="MSRC_ObjCategImageDatabase_v2_local/Images",
+        descriptor_folder="descriptors",
+        vocab_size=500,
+        random_state=42,
+    )
 
-#     bovw.build_codebook()
-#     img_paths = [
-#         os.path.join(bovw.DATASET_FOLDER, fname)
-#         for fname in os.listdir(bovw.DATASET_FOLDER)
-#         if fname.endswith(".bmp")
-#     ]
-#     histograms = bovw.build_histograms(img_paths)
-#     bovw.compute_idf(histograms)
-#     query_image = "MSRC_ObjCategImageDatabase_v2_local/Images/1_1_s.bmp"
-#     query_histogram = bovw.build_histogram(query_image)
-#     tfidf_query_histogram = bovw.build_tf_idf_histogram(query_histogram)
-#     logging.info(f"TF-IDF query histogram shape: {tfidf_query_histogram.shape}")
+    bovw.build_codebook()
+    img_paths = [
+        os.path.join(bovw.DATASET_FOLDER, fname)
+        for fname in os.listdir(bovw.DATASET_FOLDER)
+        if fname.endswith(".bmp")
+    ]
+    histograms = bovw.build_histograms(img_paths)
+    bovw.compute_idf(histograms)
+    query_image = "MSRC_ObjCategImageDatabase_v2_local/Images/1_1_s.bmp"
+    query_histogram = bovw.build_histogram(query_image)
+    tfidf_query_histogram = bovw.build_tf_idf_histogram(query_histogram)
+    logging.info(f"TF-IDF query histogram shape: {tfidf_query_histogram.shape}")
 
-#     tfidf_histograms = bovw.build_tfidf_histograms(img_paths)
-#     logging.info(f"TF-IDF histograms shape: {tfidf_histograms.shape}")
+    tfidf_histograms = bovw.build_tfidf_histograms(img_paths)
+    logging.info(f"TF-IDF histograms shape: {tfidf_histograms.shape}")
