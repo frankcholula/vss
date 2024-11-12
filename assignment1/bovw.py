@@ -7,6 +7,7 @@ from typing import Dict
 from sklearn.svm import SVC
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import normalize
+
 logging.basicConfig(level=logging.INFO)
 
 
@@ -135,31 +136,35 @@ class BoVW:
         logging.info("Applied TF-IDF weighting to histograms.")
         return tfidf_histograms
 
-
     def build_tf_idf_histogram(self, histogram: np.ndarray) -> np.ndarray:
         if self.idf_vector is None:
             raise ValueError("IDF vector not computed. Call `compute_idf` first.")
         tfidf_histogram = histogram * self.idf_vector
-        tfidf_histogram = tfidf_histogram / np.linalg.norm(tfidf_histogram, ord=2)  # L2 normalization
-        
+        tfidf_histogram = tfidf_histogram / np.linalg.norm(
+            tfidf_histogram, ord=2
+        )  # L2 normalization
+
         return tfidf_histogram
 
     def build_tfidf_histograms(self, img_paths: list) -> np.ndarray:
         histograms = self.build_histograms(img_paths)
         if self.idf_vector is None:
             self.compute_idf(histograms)
-        
-        tfidf_histograms = [self.build_tf_idf_histogram(histogram) for histogram in histograms]
+
+        tfidf_histograms = [
+            self.build_tf_idf_histogram(histogram) for histogram in histograms
+        ]
         return np.array(tfidf_histograms)
 
     def save_tfidf_histograms(self, img_paths: list, tfidf_histograms: np.ndarray):
-            tfidf_folder = os.path.join(self.DESCRIPTOR_FOLDER, "tfidf")
-            os.makedirs(tfidf_folder, exist_ok=True)  # Create folder if it doesn't exists
-            for img_path, tfidf_histogram in zip(img_paths, tfidf_histograms):
-                filename = os.path.basename(img_path).replace(".bmp", ".npy")
-                save_path = os.path.join(tfidf_folder, filename)
-                np.save(save_path, tfidf_histogram)
-                logging.info(f"Saved TF-IDF histogram for {img_path} to {save_path}")
+        tfidf_folder = os.path.join(self.DESCRIPTOR_FOLDER, "tfidf")
+        os.makedirs(tfidf_folder, exist_ok=True)  # Create folder if it doesn't exists
+        for img_path, tfidf_histogram in zip(img_paths, tfidf_histograms):
+            filename = os.path.basename(img_path).replace(".bmp", ".npy")
+            save_path = os.path.join(tfidf_folder, filename)
+            np.save(save_path, tfidf_histogram)
+            logging.info(f"Saved TF-IDF histogram for {img_path} to {save_path}")
+
 
 if __name__ == "__main__":
     bovw = BoVW(
