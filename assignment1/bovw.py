@@ -152,6 +152,14 @@ class BoVW:
         tfidf_histograms = [self.build_tf_idf_histogram(histogram) for histogram in histograms]
         return np.array(tfidf_histograms)
 
+    def save_tfidf_histograms(self, img_paths: list, tfidf_histograms: np.ndarray):
+            tfidf_folder = os.path.join(self.DESCRIPTOR_FOLDER, "tfidf")
+            os.makedirs(tfidf_folder, exist_ok=True)  # Create folder if it doesn't exists
+            for img_path, tfidf_histogram in zip(img_paths, tfidf_histograms):
+                filename = os.path.basename(img_path).replace(".bmp", ".npy")
+                save_path = os.path.join(tfidf_folder, filename)
+                np.save(save_path, tfidf_histogram)
+                logging.info(f"Saved TF-IDF histogram for {img_path} to {save_path}")
 
 if __name__ == "__main__":
     bovw = BoVW(
@@ -176,3 +184,5 @@ if __name__ == "__main__":
 
     tfidf_histograms = bovw.build_tfidf_histograms(img_paths)
     logging.info(f"TF-IDF histograms shape: {tfidf_histograms.shape}")
+    bovw.save_tfidf_histograms(img_paths, tfidf_histograms)
+    logging.info("TF-IDF histograms saved successfully.")
