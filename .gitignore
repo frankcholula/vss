@@ -173,6 +173,6 @@ resnet_dataset/
 # models
 *.keras
 
-# notion exports
-notion_exports.zip
+# notion exportsbrew 
+*.zip
 notion_exports/
